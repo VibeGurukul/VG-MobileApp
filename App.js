@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import WelcomeScreen from "./src/components/WelcomeScreen";
+import WelcomeScreen from "./src/screens/WelcomeScreen";
 
 const Stack = createStackNavigator();
 
