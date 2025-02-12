@@ -1,8 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 
 const WelcomeScreen = () => {
+  const [email, setEmail] = useState('');
+  const navigation = useNavigation();
+
+  const isValidEmail = (email) => {
+    // Basic regex for email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const checkEmailRegistration = async () => {
+    if (!isValidEmail(email)) {
+      Alert.alert('Please enter a valid email address.');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`https://dev.vibegurukul.in/api/v1/check-email?email=${(email)}`)
+
+      if (response.data.email_registered) {
+        navigation.navigate('LoginScreen', { email });
+      } else {
+        navigation.navigate('RegisterScreen', { email });
+      }
+    } catch (error) {
+      console.error('API Error:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Something went wrong. Please try again.');
+    }
+  };
   return (
     <View style={styles.container}>
       {/* Logo in the colored header area */}
@@ -18,11 +48,13 @@ const WelcomeScreen = () => {
         <TextInput
           style={styles.input}
           placeholder="Email address"
-          value=""
-          editable={true}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
         />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={checkEmailRegistration}>
           <Text style={styles.buttonText}>Continue With Email</Text>
         </TouchableOpacity>
 
