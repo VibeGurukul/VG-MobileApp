@@ -1,52 +1,51 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import PasswordInput from '../components/PasswordInput';
 
-
 const LoginScreen = () => {
   const route = useRoute();
   const { email } = route.params || {};
   const navigation = useNavigation();
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post('https://dev.vibegurukul.in/api/v1/login', {
+      const response = await axios.post('https://dev.vibegurukul.in/api/v1/login/', {
         email: email,
         password: password
-      }, {
-        timeout: 100000  // 🔹 Set a timeout of 10 seconds
-    });
+      });
       
-      console.log("Response received:", response);
       if (response.data.access_token) {  
-        console.log("Login Successful");
         const loginTime = new Date().toISOString(); // Store login timestamp
-  
+
         // Store user details in AsyncStorage
         await AsyncStorage.setItem('access_token', response.data.access_token);
         await AsyncStorage.setItem('email', response.data.email);
         await AsyncStorage.setItem('full_name', response.data.full_name);
         await AsyncStorage.setItem('login_time', loginTime);
-  
+
         navigation.navigate('HomeScreen');
       } else {
         setErrorMessage('Failed to Login. Please try again with the correct password.');
+        Alert.alert('Error', errorMessage);
       }
     } catch (error) {
       console.error("Login Error:", error?.response?.data || error?.message || error);
-  
+
       if (error.response) {
         setErrorMessage(error.response.data?.message || 'Login failed. Please check your credentials.');
       } else {
         setErrorMessage('Network error. Please try again.');
       }
+      Alert.alert('Error', errorMessage);
     }
   };
+
   return (
     <View style={styles.container}>
       {/* Logo in the colored header area */}
@@ -66,15 +65,15 @@ const LoginScreen = () => {
           editable={false}
         />
 
-         {/* Password Input Component */}
+        {/* Password Input Component */}
         <PasswordInput password={password} setPassword={setPassword} />
 
         <TouchableOpacity 
-            style={[styles.button, !password && { opacity: 0.5 }]} 
-            onPress={password ? handleSubmit : null} 
-            disabled={!password}
+          style={[styles.button, !password && { opacity: 0.5 }]} 
+          onPress={handleSubmit} 
+          disabled={!password}
         >
-            <Text style={styles.buttonText}>Login</Text>
+          <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
 
         {/* Divider */}
@@ -101,7 +100,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FF6F60',
     alignItems: 'center',
-    paddingTop: 40, // Space for logo at the top
+    paddingTop: 50, // Space for logo at the top
   },
   logo: {
     width: 100,
@@ -129,7 +128,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     color: '#1c1c1c',
-    fontWeight: 400,
+    fontWeight: '400',
     marginBottom: 30,
   },
   input: {

@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FF6F60',
     alignItems: 'center',
-    paddingTop: 40, // Space for logo at the top
+    paddingTop: 50, // Space for logo at the top
   },
   logo: {
     width: 100,
