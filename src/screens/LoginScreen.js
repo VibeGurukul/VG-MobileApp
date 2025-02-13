@@ -1,38 +1,51 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import PasswordInput from '../components/PasswordInput';
 
-const WelcomeScreen = () => {
-  const [email, setEmail] = useState('');
+const LoginScreen = () => {
+  const route = useRoute();
+  const { email } = route.params || {};
   const navigation = useNavigation();
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const isValidEmail = (email) => {
-    // Basic regex for email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const checkEmailRegistration = async () => {
-    if (!isValidEmail(email)) {
-      Alert.alert('Please enter a valid email address.');
-      return;
-    }
-
+  const handleSubmit = async () => {
     try {
-      const response = await axios.get(`https://dev.vibegurukul.in/api/v1/check-email?email=${(email)}`)
+      const response = await axios.post('https://dev.vibegurukul.in/api/v1/login/', {
+        email: email,
+        password: password
+      });
+      
+      if (response.data.access_token) {  
+        const loginTime = new Date().toISOString(); // Store login timestamp
 
-      if (response.data.email_registered) {
-        navigation.navigate('LoginScreen', { email });
+        // Store user details in AsyncStorage
+        await AsyncStorage.setItem('access_token', response.data.access_token);
+        await AsyncStorage.setItem('email', response.data.email);
+        await AsyncStorage.setItem('full_name', response.data.full_name);
+        await AsyncStorage.setItem('login_time', loginTime);
+
+        navigation.navigate('HomeScreen');
       } else {
-        navigation.navigate('RegisterScreen', { email });
+        setErrorMessage('Failed to Login. Please try again with the correct password.');
+        Alert.alert('Error', errorMessage);
       }
     } catch (error) {
-      console.error('API Error:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Something went wrong. Please try again.');
+      console.error("Login Error:", error?.response?.data || error?.message || error);
+
+      if (error.response) {
+        setErrorMessage(error.response.data?.message || 'Login failed. Please check your credentials.');
+      } else {
+        setErrorMessage('Network error. Please try again.');
+      }
+      Alert.alert('Error', errorMessage);
     }
   };
+
   return (
     <View style={styles.container}>
       {/* Logo in the colored header area */}
@@ -44,18 +57,23 @@ const WelcomeScreen = () => {
       {/* White Card Container */}
       <View style={styles.card}>
         <Text style={styles.title}>Welcome To Vibe Gurukul</Text>
-        <Text style={styles.secondaryText}>Enter your details below:</Text>
+        <Text style={styles.secondaryText}>Hi, Welcome Back 👋</Text>
         <TextInput
           style={styles.input}
           placeholder="Email address"
           value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
+          editable={false}
         />
 
-        <TouchableOpacity style={styles.button} onPress={checkEmailRegistration}>
-          <Text style={styles.buttonText}>Continue With Email</Text>
+        {/* Password Input Component */}
+        <PasswordInput password={password} setPassword={setPassword} />
+
+        <TouchableOpacity 
+          style={[styles.button, !password && { opacity: 0.5 }]} 
+          onPress={handleSubmit} 
+          disabled={!password}
+        >
+          <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
 
         {/* Divider */}
@@ -110,7 +128,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     color: '#1c1c1c',
-    fontWeight: 400,
+    fontWeight: '400',
     marginBottom: 30,
   },
   input: {
@@ -159,4 +177,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WelcomeScreen;
+export default LoginScreen;
