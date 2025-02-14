@@ -3,6 +3,7 @@ import { View, Text,TextInput, StyleSheet, Image, TouchableOpacity, ScrollView }
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavBar from '../components/BottomNavBar';
 import Header from '../components/Header';
+import HomeWhySection from '../components/HomeWhySection';
 
 const HomeScreen = ({navigation}) => {
   const [firstName, setFirstName] = useState('');
@@ -45,7 +46,7 @@ const HomeScreen = ({navigation}) => {
         {/* Cards */}
         {/* Cards Container */}
         <View style={styles.cardContainer}>
-          {/* Course Section */}
+          {/* Course Card */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Explore our courses</Text>
             <View style={styles.card}>
@@ -60,7 +61,7 @@ const HomeScreen = ({navigation}) => {
             </View>
           </View>
 
-          {/* Workshop Section */}
+          {/* Workshop Card */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Take part in our Workshops</Text>
             <View style={styles.card}>
@@ -74,6 +75,8 @@ const HomeScreen = ({navigation}) => {
               </TouchableOpacity>
             </View>
           </View>
+
+          <HomeWhySection />
         </View>
       </ScrollView>
 
@@ -107,7 +110,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   cardContainer: {
-    gap: 20,
+    gap: 10,
+    paddingHorizontal: 10,
   },
   section: {
     marginBottom: 30,
@@ -124,7 +128,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 25,
     overflow: 'hidden',
-    elevation: 3,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -145,7 +149,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     position: 'absolute',
     bottom: '40%',
-    right: '10%', // Positions button at 70% of card width (100% - 15%*2 = 70%)
+    right: '10%',
     transform: [{ translateX: 15 }] // Fine-tune positioning
   },
   ctaButtonText:{
