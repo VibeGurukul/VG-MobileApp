@@ -19,8 +19,13 @@ const BottomNavBar = ({ navigation }) => {
         <Text style={styles.navText}>Workshops</Text>
       </TouchableOpacity>
 
-      {/* Profile Button */}
+      {/* My Zone Button */}
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('HomeScreen')}>
+        <Text style={styles.navText}>My Zone</Text>
+      </TouchableOpacity>
+
+      {/* Profile Button */}
+      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ProfileScreen')}>
         <Text style={styles.navText}>Profile</Text>
       </TouchableOpacity>
     </View>
@@ -33,7 +38,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: '#ffa500',
-    height: 60,
+    height: 81,
     position: 'absolute',
     bottom: 0,
     left: 0,
