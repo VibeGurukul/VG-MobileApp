@@ -8,6 +8,8 @@ import RegisterScreen from "./src/screens/RegisterScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 
+import AllCourses from "./src/screens/Courses/AllCourses";
+
 const Stack = createStackNavigator();
 
 const SplashScreen = ({ navigation }) => {
@@ -34,6 +36,7 @@ export default function App() {
         <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
         <Stack.Screen name="HomeScreen" component={HomeScreen} />
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+        <Stack.Screen name="AllCourses" component={AllCourses} />
       </Stack.Navigator>
     </NavigationContainer>
   );
