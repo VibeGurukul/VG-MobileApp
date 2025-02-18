@@ -10,7 +10,7 @@ const BottomNavBar = ({ navigation }) => {
       </TouchableOpacity>
 
       {/* Courses Button */}
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('HomeScreen')}>
+      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('AllCourses')}>
         <Text style={styles.navText}>Courses</Text>
       </TouchableOpacity>
 
