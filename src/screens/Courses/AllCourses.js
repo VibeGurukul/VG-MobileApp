@@ -11,6 +11,7 @@ const AllCourses = ({ navigation }) => {
   const [error, setError] = useState(null);
 
   const { width: screenWidth } = Dimensions.get('window');
+  const isTablet = screenWidth > 768; 
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -56,42 +57,54 @@ const AllCourses = ({ navigation }) => {
         subtitle="All Courses"
       />
       
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, isTablet && styles.tabletContent]}>
         <TextInput
-          style={styles.searchBar}
+          style={[styles.searchBar, isTablet && styles.tabletSearchBar]}
           placeholder="Search something..."
           placeholderTextColor="#999"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
 
-        <View style={styles.coursesContainer}>
+        <View style={[styles.coursesContainer, isTablet && styles.tabletCoursesContainer]}>
           {filteredCourses.map(course => (
-            <View key={course._id} style={styles.courseCard}>
+            <View key={course._id} style={[styles.courseCard, isTablet && styles.tabletCourseCard]}>
               <Image
                 source={{ uri: course.preview_image }}
-                style={styles.courseImage}
+                style={{
+                  width: isTablet ? screenWidth * 0.4 : screenWidth * 0.8, // Adjust for tablet
+                  height: isTablet ? screenWidth * 0.4 : screenWidth * 0.8, // Adjust height proportionally
+                  borderRadius: 25,
+                  alignSelf: 'center',
+                  marginTop: screenWidth * 0.05,
+                  resizeMode: 'cover'
+                }}
                 resizeMode="cover"
               />
               
               <View style={styles.cardContent}>
-                <Text style={styles.courseTitle}>{course.title}</Text>
-                    <View style={styles.priceAndButtonContainer}>
-                        <View style={styles.priceContainer}>
-                        <Text style={styles.currentPrice}>₹{course.price}</Text>
-                        {course.original_price && course.original_price !== course.price && (
-                            <Text style={styles.originalPrice}>₹{course.original_price}</Text>
-                        )}
-                        </View>
-                        
-                        <TouchableOpacity
-                        style={styles.viewButton}
-                        onPress={() => navigation.navigate('CourseDetails', { course })}
-                        >
-                        <Text style={styles.buttonText}>View</Text>
-                        </TouchableOpacity>
-                    </View>
+                <Text style={[styles.courseTitle, isTablet && styles.tabletCourseTitle]}>
+                  {course.title}
+                </Text>
+
+                <View style={styles.priceAndButtonContainer}>
+                  <View style={styles.priceContainer}>
+                    <Text style={[styles.currentPrice, isTablet && styles.tabletCurrentPrice]}>₹{course.price}</Text>
+                    {course.original_price && course.original_price !== course.price && (
+                      <Text style={[styles.originalPrice, isTablet && styles.tabletOriginalPrice]}>
+                        ₹{course.original_price}
+                      </Text>
+                    )}
+                  </View>
+
+                  <TouchableOpacity
+                    style={[styles.viewButton, isTablet && styles.tabletViewButton]}
+                    onPress={() => navigation.navigate('CourseDetails', { course })}
+                  >
+                    <Text style={styles.buttonText}>View</Text>
+                  </TouchableOpacity>
                 </View>
+              </View>
             </View>
           ))}
         </View>
@@ -111,6 +124,9 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 80,
   },
+  tabletContent: {
+    padding: 40,
+  },
   searchBar: {
     backgroundColor: 'white',
     borderRadius: 25,
@@ -125,8 +141,18 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: '100%',
   },
+  tabletSearchBar: {
+    fontSize: 20,
+    padding: 18,
+    width: '80%',
+  },
   coursesContainer: {
     gap: 20,
+  },
+  tabletCoursesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   courseCard: {
     backgroundColor: 'white',
@@ -137,15 +163,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    width: '100%'
+    width: '100%',
   },
-  courseImage: {
-    width: 300,
-    height: 300,
-    borderRadius: 25,
-    alignSelf: 'center',
-    marginTop: 20,
-    resizeMode: 'cover'
+  tabletCourseCard: {
+    width: '48%', // Display two courses side by side on tablets
   },
   cardContent: {
     padding: 15,
@@ -156,6 +177,9 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 10,
     textAlign: 'center'
+  },
+  tabletCourseTitle: {
+    fontSize: 22,
   },
   priceAndButtonContainer: {
     flexDirection: 'row',
@@ -175,10 +199,16 @@ const styles = StyleSheet.create({
     color: '#FF6F60',
     marginRight: 10
   },
+  tabletCurrentPrice: {
+    fontSize: 18,
+  },
   originalPrice: {
     fontSize: 14,
     color: '#999',
     textDecorationLine: 'line-through',
+  },
+  tabletOriginalPrice: {
+    fontSize: 16,
   },
   viewButton: {
     backgroundColor: '#000',
@@ -186,6 +216,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     borderRadius: 10,
     alignSelf: 'flex-end',
+  },
+  tabletViewButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 30,
   },
   buttonText: {
     color: 'white',

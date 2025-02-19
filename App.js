@@ -31,10 +31,10 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="LoginScreen" component={LoginScreen} />
-        <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-        <Stack.Screen name="HomeScreen" component={HomeScreen} />
+        <Stack.Screen name="Welcome" component={WelcomeScreen} options={{headerShown: false, gestureEnabled: false}}  />
+        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{headerShown: false }} />
+        <Stack.Screen name="HomeScreen" component={HomeScreen} options={{headerShown: false, gestureEnabled: false }}/>
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
         <Stack.Screen name="AllCourses" component={AllCourses} />
       </Stack.Navigator>
