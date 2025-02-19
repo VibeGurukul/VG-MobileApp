@@ -4,7 +4,7 @@
     "slug": "vg-mobileapp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/assets/icon.png",
+    "icon": "./src/assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -23,7 +23,7 @@
       "package": "com.kushagrachauhan.vgmobileapp"
     },
     "web": {
-      "favicon": "./src/assets/favicon.png"
+      "favicon": "./src/assets/logo.png"
     },
     "extra": {
       "eas": {
