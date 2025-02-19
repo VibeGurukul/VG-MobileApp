@@ -1,10 +1,10 @@
 {
   "expo": {
     "name": "VibeGurukulApp",
-    "slug": "VibeGurukulApp",
+    "slug": "vg-mobileapp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./src/assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -17,12 +17,19 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.kushagrachauhan.vgmobileapp"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./src/assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "bbc7101e-defd-4c75-8a7d-89bd03b41f0b"
+      }
+    },
+    "owner": "kushagrachauhan"
   }
 }

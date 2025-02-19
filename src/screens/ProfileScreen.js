@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import BottomNavBar from '../components/BottomNavBar';
 import Header from '../components/Header';
 
@@ -27,9 +27,20 @@ const ProfileScreen = () => {
 
   // Handle sign out
   const handleSignOut = async () => {
-    await AsyncStorage.clear();
-    navigation.replace('Welcome'); // Redirect to Welcome Screen
+    try {
+      await AsyncStorage.clear(); // Clear user data
+  
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Welcome' }],
+        })
+      );
+    } catch (error) {
+      console.error('Error during sign-out:', error);
+    }
   };
+  
 
   return (
     <View style={styles.container}>
