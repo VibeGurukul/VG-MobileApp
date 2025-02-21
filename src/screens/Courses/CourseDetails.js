@@ -31,7 +31,7 @@ const CourseDetails = ({ route, navigation }) => {
         </View>
 
         {/* Price */}
-        <Text style={styles.priceText}>₹{course.price}</Text>
+        <Text style={styles.priceText}>₹{course.price}/-</Text>
 
         {/* Tabs Section */}
         <View style={styles.tabContainer}>
@@ -54,8 +54,9 @@ const CourseDetails = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Course Details Card */}
+        
         <View style={styles.card}>
+          {/* Course Description Card */}
           {activeTab === 'Description' && (
             <>
               <Text style={styles.sectionHeading}>Description</Text>
@@ -68,9 +69,19 @@ const CourseDetails = ({ route, navigation }) => {
               <Text style={styles.sectionText}>{course.usp}</Text>
             </>
           )}
-
+          
+          {/* Course Playlist Card */}
           {activeTab === 'Playlist' && (
-            <Text style={styles.sectionText}>Playlist content will go here...</Text>
+            <View style={styles.playlistContainer}>
+              {course.sections.map((section, index) => (
+                <View key={index} style={styles.episodeCard}>
+                  <View style={styles.iconContainer}>
+                    <Icon name="lock" size={16} color="#fff" />
+                  </View>
+                  <Text style={styles.episodeText}>{section.heading}</Text>
+                </View>
+              ))}
+            </View>
           )}
         </View>
       </ScrollView>
@@ -194,6 +205,34 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 22,
+  },
+  episodeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 15,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  iconContainer: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#FF6B6B',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  episodeText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    flex: 1,
   },
   bottomNav: {
     position: 'absolute',
