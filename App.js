@@ -8,7 +8,9 @@ import RegisterScreen from "./src/screens/RegisterScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 
+// Course Screens
 import AllCourses from "./src/screens/Courses/AllCourses";
+import CourseDetails from "./src/screens/Courses/CourseDetails";
 
 const Stack = createStackNavigator();
 
@@ -16,7 +18,7 @@ const SplashScreen = ({ navigation }) => {
   useEffect(() => {
     setTimeout(() => {
       navigation.replace("Welcome"); // Navigate to Welcome Screen
-    }, 2000); // Show splash for 2 seconds
+    }, 500); 
   }, []);
 
   return (
@@ -37,6 +39,7 @@ export default function App() {
         <Stack.Screen name="HomeScreen" component={HomeScreen} options={{headerShown: false, gestureEnabled: false }}/>
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
         <Stack.Screen name="AllCourses" component={AllCourses} />
+        <Stack.Screen name="CourseDetails" component={CourseDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );
