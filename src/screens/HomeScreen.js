@@ -1,17 +1,19 @@
-import React, {useEffect, useState} from 'react';
-import { View, Text,TextInput, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavBar from '../components/BottomNavBar';
 import Header from '../components/Header';
 import HomeWhySection from '../components/HomeWhySection';
 
-const HomeScreen = ({navigation}) => {
+const HomeScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
+  const { width } = Dimensions.get('window'); // Get screen width
+  const isTablet = width > 768; // Check if the device is a tablet
 
   useEffect(() => {
     const fetchUserName = async () => {
       try {
-        const storedFullName = await AsyncStorage.getItem('full_name'); 
+        const storedFullName = await AsyncStorage.getItem('full_name');
         if (storedFullName) {
           const firstName = storedFullName.split(' ')[0]; // Extract first name
           setFirstName(firstName);
@@ -20,10 +22,10 @@ const HomeScreen = ({navigation}) => {
         console.error('Error retrieving name from AsyncStorage:', error);
       }
     };
-  
+
     fetchUserName();
   }, []);
-  
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -44,32 +46,25 @@ const HomeScreen = ({navigation}) => {
         </View>
 
         {/* Cards */}
-        {/* Cards Container */}
-        <View style={styles.cardContainer}>
+        <View style={[styles.cardContainer, isTablet && styles.tabletCardContainer]}>
           {/* Course Card */}
-          <View style={styles.section}>
+          <View style={[styles.section, isTablet && styles.tabletSection]}>
             <Text style={styles.sectionTitle}>Explore our courses</Text>
-            <View style={styles.card}>
-              <Image
-                source={require('../assets/Blooming Buds.webp')}
-                style={styles.cardImage}
-                resizeMode="cover"
-              />
-              <TouchableOpacity style={styles.ctaButton}>
+            <View style={[styles.card, isTablet && styles.tabletCard]}>
+              <Image source={require('../assets/Blooming Buds.webp')} style={styles.cardImage} resizeMode="cover" />
+              <TouchableOpacity style={styles.ctaButton}
+                onPress={() => navigation.navigate('AllCourses')}
+              >
                 <Text style={styles.ctaButtonText}>Explore</Text>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Workshop Card */}
-          <View style={styles.section}>
+          <View style={[styles.section, isTablet && styles.tabletSection]}>
             <Text style={styles.sectionTitle}>Take part in our Workshops</Text>
-            <View style={styles.card}>
-              <Image
-                source={require('../assets/Blooming Buds.webp')}
-                style={styles.cardImage}
-                resizeMode="cover"
-              />
+            <View style={[styles.card, isTablet && styles.tabletCard]}>
+              <Image source={require('../assets/Blooming Buds.webp')} style={styles.cardImage} resizeMode="cover" />
               <TouchableOpacity style={styles.ctaButton}>
                 <Text style={styles.ctaButtonText}>Join</Text>
               </TouchableOpacity>
@@ -113,8 +108,16 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingHorizontal: 10,
   },
+  tabletCardContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+  },
   section: {
     marginBottom: 30,
+  },
+  tabletSection: {
+    width: '45%',
   },
   sectionTitle: {
     fontSize: 25,
@@ -122,7 +125,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 15,
     paddingLeft: 10,
-    textAlign:'center'
+    textAlign: 'center',
   },
   card: {
     backgroundColor: 'white',
@@ -135,12 +138,16 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     height: 175,
   },
+  tabletCard: {
+    height: 200,
+    width: '100%',
+  },
   cardImage: {
     height: '80%',
     width: '80%',
     borderRadius: 25,
     marginTop: 20,
-    paddingLeft: 20
+    alignSelf: 'center',
   },
   ctaButton: {
     backgroundColor: '#000',
@@ -150,12 +157,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: '40%',
     right: '10%',
-    transform: [{ translateX: 15 }] // Fine-tune positioning
+    transform: [{ translateX: 15 }],
   },
-  ctaButtonText:{
+  ctaButtonText: {
     color: '#FFF',
-    fontWeight: 'bold'
-  }
+    fontWeight: 'bold',
+  },
 });
 
 export default HomeScreen;
