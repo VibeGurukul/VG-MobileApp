@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
 import BottomNavBar from '../../components/BottomNavBar';
 
@@ -9,6 +10,7 @@ const AllCourses = ({ navigation }) => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [firstName, setFirstName] = useState('');
 
   const { width: screenWidth } = Dimensions.get('window');
   const isTablet = screenWidth > 768; 
@@ -25,9 +27,23 @@ const AllCourses = ({ navigation }) => {
         setLoading(false);
       }
     };
+  
+    const fetchUserName = async () => {
+      try {
+        const storedFullName = await AsyncStorage.getItem('full_name'); 
+        if (storedFullName) {
+          const firstName = storedFullName.split(' ')[0]; // Extract first name
+          setFirstName(firstName);
+        }
+      } catch (error) {
+        console.error('Error retrieving name from AsyncStorage:', error);
+      }
+    };
 
     fetchCourses();
+    fetchUserName();
   }, []);
+  
 
   // Filter courses based on search query
   const filteredCourses = courses.filter(course =>
@@ -53,7 +69,7 @@ const AllCourses = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Header
-        title="Namaste Kushagra!"
+         title={`Namaste ${firstName || 'Guest'}!`}
         subtitle="All Courses"
       />
       
