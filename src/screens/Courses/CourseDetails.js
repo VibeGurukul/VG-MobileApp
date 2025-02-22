@@ -1,23 +1,48 @@
-import React, {useState} from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-//import VideoPlayer from 'react-native-video-controls';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Header from '../../components/Header';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const CourseDetails = ({ route, navigation }) => {
   const { course } = route.params;
   const [activeTab, setActiveTab] = useState('Description');
-  const { width: screenWidth } = Dimensions.get('window');
+  const [firstName, setFirstName] = useState('');
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const storedFullName = await AsyncStorage.getItem('full_name');
+        if (storedFullName) {
+          const firstName = storedFullName.split(' ')[0]; // Extract first name
+          setFirstName(firstName);
+        }
+      } catch (error) {
+        console.error('Error retrieving name from AsyncStorage:', error);
+      }
+    };
+
+    fetchUserName();
+  }, []);
 
   return (
     <View style={styles.container}>
-      <Header title="Namaste Kushagra!" subtitle="Course Details" />
+      <Header title={`Namaste ${firstName || 'Guest'}!`} subtitle="Course Details" />
       
       <ScrollView contentContainerStyle={styles.content}>
         {/* Course Title */}
         <Text style={styles.courseTitle}>{course.title}</Text>
 
-        {/* Preview Video Placeholder*/}
+        {/* Preview Video Placeholder */}
         <View style={styles.videoContainer}>
           <View style={styles.videoPlaceholder}>
             <Text style={styles.placeholderText}>Video Preview</Text>
@@ -54,7 +79,7 @@ const CourseDetails = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
 
-        
+        {/* Content Card */}
         <View style={styles.card}>
           {/* Course Description Card */}
           {activeTab === 'Description' && (
@@ -106,11 +131,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F0F0',
   },
   content: {
-    padding: 20,
+    padding: screenWidth * 0.05, // 5% of screen width
     paddingBottom: 100,
   },
   courseTitle: {
-    fontSize: 24,
+    fontSize: screenWidth * 0.06, // 6% of screen width
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#333',
@@ -123,15 +148,15 @@ const styles = StyleSheet.create({
   },
   videoPlaceholder: {
     width: '100%',
-    height: 200, 
-    backgroundColor: '#ccc', 
+    height: screenWidth * 0.5, // 50% of screen width
+    backgroundColor: '#ccc',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 15, 
+    borderRadius: 15,
   },
   placeholderText: {
-    fontSize: 16,
-    color: '#666', 
+    fontSize: screenWidth * 0.04, // 4% of screen width
+    color: '#666',
   },
   metaContainer: {
     flexDirection: 'row',
@@ -139,18 +164,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   metaText: {
-    fontSize: 16,
+    fontSize: screenWidth * 0.04, // 4% of screen width
     color: '#666',
   },
   priceText: {
-    fontSize: 28,
+    fontSize: screenWidth * 0.06, // 6% of screen width
     fontWeight: 'bold',
     color: '#FF6F60',
     textAlign: 'center',
     marginBottom: 10,
-  },
-  sectionContainer: {
-    marginBottom: 20,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -158,7 +180,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 25,
     marginVertical: 10,
-    padding: 5
+    padding: 5,
   },
   activeTab: {
     backgroundColor: '#FFA500',
@@ -176,12 +198,12 @@ const styles = StyleSheet.create({
   activeTabText: {
     fontWeight: 'bold',
     color: '#FFF',
-    fontSize: 20
+    fontSize: screenWidth * 0.04, // 4% of screen width
   },
   inactiveTabText: {
     color: '#1c1c1c',
     fontWeight: 'bold',
-    fontSize: 20
+    fontSize: screenWidth * 0.04, // 4% of screen width
   },
   card: {
     backgroundColor: 'white',
@@ -194,7 +216,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   sectionHeading: {
-    fontSize: 18,
+    fontSize: screenWidth * 0.05, // 5% of screen width
     fontWeight: '800',
     color: '#333',
     marginTop: 15,
@@ -202,9 +224,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   sectionText: {
-    fontSize: 14,
+    fontSize: screenWidth * 0.035, // 3.5% of screen width
     color: '#666',
     lineHeight: 22,
+    textAlign: 'center',
   },
   episodeCard: {
     flexDirection: 'row',
@@ -229,7 +252,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   episodeText: {
-    fontSize: 14,
+    fontSize: screenWidth * 0.035, // 3.5% of screen width
     fontWeight: 'bold',
     color: '#333',
     flex: 1,
@@ -259,7 +282,7 @@ const styles = StyleSheet.create({
   enrollButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: screenWidth * 0.04, // 4% of screen width
   },
 });
 
