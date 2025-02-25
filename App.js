@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import WelcomeScreen from "./src/screens/WelcomeScreen";
@@ -16,9 +17,21 @@ const Stack = createStackNavigator();
 
 const SplashScreen = ({ navigation }) => {
   useEffect(() => {
-    setTimeout(() => {
-      navigation.replace("Welcome"); // Navigate to Welcome Screen
-    }, 500); 
+    const checkLoginStatus = async () => {
+      try {
+        const userToken = await AsyncStorage.getItem("access_token"); // Check if user is logged in
+        if (userToken) {
+          navigation.replace("HomeScreen"); // Redirect to Home if logged in
+        } else {
+          navigation.replace("Welcome"); // Otherwise, show Welcome screen
+        }
+      } catch (error) {
+        console.error("Error checking login status:", error);
+        navigation.replace("Welcome"); // Fallback to Welcome screen
+      }
+    };
+
+    checkLoginStatus();
   }, []);
 
   return (
@@ -33,10 +46,10 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="Welcome" component={WelcomeScreen} options={{headerShown: false, gestureEnabled: false}}  />
-        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{headerShown: false}}/>
-        <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{headerShown: false }} />
-        <Stack.Screen name="HomeScreen" component={HomeScreen} options={{headerShown: false, gestureEnabled: false }}/>
+        <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
         <Stack.Screen name="AllCourses" component={AllCourses} />
         <Stack.Screen name="CourseDetails" component={CourseDetails} />
