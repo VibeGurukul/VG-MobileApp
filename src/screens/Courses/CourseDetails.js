@@ -9,29 +9,64 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import axios from 'axios';
 import Header from '../../components/Header';
+import CourseTabs from '../../components/CourseTabs';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const CourseDetails = ({ route, navigation }) => {
   const { course } = route.params;
-  const [activeTab, setActiveTab] = useState('Description');
   const [firstName, setFirstName] = useState('');
+  const [isEnrolled, setIsEnrolled] = useState(false);
+
+  const [email, setEmail] = useState('');
+  const [token, setToken] = useState('');
 
   useEffect(() => {
-    const fetchUserName = async () => {
+    const fetchUserData = async () => {
       try {
-        const storedFullName = await AsyncStorage.getItem('full_name');
+        const storedFullName = await AsyncStorage.getItem("full_name");
+        const storedEmail = await AsyncStorage.getItem("email");
+        const storedToken = await AsyncStorage.getItem("access_token");
+
         if (storedFullName) {
-          const firstName = storedFullName.split(' ')[0]; // Extract first name
+          const firstName = storedFullName.split(" ")[0]; // Extract first name
           setFirstName(firstName);
         }
+
+        if (storedEmail && storedToken) {
+          setEmail(storedEmail);
+          setToken(storedToken);
+
+          // Call checkEnrollmentStatus after setting email & token
+          checkEnrollmentStatus(storedEmail, storedToken);
+        }
       } catch (error) {
-        console.error('Error retrieving name from AsyncStorage:', error);
+        console.error("Error retrieving user data from AsyncStorage:", error);
       }
     };
 
-    fetchUserName();
+    const checkEnrollmentStatus = async (userEmail, userToken) => {
+      if (!userToken) return; // Ensure token is available before making the request
+
+      try {
+        const response = await axios.get(
+          "https://dev.vibegurukul.in/api/v1/check-enroll",
+          {
+            params: { user_email: userEmail, course_id: course._id },
+          }
+        );
+
+        if (response.data.isEnrolled) {
+          setIsEnrolled(true);
+        }
+      } catch (error) {
+        console.error("Error checking enrollment status:", error);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   return (
@@ -58,57 +93,7 @@ const CourseDetails = ({ route, navigation }) => {
         {/* Price */}
         <Text style={styles.priceText}>₹{course.price}/-</Text>
 
-        {/* Tabs Section */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={activeTab === 'Description' ? styles.activeTab : styles.inactiveTab}
-            onPress={() => setActiveTab('Description')}
-          >
-            <Text style={activeTab === 'Description' ? styles.activeTabText : styles.inactiveTabText}>
-              Description
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={activeTab === 'Playlist' ? styles.activeTab : styles.inactiveTab}
-            onPress={() => setActiveTab('Playlist')}
-          >
-            <Text style={activeTab === 'Playlist' ? styles.activeTabText : styles.inactiveTabText}>
-              Playlist
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Content Card */}
-        <View style={styles.card}>
-          {/* Course Description Card */}
-          {activeTab === 'Description' && (
-            <>
-              <Text style={styles.sectionHeading}>Description</Text>
-              <Text style={styles.sectionText}>{course.description}</Text>
-
-              <Text style={styles.sectionHeading}>Learnings</Text>
-              <Text style={styles.sectionText}>{course.learnings}</Text>
-
-              <Text style={styles.sectionHeading}>USP</Text>
-              <Text style={styles.sectionText}>{course.usp}</Text>
-            </>
-          )}
-          
-          {/* Course Playlist Card */}
-          {activeTab === 'Playlist' && (
-            <View style={styles.playlistContainer}>
-              {course.sections.map((section, index) => (
-                <View key={index} style={styles.episodeCard}>
-                  <View style={styles.iconContainer}>
-                    <Icon name="lock" size={16} color="#fff" />
-                  </View>
-                  <Text style={styles.episodeText}>{section.heading}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
+        <CourseTabs course={course} isEnrolled={isEnrolled} />
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -117,8 +102,11 @@ const CourseDetails = ({ route, navigation }) => {
           <Icon name="bookmark" size={24} color="#FF6F60" />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.enrollButton}>
-          <Text style={styles.enrollButtonText}>Enroll Now</Text>
+        <TouchableOpacity style={[styles.bottomButton,
+          isEnrolled ? styles.continueButton : styles.enrollButton,
+        ]}
+        >
+          <Text style={styles.bottomButtonText}>{isEnrolled ? "Continue" : "Enroll Now"}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -174,89 +162,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10,
   },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    marginVertical: 10,
-    padding: 5,
-  },
-  activeTab: {
-    backgroundColor: '#FFA500',
-    padding: 10,
-    flex: 1,
-    alignItems: 'center',
-    borderRadius: 25,
-  },
-  inactiveTab: {
-    backgroundColor: '#fff',
-    padding: 10,
-    flex: 1,
-    alignItems: 'center',
-  },
-  activeTabText: {
-    fontWeight: 'bold',
-    color: '#FFF',
-    fontSize: screenWidth * 0.04, // 4% of screen width
-  },
-  inactiveTabText: {
-    color: '#1c1c1c',
-    fontWeight: 'bold',
-    fontSize: screenWidth * 0.04, // 4% of screen width
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-  },
-  sectionHeading: {
-    fontSize: screenWidth * 0.05, // 5% of screen width
-    fontWeight: '800',
-    color: '#333',
-    marginTop: 15,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  sectionText: {
-    fontSize: screenWidth * 0.035, // 3.5% of screen width
-    color: '#666',
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-  episodeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 15,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  iconContainer: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#FF6B6B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  episodeText: {
-    fontSize: screenWidth * 0.035, // 3.5% of screen width
-    fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
-  },
   bottomNav: {
     position: 'absolute',
     bottom: 0,
@@ -273,16 +178,21 @@ const styles = StyleSheet.create({
   bookmarkButton: {
     padding: 15,
   },
-  enrollButton: {
-    backgroundColor: '#000',
+  bottomButton: {
     borderRadius: 25,
     paddingVertical: 15,
     paddingHorizontal: 40,
   },
-  enrollButtonText: {
+  enrollButton: {
+    backgroundColor: '#000',
+  },
+  bottomButtonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: screenWidth * 0.04, // 4% of screen width
+  },
+  continueButton: {
+    backgroundColor: '#32CD32',
   },
 });
 
