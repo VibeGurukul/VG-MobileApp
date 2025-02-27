@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
   Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,6 +20,7 @@ const CourseDetails = ({ route, navigation }) => {
   const { course } = route.params;
   const [firstName, setFirstName] = useState('');
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
@@ -60,18 +62,32 @@ const CourseDetails = ({ route, navigation }) => {
 
         if (response.data.isEnrolled) {
           setIsEnrolled(true);
+          setLoading(false);
+        }
+        else{
+          setIsEnrolled(false);
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error checking enrollment status:", error);
+        setLoading(false);
       }
     };
 
     fetchUserData();
   }, []);
 
+  if (loading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6F60" />
+        </View>
+      );
+    }
+
   return (
     <View style={styles.container}>
-      <Header title={`Namaste ${firstName || 'Guest'}!`} subtitle="Course Details" />
+      <Header title={`Namaste ${firstName || 'Guest'}!`}  onBack={() => navigation.goBack() }/>
       
       <ScrollView contentContainerStyle={styles.content}>
         {/* Course Title */}
@@ -193,6 +209,11 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     backgroundColor: '#32CD32',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

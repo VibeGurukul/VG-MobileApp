@@ -70,7 +70,8 @@ const AllCourses = ({ navigation }) => {
     <View style={styles.container}>
       <Header
          title={`Namaste ${firstName || 'Guest'}!`}
-        subtitle="All Courses"
+         subtitle="All Courses"
+         onBack={() => navigation.goBack()}
       />
       
       <ScrollView contentContainerStyle={[styles.content, isTablet && styles.tabletContent]}>
