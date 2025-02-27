@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, CommonActions } from '@react-navigation/native';
-import BottomNavBar from '../components/BottomNavBar';
-import Header from '../components/Header';
+import BottomNavBar from '../../components/BottomNavBar';
+import Header from '../../components/Header';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
