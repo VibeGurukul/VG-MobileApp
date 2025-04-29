@@ -35,6 +35,15 @@ git clone https://github.com/VibeGurukul/VG-MobileApp.git
 cd VG-MobileApp
 ```
 
+### Install Dependencies
+```bash
+npm install
+```
+
+### Start the App
+```bash
+npm expo start
+```
 
 
 
