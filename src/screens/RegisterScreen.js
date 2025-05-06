@@ -5,11 +5,13 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import PasswordInput from '../components/PasswordInput';
+import { useAuth } from '../context/AuthContext';
 
 const RegisterScreen = () => {
   const route = useRoute();
   const { email } = route.params || {};
   const navigation = useNavigation();
+  const { login } = useAuth()
   const [fullName, setFullName] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -22,42 +24,33 @@ const RegisterScreen = () => {
         password: password,
         full_name: fullName,
         mobile_number: mobileNumber
-    });
+      });
 
-    if (response.data.token_type = 'bearer') {  
-      const loginTime = new Date().toISOString(); // Store login timestamp
+      if (response.data.token_type = 'bearer') {
+        await login(response.data);
+      } else {
+        setErrorMessage('Failed to Create account. Please try again later.');
+        Alert.alert('Error', errorMessage);
+      }
+    } catch (error) {
+      console.error("Registration Error:", error?.response?.data || error?.message || error);
 
-      // Store user details in AsyncStorage
-      await AsyncStorage.setItem('access_token', response.data.access_token);
-      await AsyncStorage.setItem('email', response.data.email);
-      await AsyncStorage.setItem('full_name', response.data.full_name);
-      await AsyncStorage.setItem('login_time', loginTime);
-
-      navigation.navigate('HomeScreen');
-    } else {
-      setErrorMessage('Failed to Create account. Please try again later.');
+      if (error.response) {
+        setErrorMessage(error.response.data?.message || 'Registration failed. Please check your credentials.');
+      } else {
+        setErrorMessage('Network error. Please try again.');
+      }
       Alert.alert('Error', errorMessage);
     }
-  } catch (error) {
-    console.error("Registration Error:", error?.response?.data || error?.message || error);
-
-    if (error.response) {
-      setErrorMessage(error.response.data?.message || 'Registration failed. Please check your credentials.');
-    } else {
-      setErrorMessage('Network error. Please try again.');
-    }
-    Alert.alert('Error', errorMessage);
-  }
   };
   return (
     <View style={styles.container}>
-      {/* Logo in the colored header area */}
+
       <Image
         source={require('../assets/logo.png')}
         style={styles.logo}
       />
 
-      {/* White Card Container */}
       <View style={styles.card}>
         <Text style={styles.title}>Welcome To Vibe Gurukul</Text>
         <Text style={styles.secondaryText}>Hey There,👋</Text>
@@ -78,21 +71,18 @@ const RegisterScreen = () => {
           placeholder="Mobile"
           value={mobileNumber}
           onChangeText={(text) => {
-            // Allow only numbers
             const numericValue = text.replace(/[^0-9]/g, '');
             setMobileNumber(numericValue);
           }}
           keyboardType="phone-pad"
-          maxLength={10}  // Adjust as per country
+          maxLength={10}
         />
-        {/* Password Input Component */}
         <PasswordInput password={password} setPassword={setPassword} />
 
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Create an account</Text>
         </TouchableOpacity>
 
-        {/* Divider */}
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
           <Text style={styles.dividerText}>OR</Text>
@@ -104,7 +94,6 @@ const RegisterScreen = () => {
           <TouchableOpacity style={styles.socialButton}>
             <Icon name="facebook" size={24} color="#3b5998" />
           </TouchableOpacity>
-          {/* Add other social icons */}
         </View>
       </View>
     </View>
@@ -140,7 +129,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#000',
   },
-  secondaryText:{
+  secondaryText: {
     fontSize: 20,
     textAlign: 'center',
     color: '#1c1c1c',

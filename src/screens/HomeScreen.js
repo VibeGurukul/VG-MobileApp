@@ -7,8 +7,8 @@ import HomeWhySection from '../components/HomeWhySection';
 
 const HomeScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
-  const { width } = Dimensions.get('window'); // Get screen width
-  const isTablet = width > 768; // Check if the device is a tablet
+  const { width } = Dimensions.get('window');
+  const isTablet = width > 768;
 
   useEffect(() => {
     const fetchUserName = async () => {
