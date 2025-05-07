@@ -5,10 +5,12 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import PasswordInput from '../components/PasswordInput';
+import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = () => {
   const route = useRoute();
   const { email } = route.params || {};
+  const { login } = useAuth()
   const navigation = useNavigation();
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -19,17 +21,9 @@ const LoginScreen = () => {
         email: email,
         password: password
       });
-      
-      if (response.data.access_token) {  
-        const loginTime = new Date().toISOString(); // Store login timestamp
 
-        // Store user details in AsyncStorage
-        await AsyncStorage.setItem('access_token', response.data.access_token);
-        await AsyncStorage.setItem('email', response.data.email);
-        await AsyncStorage.setItem('full_name', response.data.full_name);
-        await AsyncStorage.setItem('login_time', loginTime);
-
-        navigation.navigate('HomeScreen');
+      if (response.data.access_token) {
+        await login(response.data);
       } else {
         setErrorMessage('Failed to Login. Please try again with the correct password.');
         Alert.alert('Error', errorMessage);
@@ -68,12 +62,19 @@ const LoginScreen = () => {
         {/* Password Input Component */}
         <PasswordInput password={password} setPassword={setPassword} />
 
-        <TouchableOpacity 
-          style={[styles.button, !password && { opacity: 0.5 }]} 
-          onPress={handleSubmit} 
+        <TouchableOpacity
+          style={[styles.button, !password && { opacity: 0.5 }]}
+          onPress={handleSubmit}
           disabled={!password}
         >
           <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ForgotPassword")}
+        >
+          <Text style={{ textAlign: 'right', color: 'blue', fontSize: 14, marginVertical: 10, marginRight: 10 }}>
+            Forget Password?
+          </Text>
         </TouchableOpacity>
 
         {/* Divider */}
@@ -124,7 +125,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#000',
   },
-  secondaryText:{
+  secondaryText: {
     fontSize: 20,
     textAlign: 'center',
     color: '#1c1c1c',
@@ -145,7 +146,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFA500',
     borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 30
   },
   buttonText: {
     color: '#fff',

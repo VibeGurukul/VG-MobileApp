@@ -4,15 +4,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import BottomNavBar from '../../components/BottomNavBar';
 import Header from '../../components/Header';
+import { useAuth } from '../../context/AuthContext';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const [firstName, setFirstName] = useState('');
+  const { logout } = useAuth()
 
   useEffect(() => {
     const fetchUserName = async () => {
       try {
-        const storedFullName = await AsyncStorage.getItem('full_name'); 
+        const storedFullName = await AsyncStorage.getItem('full_name');
         if (storedFullName) {
           const firstName = storedFullName.split(' ')[0]; // Extract first name
           setFirstName(firstName);
@@ -21,26 +23,19 @@ const ProfileScreen = () => {
         console.error('Error retrieving name from AsyncStorage:', error);
       }
     };
-  
+
     fetchUserName();
   }, []);
 
   // Handle sign out
   const handleSignOut = async () => {
     try {
-      await AsyncStorage.clear(); // Clear user data
-  
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'Welcome' }],
-        })
-      );
+      await logout()
     } catch (error) {
       console.error('Error during sign-out:', error);
     }
   };
-  
+
 
   return (
     <View style={styles.container}>
@@ -48,32 +43,32 @@ const ProfileScreen = () => {
       <Header
         title={`Namaste ${firstName || 'Guest'}!`}
         subtitle="Continue your journey into the unknowns of Sanatan with us."
-      />      
+      />
       <View style={styles.content} >
         {/* Search Bar */}
-            <View style={styles.searchContainer}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search something..."
-                    placeholderTextColor="#999"
-                />
-            </View>
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search something..."
+            placeholderTextColor="#999"
+          />
+        </View>
 
         {/* Update Buttons */}
         <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Update Password</Text>
+          <Text style={styles.buttonText}>Update Password</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Update Mobile</Text>
+          <Text style={styles.buttonText}>Update Mobile</Text>
         </TouchableOpacity>
 
         {/* Sign Out Button */}
         <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-            <Text style={styles.signOutText}>Sign Out</Text>
+          <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
 
-        
+
       </View>
       {/* Bottom Navigation */}
       <BottomNavBar navigation={navigation} />
@@ -83,13 +78,13 @@ const ProfileScreen = () => {
 
 // Styles
 const styles = StyleSheet.create({
-container: {
+  container: {
     flex: 1,
     backgroundColor: '#F0F0F0',
-    },
-    content: {
-        padding: 20,
-      },
+  },
+  content: {
+    padding: 20,
+  },
   searchContainer: {
     marginBottom: 30,
   },
