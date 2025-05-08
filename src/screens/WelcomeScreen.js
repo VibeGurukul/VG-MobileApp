@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import { isValidEmail } from '../utils';
+import { colors } from '../assets/colors';
 
 const WelcomeScreen = () => {
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
-
-  const isValidEmail = (email) => {
-    // Basic regex for email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
 
   const checkEmailRegistration = async () => {
     if (!isValidEmail(email)) {
       Alert.alert('Please enter a valid email address.');
       return;
     }
+
+    setIsLoading(true);
 
     try {
       const response = await axios.get(`https://dev.vibegurukul.in/api/v1/check-email?email=${(email)}`)
@@ -31,17 +30,18 @@ const WelcomeScreen = () => {
     } catch (error) {
       console.error('API Error:', error);
       Alert.alert('Error', error.response?.data?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
     <View style={styles.container}>
-      {/* Logo in the colored header area */}
       <Image
         source={require('../assets/logo.png')}
         style={styles.logo}
       />
 
-      {/* White Card Container */}
       <View style={styles.card}>
         <Text style={styles.title}>Welcome To Vibe Gurukul</Text>
         <Text style={styles.secondaryText}>Enter your details below:</Text>
@@ -52,13 +52,21 @@ const WelcomeScreen = () => {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          editable={!isLoading}
         />
 
-        <TouchableOpacity style={styles.button} onPress={checkEmailRegistration}>
-          <Text style={styles.buttonText}>Continue With Email</Text>
+        <TouchableOpacity
+          style={[styles.button, isLoading && styles.buttonDisabled]}
+          onPress={checkEmailRegistration}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.buttonText}>Continue With Email</Text>
+          )}
         </TouchableOpacity>
 
-        {/* Divider */}
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
           <Text style={styles.dividerText}>OR</Text>
@@ -67,10 +75,9 @@ const WelcomeScreen = () => {
         <Text style={styles.secondaryText}>Sign In With</Text>
 
         <View style={styles.socialContainer}>
-          <TouchableOpacity style={styles.socialButton}>
+          <TouchableOpacity style={styles.socialButton} disabled={isLoading}>
             <Icon name="facebook" size={24} color="#3b5998" />
           </TouchableOpacity>
-          {/* Add other social icons */}
         </View>
       </View>
     </View>
@@ -80,9 +87,9 @@ const WelcomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FF6F60',
+    backgroundColor: colors.primary,
     alignItems: 'center',
-    paddingTop: 50, // Space for logo at the top
+    paddingTop: 50,
   },
   logo: {
     width: 100,
@@ -110,7 +117,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     color: '#1c1c1c',
-    fontWeight: 400,
+    fontWeight: '400',
     marginBottom: 30,
   },
   input: {
@@ -124,10 +131,16 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     padding: 15,
-    backgroundColor: '#FFA500',
+    backgroundColor: colors.secondary,
     borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 30
+    justifyContent: 'center',
+    marginBottom: 30,
+    height: 50,
+  },
+  buttonDisabled: {
+    backgroundColor: '#FFC04D',
+    opacity: 0.5
   },
   buttonText: {
     color: '#fff',

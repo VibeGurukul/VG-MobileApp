@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import InfoModal from '../components/Modal/InfoModal';
+import { colors } from '../assets/colors';
 
 const ForgotPasswordScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
@@ -66,9 +67,12 @@ const ForgotPasswordScreen = ({ navigation }) => {
                         onPress={handleSubmit}
                         disabled={!email || isLoading}
                     >
-                        <Text style={styles.buttonText}>
-                            {isLoading ? "Sending..." : "Send Reset Link"}
-                        </Text>
+                        {
+                            isLoading ? <ActivityIndicator color="#fff" size="small" /> :
+                                <Text style={styles.buttonText}>
+                                    Send Reset Link
+                                </Text>
+                        }
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -95,7 +99,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FF6F60',
+        backgroundColor: colors.primary,
         alignItems: 'center',
         paddingTop: 50,
     },
@@ -140,7 +144,7 @@ const styles = StyleSheet.create({
     button: {
         width: '100%',
         padding: 15,
-        backgroundColor: '#FFA500',
+        backgroundColor: colors.secondary,
         borderRadius: 10,
         alignItems: 'center',
         marginBottom: 20,

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import PasswordInput from '../components/PasswordInput';
 import { useAuth } from '../context/AuthContext';
+import { colors } from '../assets/colors';
 
 const LoginScreen = () => {
   const route = useRoute();
@@ -14,8 +15,11 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
+    setIsLoading(true);
+
     try {
       const response = await axios.post('https://dev.vibegurukul.in/api/v1/login/', {
         email: email,
@@ -37,18 +41,18 @@ const LoginScreen = () => {
         setErrorMessage('Network error. Please try again.');
       }
       Alert.alert('Error', errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Logo in the colored header area */}
       <Image
         source={require('../assets/logo.png')}
         style={styles.logo}
       />
 
-      {/* White Card Container */}
       <View style={styles.card}>
         <Text style={styles.title}>Welcome To Vibe Gurukul</Text>
         <Text style={styles.secondaryText}>Hi, Welcome Back 👋</Text>
@@ -59,25 +63,36 @@ const LoginScreen = () => {
           editable={false}
         />
 
-        {/* Password Input Component */}
-        <PasswordInput password={password} setPassword={setPassword} />
+        <PasswordInput
+          password={password}
+          setPassword={setPassword}
+          editable={!isLoading}
+        />
 
         <TouchableOpacity
-          style={[styles.button, !password && { opacity: 0.5 }]}
+          style={[
+            styles.button,
+            (!password || isLoading) && styles.buttonDisabled
+          ]}
           onPress={handleSubmit}
-          disabled={!password}
+          disabled={!password || isLoading}
         >
-          <Text style={styles.buttonText}>Login</Text>
+          {isLoading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
         </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() => navigation.navigate("ForgotPassword")}
+          disabled={isLoading}
         >
           <Text style={{ textAlign: 'right', color: 'blue', fontSize: 14, marginVertical: 10, marginRight: 10 }}>
             Forget Password?
           </Text>
         </TouchableOpacity>
 
-        {/* Divider */}
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
           <Text style={styles.dividerText}>OR</Text>
@@ -86,10 +101,9 @@ const LoginScreen = () => {
         <Text style={styles.secondaryText}>Sign In With</Text>
 
         <View style={styles.socialContainer}>
-          <TouchableOpacity style={styles.socialButton}>
+          <TouchableOpacity style={styles.socialButton} disabled={isLoading}>
             <Icon name="facebook" size={24} color="#3b5998" />
           </TouchableOpacity>
-          {/* Add other social icons */}
         </View>
       </View>
     </View>
@@ -99,9 +113,9 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FF6F60',
+    backgroundColor: colors.primary,
     alignItems: 'center',
-    paddingTop: 50, // Space for logo at the top
+    paddingTop: 50,
   },
   logo: {
     width: 100,
@@ -143,9 +157,15 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     padding: 15,
-    backgroundColor: '#FFA500',
+    backgroundColor: colors.secondary,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    height: 50,
+  },
+  buttonDisabled: {
+    backgroundColor: '#FFC04D',
+    opacity: 0.5
   },
   buttonText: {
     color: '#fff',

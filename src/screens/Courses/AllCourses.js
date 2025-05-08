@@ -4,6 +4,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
 import BottomNavBar from '../../components/BottomNavBar';
+import { colors } from '../../assets/colors';
 
 const AllCourses = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,13 +14,13 @@ const AllCourses = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
 
   const { width: screenWidth } = Dimensions.get('window');
-  const isTablet = screenWidth > 768; 
+  const isTablet = screenWidth > 768;
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get('https://dev.vibegurukul.in/api/v1/courses'); 
-        setCourses(response.data); 
+        const response = await axios.get('https://dev.vibegurukul.in/api/v1/courses');
+        setCourses(response.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching courses:', err);
@@ -27,10 +28,10 @@ const AllCourses = ({ navigation }) => {
         setLoading(false);
       }
     };
-  
+
     const fetchUserName = async () => {
       try {
-        const storedFullName = await AsyncStorage.getItem('full_name'); 
+        const storedFullName = await AsyncStorage.getItem('full_name');
         if (storedFullName) {
           const firstName = storedFullName.split(' ')[0]; // Extract first name
           setFirstName(firstName);
@@ -43,7 +44,7 @@ const AllCourses = ({ navigation }) => {
     fetchCourses();
     fetchUserName();
   }, []);
-  
+
 
   // Filter courses based on search query
   const filteredCourses = courses.filter(course =>
@@ -53,7 +54,7 @@ const AllCourses = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#FF6F60" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -69,11 +70,11 @@ const AllCourses = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Header
-         title={`Namaste ${firstName || 'Guest'}!`}
-         subtitle="All Courses"
-         onBack={() => navigation.goBack()}
+        title={`Namaste ${firstName || 'Guest'}!`}
+        subtitle="All Courses"
+        onBack={() => navigation.goBack()}
       />
-      
+
       <ScrollView contentContainerStyle={[styles.content, isTablet && styles.tabletContent]}>
         <TextInput
           style={[styles.searchBar, isTablet && styles.tabletSearchBar]}
@@ -98,7 +99,7 @@ const AllCourses = ({ navigation }) => {
                 }}
                 resizeMode="cover"
               />
-              
+
               <View style={styles.cardContent}>
                 <Text style={[styles.courseTitle, isTablet && styles.tabletCourseTitle]}>
                   {course.title}
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
   currentPrice: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FF6F60',
+    color: colors.primary,
     marginRight: 10
   },
   tabletCurrentPrice: {
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#FF6F60',
+    color: colors.primary,
   },
 });
 
