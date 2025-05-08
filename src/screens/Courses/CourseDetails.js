@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import Header from '../../components/Header';
 import CourseTabs from '../../components/CourseTabs';
+import { colors } from '../../assets/colors';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -64,7 +65,7 @@ const CourseDetails = ({ route, navigation }) => {
           setIsEnrolled(true);
           setLoading(false);
         }
-        else{
+        else {
           setIsEnrolled(false);
           setLoading(false);
         }
@@ -78,17 +79,17 @@ const CourseDetails = ({ route, navigation }) => {
   }, []);
 
   if (loading) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FF6F60" />
-        </View>
-      );
-    }
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Header title={`Namaste ${firstName || 'Guest'}!`}  onBack={() => navigation.goBack() }/>
-      
+      <Header title={`Namaste ${firstName || 'Guest'}!`} onBack={() => navigation.goBack()} />
+
       <ScrollView contentContainerStyle={styles.content}>
         {/* Course Title */}
         <Text style={styles.courseTitle}>{course.title}</Text>
@@ -115,11 +116,11 @@ const CourseDetails = ({ route, navigation }) => {
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.bookmarkButton}>
-          <Icon name="bookmark" size={24} color="#FF6F60" />
+          <Icon name="bookmark" size={24} color={colors.primary} />
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={[styles.bottomButton,
-          isEnrolled ? styles.continueButton : styles.enrollButton,
+        isEnrolled ? styles.continueButton : styles.enrollButton,
         ]}
         >
           <Text style={styles.bottomButtonText}>{isEnrolled ? "Continue" : "Enroll Now"}</Text>
@@ -172,9 +173,9 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   priceText: {
-    fontSize: screenWidth * 0.06, // 6% of screen width
+    fontSize: screenWidth * 0.06,
     fontWeight: 'bold',
-    color: '#FF6F60',
+    color: colors.primary,
     textAlign: 'center',
     marginBottom: 10,
   },
