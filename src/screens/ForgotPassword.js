@@ -3,9 +3,11 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, Scro
 import axios from 'axios';
 import InfoModal from '../components/Modal/InfoModal';
 import { colors } from '../assets/colors';
+import { useRoute } from '@react-navigation/native';
 
 const ForgotPasswordScreen = ({ navigation }) => {
-    const [email, setEmail] = useState('');
+    const route = useRoute()
+    const { email } = route.params
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
@@ -26,7 +28,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
             });
 
             if (response.data) {
-                setModalVisible(true); // Show modal on success
+                setModalVisible(true);
             }
         } catch (error) {
             console.error("Forgot Password Error:", error?.response?.data?.detail);
@@ -57,8 +59,9 @@ const ForgotPasswordScreen = ({ navigation }) => {
                         style={styles.input}
                         placeholder="Email address"
                         value={email}
-                        onChangeText={setEmail}
+                        disabled={true}
                         keyboardType="email-address"
+                        editable={false}
                         autoCapitalize="none"
                     />
 
@@ -67,12 +70,11 @@ const ForgotPasswordScreen = ({ navigation }) => {
                         onPress={handleSubmit}
                         disabled={!email || isLoading}
                     >
-                        {
-                            isLoading ? <ActivityIndicator color="#fff" size="small" /> :
-                                <Text style={styles.buttonText}>
-                                    Send Reset Link
-                                </Text>
-                        }
+                        {isLoading ? (
+                            <ActivityIndicator color="#fff" size="small" />
+                        ) : (
+                            <Text style={styles.buttonText}>Send Reset Link</Text>
+                        )}
                     </TouchableOpacity>
 
                     <TouchableOpacity
