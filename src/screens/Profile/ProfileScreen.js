@@ -17,7 +17,7 @@ const ProfileScreen = () => {
       try {
         const storedFullName = await AsyncStorage.getItem('full_name');
         if (storedFullName) {
-          const firstName = storedFullName.split(' ')[0]; // Extract first name
+          const firstName = storedFullName.split(' ')[0];
           setFirstName(firstName);
         }
       } catch (error) {

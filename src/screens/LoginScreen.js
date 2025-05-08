@@ -77,7 +77,14 @@ const LoginScreen = () => {
           onPress={handleSubmit}
           disabled={!password || isLoading}
         >
-          <Text style={styles.buttonText}>Login</Text>
+          {isLoading ? <ActivityIndicator size={'small'} color={colors.white} /> : <Text style={styles.buttonText}>Login</Text>}
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ForgotPassword", { ...route.params })}
+        >
+          <Text style={{ textAlign: 'right', color: 'blue', fontSize: 14, marginVertical: 10, marginRight: 10 }}>
+            Forget Password?
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.divider}>

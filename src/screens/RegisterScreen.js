@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,8 +17,10 @@ const RegisterScreen = () => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async () => {
+    setIsLoading(true)
     try {
       const response = await axios.post(`https://dev.vibegurukul.in/api/v1/register/`, {
         email: email,
@@ -42,6 +44,8 @@ const RegisterScreen = () => {
         setErrorMessage('Network error. Please try again.');
       }
       Alert.alert('Error', errorMessage);
+    } finally {
+      setIsLoading(false)
     }
   };
   return (
@@ -80,8 +84,13 @@ const RegisterScreen = () => {
         />
         <PasswordInput password={password} setPassword={setPassword} />
 
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Create an account</Text>
+        <TouchableOpacity style={[styles.button, isLoading && { opacity: 0.5 }]}
+          disabled={isLoading}
+          onPress={handleSubmit}>
+          {isLoading ? <ActivityIndicator
+            size={'small'}
+            color={colors.white}
+          /> : <Text style={styles.buttonText}>Create an account</Text>}
         </TouchableOpacity>
 
         <View style={styles.divider}>
