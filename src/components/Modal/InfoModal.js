@@ -1,6 +1,7 @@
 // components/PasswordResetModal.js
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { colors } from '../../assets/colors';
 
 const InfoModal = ({ title, description, visible, onClose }) => {
     return (
@@ -47,7 +48,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     button: {
-        backgroundColor: '#FFA500',
+        backgroundColor: colors.secondary,
         paddingVertical: 10,
         paddingHorizontal: 30,
         borderRadius: 8,

@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import PasswordInput from '../components/PasswordInput';
 import { useAuth } from '../context/AuthContext';
+import { colors } from '../assets/colors';
 
 const RegisterScreen = () => {
   const route = useRoute();
@@ -103,9 +104,9 @@ const RegisterScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FF6F60',
+    backgroundColor: colors.primary,
     alignItems: 'center',
-    paddingTop: 50, // Space for logo at the top
+    paddingTop: 50,
   },
   logo: {
     width: 100,
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     padding: 15,
-    backgroundColor: '#FFA500',
+    backgroundColor: colors.secondary,
     borderRadius: 10,
     alignItems: 'center',
     marginBottom: 10

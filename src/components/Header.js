@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { colors } from '../assets/colors';
 
 const Header = ({ title, subtitle, onBack }) => {
   return (
@@ -26,7 +27,7 @@ const Header = ({ title, subtitle, onBack }) => {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#FF6F60',
+    backgroundColor: colors.primary,
     padding: 20,
     paddingTop: 50,
     borderBottomLeftRadius: 50,
@@ -34,17 +35,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerNarrow: {
-    paddingTop: 50, 
+    paddingTop: 50,
   },
   titleContainer: {
     flexDirection: 'row',
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    width: '100%', 
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
   backButton: {
-    position: 'absolute', 
-    left: 0, 
+    position: 'absolute',
+    left: 0,
   },
   headerTitle: {
     fontSize: 30,

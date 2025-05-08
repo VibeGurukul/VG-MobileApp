@@ -5,6 +5,7 @@ import { useNavigation, CommonActions } from '@react-navigation/native';
 import BottomNavBar from '../../components/BottomNavBar';
 import Header from '../../components/Header';
 import { useAuth } from '../../context/AuthContext';
+import { colors } from '../../assets/colors';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -107,26 +108,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#000',
+    color: colors.textPrimary,
     fontSize: 16,
     fontWeight: 'bold',
   },
   signOutButton: {
-    backgroundColor: 'red',
+    backgroundColor: colors.error,
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
     marginVertical: 20,
   },
   signOutText: {
-    color: '#fff',
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: '#000',
+    marginBottom: 20,
+  },
+  profileName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  profileDescription: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  editButton: {
+    backgroundColor: colors.secondary,
     fontSize: 16,
     fontWeight: 'bold',
   },
   bottomNav: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#FFA500',
+    backgroundColor: colors.secondary,
     padding: 10,
     borderRadius: 20,
     position: 'absolute',
