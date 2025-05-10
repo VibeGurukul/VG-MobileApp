@@ -17,6 +17,11 @@ const Header = ({ title, subtitle, onBack }) => {
 
         {/* Title */}
         <Text style={styles.headerTitle}>{title}</Text>
+        {onBack && (
+          <TouchableOpacity style={{ width: '20%' }}>
+            <Icon name="caret-left" size={30} color={colors.primary} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Subtitle (Optional) */}
@@ -29,13 +34,13 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.primary,
     padding: 20,
-    paddingTop: 50,
+    paddingTop: 30,
     borderBottomLeftRadius: 50,
     borderBottomRightRadius: 50,
     alignItems: 'center',
   },
   headerNarrow: {
-    paddingTop: 50,
+    paddingTop: 30,
   },
   titleContainer: {
     flexDirection: 'row',
@@ -44,14 +49,18 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   backButton: {
-    position: 'absolute',
+    width: '20%',
+    justifyContent: 'center',
+  },
+  backButtonIcon: {
     left: 0,
   },
   headerTitle: {
     fontSize: 30,
     fontWeight: 'bold',
+    width: '60%',
     color: 'white',
-    marginBottom: 10, // Reduced margin when no subtitle is present
+    marginBottom: 5,
     textAlign: 'center',
   },
   headerSubtitle: {

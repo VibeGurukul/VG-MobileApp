@@ -7,13 +7,17 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
+  Button,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEvent, Video } from 'expo'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import Header from '../../components/Header';
 import CourseTabs from '../../components/CourseTabs';
 import { colors } from '../../assets/colors';
+import { useAuth } from '../../context/AuthContext';
+import { API } from '../../constants';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -23,8 +27,38 @@ const CourseDetails = ({ route, navigation }) => {
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const { user } = useAuth()
+
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
+  const [isLoading, setIsLoading] = useState('');
+
+
+
+  const checkEnrollmentStatus = async (userEmail, userToken) => {
+    if (!userToken) return;
+
+    try {
+      const response = await axios.get(
+        `${API.BASE_URL}/check-enroll`,
+        {
+          params: { user_email: userEmail, course_id: course._id },
+        }
+      );
+
+      if (response.data.isEnrolled) {
+        setIsEnrolled(true);
+        setLoading(false);
+      }
+      else {
+        setIsEnrolled(false);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error checking enrollment status:", error);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -41,8 +75,6 @@ const CourseDetails = ({ route, navigation }) => {
         if (storedEmail && storedToken) {
           setEmail(storedEmail);
           setToken(storedToken);
-
-          // Call checkEnrollmentStatus after setting email & token
           checkEnrollmentStatus(storedEmail, storedToken);
         }
       } catch (error) {
@@ -50,33 +82,37 @@ const CourseDetails = ({ route, navigation }) => {
       }
     };
 
-    const checkEnrollmentStatus = async (userEmail, userToken) => {
-      if (!userToken) return; // Ensure token is available before making the request
 
-      try {
-        const response = await axios.get(
-          "https://dev.vibegurukul.in/api/v1/check-enroll",
-          {
-            params: { user_email: userEmail, course_id: course._id },
-          }
-        );
-
-        if (response.data.isEnrolled) {
-          setIsEnrolled(true);
-          setLoading(false);
-        }
-        else {
-          setIsEnrolled(false);
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Error checking enrollment status:", error);
-        setLoading(false);
-      }
-    };
 
     fetchUserData();
   }, []);
+
+  const handleEnroll = async (courseId) => {
+    if (isEnrolled) return
+    setIsLoading(true)
+    try {
+      const data = {
+        user_email: user.email,
+        course_id: courseId
+      }
+      const response = await axios.post(`${API.BASE_URL}/enroll`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      })
+
+      if (response.data) {
+        checkEnrollmentStatus(user.email, token);
+      } else {
+        console.log("err")
+      }
+    } catch (error) {
+      console.error('API Error:', error.response.data);
+      Alert.alert('Error', error.response?.data?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -86,9 +122,14 @@ const CourseDetails = ({ route, navigation }) => {
     );
   }
 
+
+
   return (
     <View style={styles.container}>
-      <Header title={`Namaste ${firstName || 'Guest'}!`} onBack={() => navigation.goBack()} />
+      <Header
+        title={`Namaste ${firstName || "Guest"}!`}
+        onBack={() => navigation.goBack()}
+      />
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Course Title */}
@@ -119,11 +160,16 @@ const CourseDetails = ({ route, navigation }) => {
           <Icon name="bookmark" size={24} color={colors.primary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.bottomButton,
-        isEnrolled ? styles.continueButton : styles.enrollButton,
-        ]}
+        <TouchableOpacity
+          onPress={() => handleEnroll(course._id)}
+          style={[
+            styles.bottomButton,
+            isEnrolled ? styles.continueButton : styles.enrollButton,
+          ]}
         >
-          <Text style={styles.bottomButtonText}>{isEnrolled ? "Continue" : "Enroll Now"}</Text>
+          {isLoading ? <ActivityIndicator size={"small"} color={colors.white} /> : <Text style={styles.bottomButtonText}>
+            {isEnrolled ? "Continue" : "Enroll Now"}
+          </Text>}
         </TouchableOpacity>
       </View>
     </View>
@@ -131,6 +177,20 @@ const CourseDetails = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    flex: 1,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 50,
+  },
+  video: {
+    width: 350,
+    height: 275,
+  },
+  controlsContainer: {
+    padding: 10,
+  },
   container: {
     flex: 1,
     backgroundColor: '#F0F0F0',

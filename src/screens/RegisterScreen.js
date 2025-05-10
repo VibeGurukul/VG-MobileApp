@@ -7,6 +7,7 @@ import axios from 'axios';
 import PasswordInput from '../components/PasswordInput';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../assets/colors';
+import { API } from '../constants';
 
 const RegisterScreen = () => {
   const route = useRoute();
@@ -22,7 +23,7 @@ const RegisterScreen = () => {
   const handleSubmit = async () => {
     setIsLoading(true)
     try {
-      const response = await axios.post(`https://dev.vibegurukul.in/api/v1/register/`, {
+      const response = await axios.post(`${API.BASE_URL}/register/`, {
         email: email,
         password: password,
         full_name: fullName,
