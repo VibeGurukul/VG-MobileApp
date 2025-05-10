@@ -4,6 +4,7 @@ import axios from 'axios';
 import InfoModal from '../components/Modal/InfoModal';
 import { colors } from '../assets/colors';
 import { useRoute } from '@react-navigation/native';
+import { API } from '../constants';
 
 const ForgotPasswordScreen = ({ navigation }) => {
     const route = useRoute()
@@ -23,7 +24,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
         setErrorMessage('');
 
         try {
-            const response = await axios.post('https://dev.vibegurukul.in/api/v1/forgot-password', {
+            const response = await axios.post(`${API.BASE_URL}/forgot-password`, {
                 email: email
             });
 

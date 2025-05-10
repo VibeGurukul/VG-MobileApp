@@ -28,7 +28,6 @@ const ProfileScreen = () => {
     fetchUserName();
   }, []);
 
-  // Handle sign out
   const handleSignOut = async () => {
     try {
       await logout()
