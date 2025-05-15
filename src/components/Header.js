@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { colors } from '../assets/colors';
 
 const Header = ({ title, subtitle, onBack }) => {
   return (
-    <View style={[styles.header, !subtitle && styles.headerNarrow]}>
+    <SafeAreaView style={[styles.header, !subtitle && styles.headerNarrow]}>
       {/* Title and Back Button Container */}
       <View style={styles.titleContainer}>
         {/* Back Button (Optional) */}
@@ -26,7 +26,7 @@ const Header = ({ title, subtitle, onBack }) => {
 
       {/* Subtitle (Optional) */}
       {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -34,13 +34,13 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.primary,
     padding: 20,
-    paddingTop: 30,
+    paddingTop: 50,
     borderBottomLeftRadius: 50,
     borderBottomRightRadius: 50,
     alignItems: 'center',
   },
   headerNarrow: {
-    paddingTop: 30,
+    paddingTop: 50,
   },
   titleContainer: {
     flexDirection: 'row',
@@ -56,9 +56,9 @@ const styles = StyleSheet.create({
     left: 0,
   },
   headerTitle: {
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: 'bold',
-    width: '60%',
+    // width: '60%',
     color: 'white',
     marginBottom: 5,
     textAlign: 'center',
