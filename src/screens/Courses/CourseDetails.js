@@ -18,6 +18,8 @@ import CourseTabs from '../../components/CourseTabs';
 import { colors } from '../../assets/colors';
 import { useAuth } from '../../context/AuthContext';
 import { API } from '../../constants';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import VideoPlayer from '../../components/VideoPlayer';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -32,6 +34,11 @@ const CourseDetails = ({ route, navigation }) => {
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
   const [isLoading, setIsLoading] = useState('');
+
+  // const player = useVideoPlayer("https://vibegurukul.s3.ap-south-1.amazonaws.com/Women-Part-01/Preview/master.m3u8", player => {
+  //   player.loop = true;
+  //   player.play();
+  // });
 
 
 
@@ -61,6 +68,7 @@ const CourseDetails = ({ route, navigation }) => {
   };
 
   useEffect(() => {
+    console.log("course,", course)
     const fetchUserData = async () => {
       try {
         const storedFullName = await AsyncStorage.getItem("full_name");
@@ -138,7 +146,12 @@ const CourseDetails = ({ route, navigation }) => {
         {/* Preview Video Placeholder */}
         <View style={styles.videoContainer}>
           <View style={styles.videoPlaceholder}>
-            <Text style={styles.placeholderText}>Video Preview</Text>
+            {/* <Text style={styles.placeholderText}>Video Preview</Text> */}
+            {/* <VideoView style={{ height: '100%', width: '100%' }} player={player} allowsFullscreen allowsPictureInPicture /> */}
+            <VideoPlayer
+              videoURL={course?.videos[0]?.url}
+            />
+
           </View>
         </View>
 

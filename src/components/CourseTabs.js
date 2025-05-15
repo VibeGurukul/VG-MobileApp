@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { colors } from "../assets/colors";
+import { useNavigation } from "@react-navigation/native";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const CourseTabs = ({ course, isEnrolled }) => {
   const [activeTab, setActiveTab] = useState("Description");
+  const navigation = useNavigation()
 
   return (
     <View>
@@ -48,7 +50,11 @@ const CourseTabs = ({ course, isEnrolled }) => {
         ) : (
           <View style={styles.playlistContainer}>
             {course.sections.map((section, index) => (
-              <View
+              <TouchableOpacity
+                // onPress={() => console.log("section: ", section.id)}
+                onPress={() => navigation.navigate("MainVideoScreen", {
+                  videoURL: section.videos[0]?.url, videoTitle: section.videos[0]?.title, courseId: course._id, chapterId: section.id
+                })}
                 key={index}
                 style={[styles.episodeCard]}
               >
@@ -65,7 +71,7 @@ const CourseTabs = ({ course, isEnrolled }) => {
                 >
                   {section.heading}
                 </Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
