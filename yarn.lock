@@ -2423,6 +2423,11 @@ expo-modules-core@2.3.12:
   dependencies:
     invariant "^2.2.4"
 
+expo-screen-orientation@~8.1.6:
+  version "8.1.6"
+  resolved "https://registry.yarnpkg.com/expo-screen-orientation/-/expo-screen-orientation-8.1.6.tgz#db9f21e53ec73a174020ae2dde11933a9a5c26a0"
+  integrity sha512-2ueYwTNCCP/8DhiChS5Mwq/N0nIc0gOVg8SgUa9VuTRMta9jHpCRmuZ6CJftRL+vW4NNGorwpGBus8YWVYeaPw==
+
 expo-splash-screen@~0.30.7:
   version "0.30.7"
   resolved "https://registry.yarnpkg.com/expo-splash-screen/-/expo-splash-screen-0.30.7.tgz#bd4f0ea643c8f09ed43957ec6cf5a051edfcdfa7"
@@ -2437,6 +2442,11 @@ expo-status-bar@~2.2.3:
   dependencies:
     react-native-edge-to-edge "1.6.0"
     react-native-is-edge-to-edge "^1.1.6"
+
+expo-video@^2.1.9:
+  version "2.1.9"
+  resolved "https://registry.yarnpkg.com/expo-video/-/expo-video-2.1.9.tgz#e0cb263f8cb9605c8cf10a79a66a0f8a8e28d97f"
+  integrity sha512-BEainlMBgAI6ww4D2fkG25WwTm+Is8suJp8SCU5Pyxs2TzrTH9q/E4bWcl8ausHGrANspLHvHY7cYlC9pgAGFw==
 
 expo@^53.0.4:
   version "53.0.4"
