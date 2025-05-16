@@ -2,11 +2,25 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { colors } from "../assets/colors";
+import { useNavigation } from "@react-navigation/native";
+import { Toast } from "toastify-react-native";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const CourseTabs = ({ course, isEnrolled }) => {
+const CourseTabs = ({ course, isEnrolled, player }) => {
   const [activeTab, setActiveTab] = useState("Description");
+  const navigation = useNavigation()
+
+  const handleCourseClick = (section) => {
+    if (isEnrolled) {
+      player.pause()
+      navigation.navigate("MainVideoScreen", {
+        videoURL: section.videos[0]?.url, videoTitle: section.videos[0]?.title, courseId: course._id, chapterId: section.id
+      })
+    } else {
+      Toast.error("You are not enrolled in this course")
+    }
+  }
 
   return (
     <View>
@@ -48,7 +62,9 @@ const CourseTabs = ({ course, isEnrolled }) => {
         ) : (
           <View style={styles.playlistContainer}>
             {course.sections.map((section, index) => (
-              <View
+              <TouchableOpacity
+                // onPress={() => console.log("section: ", section.id)}
+                onPress={() => handleCourseClick(section)}
                 key={index}
                 style={[styles.episodeCard]}
               >
@@ -65,7 +81,7 @@ const CourseTabs = ({ course, isEnrolled }) => {
                 >
                   {section.heading}
                 </Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
