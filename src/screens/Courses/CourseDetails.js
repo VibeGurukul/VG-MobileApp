@@ -8,9 +8,9 @@ import {
   ActivityIndicator,
   Dimensions,
   Button,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEvent, Video } from 'expo'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import Header from '../../components/Header';
@@ -19,7 +19,7 @@ import { colors } from '../../assets/colors';
 import { useAuth } from '../../context/AuthContext';
 import { API } from '../../constants';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import VideoPlayer from '../../components/VideoPlayer';
+import { Toast } from 'toastify-react-native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -33,12 +33,13 @@ const CourseDetails = ({ route, navigation }) => {
 
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
-  const [isLoading, setIsLoading] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  // const player = useVideoPlayer("https://vibegurukul.s3.ap-south-1.amazonaws.com/Women-Part-01/Preview/master.m3u8", player => {
-  //   player.loop = true;
-  //   player.play();
-  // });
+  const player = useVideoPlayer(course?.videos[0]?.url, player => {
+    player.loop = true;
+    player.play();
+    // player.muted = true;
+  });
 
 
 
@@ -68,15 +69,17 @@ const CourseDetails = ({ route, navigation }) => {
   };
 
   useEffect(() => {
-    console.log("course,", course)
     const fetchUserData = async () => {
       try {
-        const storedFullName = await AsyncStorage.getItem("full_name");
-        const storedEmail = await AsyncStorage.getItem("email");
-        const storedToken = await AsyncStorage.getItem("access_token");
+        const keys = ["full_name", "email", "access_token"];
+        const storedValues = await AsyncStorage.multiGet(keys);
+
+        const storedFullName = storedValues[0][1];
+        const storedEmail = storedValues[1][1];
+        const storedToken = storedValues[2][1];
 
         if (storedFullName) {
-          const firstName = storedFullName.split(" ")[0]; // Extract first name
+          const firstName = storedFullName.split(" ")[0];
           setFirstName(firstName);
         }
 
@@ -110,25 +113,25 @@ const CourseDetails = ({ route, navigation }) => {
       })
 
       if (response.data) {
-        checkEnrollmentStatus(user.email, token);
+        Toast.success("You have successfully enrolled in the course.");
+        await checkEnrollmentStatus(user.email, token);
       } else {
         console.log("err")
       }
     } catch (error) {
-      console.error('API Error:', error.response.data);
       Alert.alert('Error', error.response?.data?.message || 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
   }
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <View style={styles.loadingContainer}>
+  //       <ActivityIndicator size="large" color={colors.primary} />
+  //     </View>
+  //   );
+  // }
 
 
 
@@ -146,12 +149,12 @@ const CourseDetails = ({ route, navigation }) => {
         {/* Preview Video Placeholder */}
         <View style={styles.videoContainer}>
           <View style={styles.videoPlaceholder}>
-            {/* <Text style={styles.placeholderText}>Video Preview</Text> */}
-            {/* <VideoView style={{ height: '100%', width: '100%' }} player={player} allowsFullscreen allowsPictureInPicture /> */}
-            <VideoPlayer
-              videoURL={course?.videos[0]?.url}
+            <VideoView
+              style={{ height: "100%", width: "100%" }}
+              player={player}
+              allowsFullscreen
+              allowsPictureInPicture
             />
-
           </View>
         </View>
 
@@ -164,7 +167,7 @@ const CourseDetails = ({ route, navigation }) => {
         {/* Price */}
         <Text style={styles.priceText}>₹{course.price}/-</Text>
 
-        <CourseTabs course={course} isEnrolled={isEnrolled} />
+        <CourseTabs course={course} isEnrolled={isEnrolled} player={player} />
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -172,18 +175,34 @@ const CourseDetails = ({ route, navigation }) => {
         <TouchableOpacity style={styles.bookmarkButton}>
           <Icon name="bookmark" size={24} color={colors.primary} />
         </TouchableOpacity>
-
-        <TouchableOpacity
+        {loading ? <TouchableOpacity
           onPress={() => handleEnroll(course._id)}
           style={[
             styles.bottomButton,
-            isEnrolled ? styles.continueButton : styles.enrollButton,
           ]}
         >
-          {isLoading ? <ActivityIndicator size={"small"} color={colors.white} /> : <Text style={styles.bottomButtonText}>
-            {isEnrolled ? "Continue" : "Enroll Now"}
-          </Text>}
-        </TouchableOpacity>
+          <ActivityIndicator size="small" color={colors.primary} />
+        </TouchableOpacity> : <>
+          {course.price != "Coming Soon" ? (
+            <TouchableOpacity
+              onPress={() => handleEnroll(course._id)}
+              style={[
+                styles.bottomButton,
+                isEnrolled ? styles.continueButton : styles.enrollButton,
+              ]}
+            >
+              {isLoading ? (
+                <ActivityIndicator size={"small"} color={colors.white} />
+              ) : (
+                <Text style={styles.bottomButtonText}>
+                  {isEnrolled ? "Continue" : "Enroll Now"}
+                </Text>
+              )}
+            </TouchableOpacity>
+          ) : (
+            <></>
+          )}
+        </>}
       </View>
     </View>
   );
