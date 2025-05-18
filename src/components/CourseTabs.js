@@ -7,20 +7,35 @@ import { Toast } from "toastify-react-native";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const CourseTabs = ({ course, isEnrolled, player }) => {
+const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
   const [activeTab, setActiveTab] = useState("Description");
-  const navigation = useNavigation()
+  const navigation = useNavigation();
+
+  // Function to get progress for a specific section
+  const getSectionProgress = (sectionId) => {
+    if (!progressList || progressList.length === 0) return 0;
+
+
+    const sectionProgress = progressList.find(
+      item => item.section_id === sectionId
+    );
+
+    return sectionProgress ? sectionProgress.progress : 0;
+  };
 
   const handleCourseClick = (section) => {
     if (isEnrolled) {
-      player.pause()
+      player.pause();
       navigation.navigate("MainVideoScreen", {
-        videoURL: section.videos[0]?.url, videoTitle: section.videos[0]?.title, courseId: course._id, chapterId: section.id
-      })
+        videoURL: section.videos[0]?.url,
+        videoTitle: section.videos[0]?.title,
+        courseId: course._id,
+        chapterId: section.id
+      });
     } else {
-      Toast.error("You are not enrolled in this course")
+      Toast.error("You are not enrolled in this course");
     }
-  }
+  };
 
   return (
     <View>
@@ -61,28 +76,44 @@ const CourseTabs = ({ course, isEnrolled, player }) => {
           </>
         ) : (
           <View style={styles.playlistContainer}>
-            {course.sections.map((section, index) => (
-              <TouchableOpacity
-                // onPress={() => console.log("section: ", section.id)}
-                onPress={() => handleCourseClick(section)}
-                key={index}
-                style={[styles.episodeCard]}
-              >
-                <View
-                  style={[
-                    styles.iconContainer,
-                    isEnrolled ? styles.iconContainerEnrolled : styles.iconContainerLocked,
-                  ]}
+            {course.sections.map((section, index) => {
+              const progress = getSectionProgress(section.id);
+              return (
+                <TouchableOpacity
+                  onPress={() => handleCourseClick(section)}
+                  key={index}
+                  style={[styles.episodeCard]}
                 >
-                  <Icon name={isEnrolled ? "play" : "lock"} size={16} color="#fff" />
-                </View>
-                <Text
-                  style={[styles.episodeText]}
-                >
-                  {section.heading}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      isEnrolled ? styles.iconContainerEnrolled : styles.iconContainerLocked,
+                    ]}
+                  >
+                    <Icon name={isEnrolled ? "play" : "lock"} size={16} color="#fff" />
+                  </View>
+                  <View style={styles.episodeContent}>
+                    <Text style={styles.episodeText}>
+                      {section.heading}
+                    </Text>
+
+                    {isEnrolled && (
+                      <View style={styles.progressContainer}>
+                        <View style={styles.progressBarBackground}>
+                          <View
+                            style={[
+                              styles.progressBarFill,
+                              { width: `${progress}%` }
+                            ]}
+                          />
+                        </View>
+                        <Text style={styles.progressText}>{progress}% completed</Text>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
       </View>
@@ -152,7 +183,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 12,
     borderRadius: 15,
-    marginBottom: 8,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
@@ -171,12 +202,36 @@ const styles = StyleSheet.create({
   iconContainerEnrolled: {
     backgroundColor: "#32CD32",
   },
-  episodeText: {
-    fontSize: screenWidth * 0.035, // 3.5% of screen width
-    fontWeight: 'bold',
-    color: '#333',
+  iconContainerLocked: {
+    backgroundColor: "#888888",
+  },
+  episodeContent: {
     flex: 1,
   },
+  episodeText: {
+    fontSize: screenWidth * 0.035,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 6,
+  },
+  progressContainer: {
+    marginTop: 4,
+  },
+  progressBarBackground: {
+    height: 6,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: colors.secondary,
+  },
+  progressText: {
+    fontSize: screenWidth * 0.03,
+    color: '#666',
+    marginTop: 2,
+  }
 });
 
 export default CourseTabs;

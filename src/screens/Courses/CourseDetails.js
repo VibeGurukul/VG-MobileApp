@@ -28,17 +28,17 @@ const CourseDetails = ({ route, navigation }) => {
   const [firstName, setFirstName] = useState('');
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [progressList, setProgressList] = useState([]);
 
-  const { user } = useAuth()
+  const { user, token } = useAuth()
 
   const [email, setEmail] = useState('');
-  const [token, setToken] = useState('');
+
   const [isLoading, setIsLoading] = useState(false);
 
   const player = useVideoPlayer(course?.videos[0]?.url, player => {
     player.loop = true;
     player.play();
-    // player.muted = true;
   });
 
 
@@ -56,6 +56,7 @@ const CourseDetails = ({ route, navigation }) => {
 
       if (response.data.isEnrolled) {
         setIsEnrolled(true);
+        getSectionProgress()
         setLoading(false);
       }
       else {
@@ -67,6 +68,30 @@ const CourseDetails = ({ route, navigation }) => {
       setLoading(false);
     }
   };
+
+
+
+  const getSectionProgress = async () => {
+    try {
+      let response = await axios.get(
+        `${API.BASE_URL}/users/progress/${course?._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("resP: ", response.data)
+      setProgressList(response.data);
+    } catch (error) {
+      console.log("error is: ", error.response.data, " test: ", `${API.BASE_URL}/users/progress/${course?._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+    }
+  }
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -85,7 +110,6 @@ const CourseDetails = ({ route, navigation }) => {
 
         if (storedEmail && storedToken) {
           setEmail(storedEmail);
-          setToken(storedToken);
           checkEnrollmentStatus(storedEmail, storedToken);
         }
       } catch (error) {
@@ -167,7 +191,7 @@ const CourseDetails = ({ route, navigation }) => {
         {/* Price */}
         <Text style={styles.priceText}>₹{course.price}/-</Text>
 
-        <CourseTabs course={course} isEnrolled={isEnrolled} player={player} />
+        <CourseTabs course={course} isEnrolled={isEnrolled} player={player} progressList={progressList} />
       </ScrollView>
 
       {/* Bottom Navigation */}

@@ -11,10 +11,8 @@ const VideoPlayer = ({
   autoLandscape = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState(true);
-  const progressIntervalRef = useRef(null);
   const hasPerformedInitialSeek = useRef(false);
 
-  // Set screen orientation to landscape when component mounts
   useEffect(() => {
     const setOrientation = async () => {
       if (autoLandscape) {
@@ -37,10 +35,15 @@ const VideoPlayer = ({
           console.error("Failed to unlock screen orientation:", error);
         });
       }
+
+      // Save progress when component unmounts
+      if (player) {
+        handleSaveProgress();
+      }
     };
   }, [autoLandscape]);
 
-  const saveProgress = async (progress, duration) => {
+  const saveProgress = (progress, duration) => {
     try {
       const progressPercentage =
         duration > 0 ? ((progress / duration) * 100).toFixed(2) : 0;
@@ -50,8 +53,19 @@ const VideoPlayer = ({
     }
   };
 
+  const handleSaveProgress = () => {
+    if (player && player.currentTime && player.duration) {
+      // If the video is at the end (with a small threshold), save as 100%
+      if (player.currentTime >= player.duration - 0.5) {
+        onProgress(100);
+      } else {
+        saveProgress(player.currentTime, player.duration);
+      }
+    }
+  };
+
   const player = useVideoPlayer(videoURL, async (player) => {
-    player.loop = true;
+    player.loop = false; // Changed from true to false to detect end of video
     player.play();
     setIsPlaying(true);
     console.log("Player created");
@@ -74,28 +88,13 @@ const VideoPlayer = ({
       setIsPlaying(true);
     } else if (status === "paused") {
       setIsPlaying(false);
-      if (player.currentTime && player.duration) {
-        saveProgress(player.currentTime, player.duration);
-      }
+      handleSaveProgress();
+    } else if (status === "complete") {
+      // Video completed, save progress as 100%
+      setIsPlaying(false);
+      onProgress(100);
     }
   });
-
-  // Save progress periodically (every 5 seconds)
-  useEffect(() => {
-    if (isPlaying && player) {
-      progressIntervalRef.current = setInterval(() => {
-        if (player && player.currentTime && player.duration) {
-          saveProgress(player.currentTime, player.duration);
-        }
-      }, 5000); // Save every 5 seconds rather than checking if divisible by 5
-    }
-
-    return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
-    };
-  }, [player, isPlaying]);
 
   return (
     <VideoView
