@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { colors } from '../assets/colors';
 
 const Header = ({ title, subtitle, onBack }) => {
   return (
-    <View style={[styles.header, !subtitle && styles.headerNarrow]}>
+    <SafeAreaView style={[styles.header, !subtitle && styles.headerNarrow]}>
       {/* Title and Back Button Container */}
       <View style={styles.titleContainer}>
         {/* Back Button (Optional) */}
@@ -17,11 +17,16 @@ const Header = ({ title, subtitle, onBack }) => {
 
         {/* Title */}
         <Text style={styles.headerTitle}>{title}</Text>
+        {onBack && (
+          <TouchableOpacity style={{ width: '20%' }}>
+            <Icon name="caret-left" size={30} color={colors.primary} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Subtitle (Optional) */}
       {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -44,14 +49,18 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   backButton: {
-    position: 'absolute',
+    width: '20%',
+    justifyContent: 'center',
+  },
+  backButtonIcon: {
     left: 0,
   },
   headerTitle: {
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: 'bold',
+    // width: '60%',
     color: 'white',
-    marginBottom: 10, // Reduced margin when no subtitle is present
+    marginBottom: 5,
     textAlign: 'center',
   },
   headerSubtitle: {

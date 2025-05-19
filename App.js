@@ -6,6 +6,7 @@ import SplashScreen from "./src/screens/SplashScreen";
 import AuthStack from "./src/navigation/AuthStack";
 import AppStack from "./src/navigation/AppStack";
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
+import ToastManager from "toastify-react-native";
 
 const RootStack = createStackNavigator();
 
@@ -37,6 +38,7 @@ const RootNavigation = () => {
       ) : (
         <RootStack.Screen name="Auth" component={AuthStack} />
       )}
+
     </RootStack.Navigator>
   );
 };
@@ -46,6 +48,7 @@ export default function App() {
     <AuthProvider>
       <NavigationContainer>
         <RootNavigation />
+        <ToastManager />
       </NavigationContainer>
     </AuthProvider>
   );

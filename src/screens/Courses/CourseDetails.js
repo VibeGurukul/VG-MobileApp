@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
+  Button,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -14,6 +16,10 @@ import axios from 'axios';
 import Header from '../../components/Header';
 import CourseTabs from '../../components/CourseTabs';
 import { colors } from '../../assets/colors';
+import { useAuth } from '../../context/AuthContext';
+import { API } from '../../constants';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { Toast } from 'toastify-react-native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -22,27 +28,88 @@ const CourseDetails = ({ route, navigation }) => {
   const [firstName, setFirstName] = useState('');
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [progressList, setProgressList] = useState([]);
+
+  const { user, token } = useAuth()
 
   const [email, setEmail] = useState('');
-  const [token, setToken] = useState('');
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const player = useVideoPlayer(course?.videos[0]?.url, player => {
+    player.loop = true;
+    player.play();
+  });
+
+
+
+  const checkEnrollmentStatus = async (userEmail, userToken) => {
+    if (!userToken) return;
+
+    try {
+      const response = await axios.get(
+        `${API.BASE_URL}/check-enroll`,
+        {
+          params: { user_email: userEmail, course_id: course._id },
+        }
+      );
+
+      if (response.data.isEnrolled) {
+        setIsEnrolled(true);
+        getSectionProgress()
+        setLoading(false);
+      }
+      else {
+        setIsEnrolled(false);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error checking enrollment status:", error);
+      setLoading(false);
+    }
+  };
+
+
+
+  const getSectionProgress = async () => {
+    try {
+      let response = await axios.get(
+        `${API.BASE_URL}/users/progress/${course?._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("resP: ", response.data)
+      setProgressList(response.data);
+    } catch (error) {
+      console.log("error is: ", error.response.data, " test: ", `${API.BASE_URL}/users/progress/${course?._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+    }
+  }
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const storedFullName = await AsyncStorage.getItem("full_name");
-        const storedEmail = await AsyncStorage.getItem("email");
-        const storedToken = await AsyncStorage.getItem("access_token");
+        const keys = ["full_name", "email", "access_token"];
+        const storedValues = await AsyncStorage.multiGet(keys);
+
+        const storedFullName = storedValues[0][1];
+        const storedEmail = storedValues[1][1];
+        const storedToken = storedValues[2][1];
 
         if (storedFullName) {
-          const firstName = storedFullName.split(" ")[0]; // Extract first name
+          const firstName = storedFullName.split(" ")[0];
           setFirstName(firstName);
         }
 
         if (storedEmail && storedToken) {
           setEmail(storedEmail);
-          setToken(storedToken);
-
-          // Call checkEnrollmentStatus after setting email & token
           checkEnrollmentStatus(storedEmail, storedToken);
         }
       } catch (error) {
@@ -50,45 +117,54 @@ const CourseDetails = ({ route, navigation }) => {
       }
     };
 
-    const checkEnrollmentStatus = async (userEmail, userToken) => {
-      if (!userToken) return; // Ensure token is available before making the request
 
-      try {
-        const response = await axios.get(
-          "https://dev.vibegurukul.in/api/v1/check-enroll",
-          {
-            params: { user_email: userEmail, course_id: course._id },
-          }
-        );
-
-        if (response.data.isEnrolled) {
-          setIsEnrolled(true);
-          setLoading(false);
-        }
-        else {
-          setIsEnrolled(false);
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Error checking enrollment status:", error);
-        setLoading(false);
-      }
-    };
 
     fetchUserData();
   }, []);
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
+  const handleEnroll = async (courseId) => {
+    if (isEnrolled) return
+    setIsLoading(true)
+    try {
+      const data = {
+        user_email: user.email,
+        course_id: courseId
+      }
+      const response = await axios.post(`${API.BASE_URL}/enroll`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      })
+
+      if (response.data) {
+        Toast.success("You have successfully enrolled in the course.");
+        await checkEnrollmentStatus(user.email, token);
+      } else {
+        console.log("err")
+      }
+    } catch (error) {
+      Alert.alert('Error', error.response?.data?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   }
+
+  // if (loading) {
+  //   return (
+  //     <View style={styles.loadingContainer}>
+  //       <ActivityIndicator size="large" color={colors.primary} />
+  //     </View>
+  //   );
+  // }
+
+
 
   return (
     <View style={styles.container}>
-      <Header title={`Namaste ${firstName || 'Guest'}!`} onBack={() => navigation.goBack()} />
+      <Header
+        title={`Namaste ${firstName || "Guest"}!`}
+        onBack={() => navigation.goBack()}
+      />
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Course Title */}
@@ -97,7 +173,12 @@ const CourseDetails = ({ route, navigation }) => {
         {/* Preview Video Placeholder */}
         <View style={styles.videoContainer}>
           <View style={styles.videoPlaceholder}>
-            <Text style={styles.placeholderText}>Video Preview</Text>
+            <VideoView
+              style={{ height: "100%", width: "100%" }}
+              player={player}
+              allowsFullscreen
+              allowsPictureInPicture
+            />
           </View>
         </View>
 
@@ -110,7 +191,7 @@ const CourseDetails = ({ route, navigation }) => {
         {/* Price */}
         <Text style={styles.priceText}>₹{course.price}/-</Text>
 
-        <CourseTabs course={course} isEnrolled={isEnrolled} />
+        <CourseTabs course={course} isEnrolled={isEnrolled} player={player} progressList={progressList} />
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -118,19 +199,54 @@ const CourseDetails = ({ route, navigation }) => {
         <TouchableOpacity style={styles.bookmarkButton}>
           <Icon name="bookmark" size={24} color={colors.primary} />
         </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.bottomButton,
-        isEnrolled ? styles.continueButton : styles.enrollButton,
-        ]}
+        {loading ? <TouchableOpacity
+          onPress={() => handleEnroll(course._id)}
+          style={[
+            styles.bottomButton,
+          ]}
         >
-          <Text style={styles.bottomButtonText}>{isEnrolled ? "Continue" : "Enroll Now"}</Text>
-        </TouchableOpacity>
+          <ActivityIndicator size="small" color={colors.primary} />
+        </TouchableOpacity> : <>
+          {course.price != "Coming Soon" ? (
+            <TouchableOpacity
+              onPress={() => handleEnroll(course._id)}
+              style={[
+                styles.bottomButton,
+                isEnrolled ? styles.continueButton : styles.enrollButton,
+              ]}
+            >
+              {isLoading ? (
+                <ActivityIndicator size={"small"} color={colors.white} />
+              ) : (
+                <Text style={styles.bottomButtonText}>
+                  {isEnrolled ? "Continue" : "Enroll Now"}
+                </Text>
+              )}
+            </TouchableOpacity>
+          ) : (
+            <></>
+          )}
+        </>}
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    flex: 1,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 50,
+  },
+  video: {
+    width: 350,
+    height: 275,
+  },
+  controlsContainer: {
+    padding: 10,
+  },
   container: {
     flex: 1,
     backgroundColor: '#F0F0F0',

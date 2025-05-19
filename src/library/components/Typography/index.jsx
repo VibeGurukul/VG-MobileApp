@@ -1,5 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import { Text } from "react-native";
 
 const Typography = ({ children, style }) => {
   return (
@@ -10,5 +9,3 @@ const Typography = ({ children, style }) => {
 };
 
 export default Typography;
-
-const styles = StyleSheet.create({});

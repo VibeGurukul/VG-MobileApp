@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { isValidEmail } from '../utils';
 import { colors } from '../assets/colors';
+import { API } from '../constants';
 
 const WelcomeScreen = () => {
   const [email, setEmail] = useState('');
@@ -20,7 +21,7 @@ const WelcomeScreen = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.get(`https://dev.vibegurukul.in/api/v1/check-email?email=${(email)}`)
+      const response = await axios.get(`${API.BASE_URL}/check-email?email=${(email)}`)
 
       if (response.data.email_registered) {
         navigation.navigate('LoginScreen', { email });

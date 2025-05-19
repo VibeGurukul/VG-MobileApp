@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
 import BottomNavBar from '../../components/BottomNavBar';
 import { colors } from '../../assets/colors';
+import { API } from '../../constants';
 
 const AllCourses = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,7 +20,7 @@ const AllCourses = ({ navigation }) => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get('https://dev.vibegurukul.in/api/v1/courses');
+        const response = await axios.get(`${API.BASE_URL}/courses`);
         setCourses(response.data);
         setLoading(false);
       } catch (err) {
