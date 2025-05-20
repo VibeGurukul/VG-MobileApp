@@ -20,17 +20,23 @@ import { useAuth } from '../../context/AuthContext';
 import { API } from '../../constants';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { Toast } from 'toastify-react-native';
+import { addBookmark, removeBookmark } from '../../store/slices/bookmarkSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const CourseDetails = ({ route, navigation }) => {
+  const dispatch = useDispatch()
+
+  const state = useSelector(state => state.bookmark)
+
   const { course } = route.params;
   const [firstName, setFirstName] = useState('');
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [progressList, setProgressList] = useState([]);
 
-  const { user, token } = useAuth()
+  const { user, token } = useAuth();
 
   const [email, setEmail] = useState('');
 
@@ -41,6 +47,18 @@ const CourseDetails = ({ route, navigation }) => {
     player.play();
   });
 
+
+  const checkIfBookmarked = () => {
+    let hasBookmarked = state.bookmarked?.filter((bookmark) => {
+      return bookmark._id === course._id
+    });
+    return hasBookmarked.length ? true : false
+  }
+  const onPressBookmark = () => {
+    if (!checkIfBookmarked())
+      dispatch(addBookmark(course))
+    else dispatch(removeBookmark(course?._id));
+  }
 
 
   const checkEnrollmentStatus = async (userEmail, userToken) => {
@@ -81,7 +99,6 @@ const CourseDetails = ({ route, navigation }) => {
           },
         }
       );
-      console.log("resP: ", response.data)
       setProgressList(response.data);
     } catch (error) {
       console.log("error is: ", error.response.data, " test: ", `${API.BASE_URL}/users/progress/${course?._id}`,
@@ -196,8 +213,10 @@ const CourseDetails = ({ route, navigation }) => {
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.bookmarkButton}>
-          <Icon name="bookmark" size={24} color={colors.primary} />
+        <TouchableOpacity
+          onPress={onPressBookmark}
+          style={styles.bookmarkButton}>
+          <Icon name={checkIfBookmarked() ? "bookmark" : "bookmark-o"} size={24} color={colors.primary} />
         </TouchableOpacity>
         {loading ? <TouchableOpacity
           onPress={() => handleEnroll(course._id)}
