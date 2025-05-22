@@ -7,6 +7,9 @@ import AuthStack from "./src/navigation/AuthStack";
 import AppStack from "./src/navigation/AppStack";
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
 import ToastManager from "toastify-react-native";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { persistor, store } from "./src/store";
 
 const RootStack = createStackNavigator();
 
@@ -45,12 +48,16 @@ const RootNavigation = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <RootNavigation />
-        <ToastManager />
-      </NavigationContainer>
-    </AuthProvider>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <AuthProvider>
+          <NavigationContainer>
+            <RootNavigation />
+            <ToastManager />
+          </NavigationContainer>
+        </AuthProvider>
+      </PersistGate>
+    </Provider>
   );
 }
 
