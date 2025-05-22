@@ -5,6 +5,7 @@ import ProfileScreen from "../screens/Profile/ProfileScreen";
 import AllCourses from "../screens/Courses/AllCourses";
 import CourseDetails from "../screens/Courses/CourseDetails";
 import MainVideoScreen from "../screens/MainVideo";
+import MyZone from "../screens/MyZone";
 
 const Stack = createStackNavigator();
 
@@ -16,6 +17,7 @@ export default function AppStack() {
             <Stack.Screen name="AllCourses" component={AllCourses} />
             <Stack.Screen name="CourseDetails" component={CourseDetails} />
             <Stack.Screen name="MainVideoScreen" component={MainVideoScreen} />
+            <Stack.Screen name="MyZone" component={MyZone} />
         </Stack.Navigator>
     );
 }
