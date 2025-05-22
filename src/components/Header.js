@@ -8,17 +8,18 @@ const Header = ({ title, subtitle, onBack }) => {
     <SafeAreaView style={[styles.header, !subtitle && styles.headerNarrow]}>
       {/* Title and Back Button Container */}
       <View style={styles.titleContainer}>
-        {/* Back Button (Optional) */}
-        {onBack && (
-          <TouchableOpacity onPress={onBack} style={styles.backButton}>
-            <Icon name="caret-left" size={30} color="black" />
-          </TouchableOpacity>
-        )}
+        <View style={{ width: '10%' }}>
+          {onBack && (
+            <TouchableOpacity onPress={onBack} style={styles.backButton}>
+              <Icon name="caret-left" size={30} color="black" />
+            </TouchableOpacity>
+          )}
+        </View>
 
         {/* Title */}
         <Text style={styles.headerTitle}>{title}</Text>
         {onBack && (
-          <TouchableOpacity style={{ width: '20%' }}>
+          <TouchableOpacity style={{ width: '10%' }}>
             <Icon name="caret-left" size={30} color={colors.primary} />
           </TouchableOpacity>
         )}
@@ -49,16 +50,16 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   backButton: {
-    width: '20%',
+
     justifyContent: 'center',
   },
   backButtonIcon: {
     left: 0,
   },
   headerTitle: {
-    fontSize: 25,
+    fontSize: 24,
     fontWeight: 'bold',
-    // width: '60%',
+    width: '80%',
     color: 'white',
     marginBottom: 5,
     textAlign: 'center',
