@@ -73,7 +73,13 @@ export default function LearningDashboard({ navigation }) {
           Authorization: `Bearer ${token}`,
         },
       });
-      setMyCourses(response.data);
+      console.log("response: ", response.data);
+      if (response.data && response.data[0]) {
+        console.log("aya");
+        setMyCourses(response.data || []);
+      } else {
+        setMyCourses([]);
+      }
     } catch (error) {
       console.log("the error: ", error);
     } finally {
@@ -104,9 +110,10 @@ export default function LearningDashboard({ navigation }) {
             </View>
           ) : (
             <View style={styles.cardRow}>
-              {myCourses.map((course, index) => (
-                <CourseCard key={course.id} course={course} index={index} />
-              ))}
+              {myCourses[0] &&
+                myCourses?.map((course, index) => (
+                  <CourseCard key={course.id} course={course} index={index} />
+                ))}
               {myCourses.length === 0 && <EmptyComponent />}
             </View>
           )}
