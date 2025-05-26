@@ -22,6 +22,7 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { Toast } from 'toastify-react-native';
 import { addBookmark, removeBookmark } from '../../store/slices/bookmarkSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../../store/slices/cart-slice';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -29,11 +30,14 @@ const CourseDetails = ({ route, navigation }) => {
   const dispatch = useDispatch()
 
   const state = useSelector(state => state.bookmark)
+  const cartState = useSelector(state => state.cart)
 
-  const { course } = route.params;
+  const params = route.params;
   const [firstName, setFirstName] = useState('');
+  const [course, setCourse] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [courseLoading, setCourseLoading] = useState(true); // New loading state for course API
   const [progressList, setProgressList] = useState([]);
 
   const { user, token } = useAuth();
@@ -42,11 +46,33 @@ const CourseDetails = ({ route, navigation }) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const player = useVideoPlayer(course?.videos[0]?.url, player => {
+  const player = useVideoPlayer(course?.videos?.[0]?.url, player => {
     player.loop = true;
     player.play();
   });
 
+  const getCourseDetails = async () => {
+    setCourseLoading(true); // Start loading
+    try {
+      const response = await axios.get(`${API.BASE_URL}/courses/${params.course._id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      })
+      const data = response.data;
+      setCourse(data)
+
+    } catch (error) {
+      console.log("error: ", error.response)
+      Alert.alert('Error', 'Failed to load course details. Please try again.');
+    } finally {
+      setCourseLoading(false); // Stop loading
+    }
+  }
+
+  useEffect(() => {
+    getCourseDetails()
+  }, []) // Remove course dependency to prevent infinite loop
 
   const checkIfBookmarked = () => {
     let hasBookmarked = state.bookmarked?.filter((bookmark) => {
@@ -54,15 +80,24 @@ const CourseDetails = ({ route, navigation }) => {
     });
     return hasBookmarked.length ? true : false
   }
+
+  const checkIfInCart = () => {
+    console.log("checkIfInCart", cartState);
+    let inCart = cartState.cart?.filter((item) => {
+      return item.course_id === course._id
+    });
+    return inCart.length ? true : false
+  }
+
   const onPressBookmark = () => {
     if (!checkIfBookmarked())
       dispatch(addBookmark(course))
     else dispatch(removeBookmark(course?._id));
   }
 
-
   const checkEnrollmentStatus = async (userEmail, userToken) => {
-    if (!userToken) return;
+    console.log("rann: ,", userEmail)
+    if (!userToken || !course) return;
 
     try {
       const response = await axios.get(
@@ -86,8 +121,6 @@ const CourseDetails = ({ route, navigation }) => {
       setLoading(false);
     }
   };
-
-
 
   const getSectionProgress = async () => {
     try {
@@ -134,10 +167,8 @@ const CourseDetails = ({ route, navigation }) => {
       }
     };
 
-
-
     fetchUserData();
-  }, []);
+  }, [course]); // Add course as dependency so it runs after course is loaded
 
   const handleEnroll = async (courseId) => {
     if (isEnrolled) return
@@ -166,15 +197,75 @@ const CourseDetails = ({ route, navigation }) => {
     }
   }
 
-  // if (loading) {
-  //   return (
-  //     <View style={styles.loadingContainer}>
-  //       <ActivityIndicator size="large" color={colors.primary} />
-  //     </View>
-  //   );
-  // }
+  const handleAddToCart = async (course) => {
+    if (isEnrolled) return
+    if (checkIfInCart()) {
+      navigation.navigate("Cart");
+      return;
+    }
+    setIsLoading(true)
+    try {
+      const data =
+      {
+        "course_id": course._id,
+        "price": course.price,
+        "short_title": course.short_title,
+        "preview_image": course.preview_image,
+        "title": course.title
+      }
+      const response = await axios.post(`${API.BASE_URL}/users/cart/add`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      })
+      if (response.data) {
+        dispatch(addToCart(data))
+        Toast.success("Course added to cart successfully.");
+      } else {
+        console.log("err")
+      }
+    } catch (error) {
+      Alert.alert('Error', error.response?.data?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
+  // Show loading screen while course is being fetched
+  if (courseLoading) {
+    return (
+      <View style={styles.container}>
+        <Header
+          title={`Namaste ${firstName || "Guest"}!`}
+          onBack={() => navigation.goBack()}
+        />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </View>
+    );
+  }
 
+  // Show error state if course failed to load
+  if (!course) {
+    return (
+      <View style={styles.container}>
+        <Header
+          title={`Namaste ${firstName || "Guest"}!`}
+          onBack={() => navigation.goBack()}
+        />
+        <View style={styles.loadingContainer}>
+          <Text style={styles.errorText}>Failed to load course details</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={getCourseDetails}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -208,44 +299,58 @@ const CourseDetails = ({ route, navigation }) => {
         {/* Price */}
         <Text style={styles.priceText}>₹{course.price}/-</Text>
 
-        <CourseTabs course={course} isEnrolled={isEnrolled} player={player} progressList={progressList} />
+        <CourseTabs
+          course={course}
+          isEnrolled={isEnrolled}
+          player={player}
+          progressList={progressList}
+        />
       </ScrollView>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
           onPress={onPressBookmark}
-          style={styles.bookmarkButton}>
-          <Icon name={checkIfBookmarked() ? "bookmark" : "bookmark-o"} size={24} color={colors.primary} />
-        </TouchableOpacity>
-        {loading ? <TouchableOpacity
-          onPress={() => handleEnroll(course._id)}
-          style={[
-            styles.bottomButton,
-          ]}
+          style={styles.bookmarkButton}
         >
-          <ActivityIndicator size="small" color={colors.primary} />
-        </TouchableOpacity> : <>
-          {course.price != "Coming Soon" ? (
-            <TouchableOpacity
-              onPress={() => handleEnroll(course._id)}
-              style={[
-                styles.bottomButton,
-                isEnrolled ? styles.continueButton : styles.enrollButton,
-              ]}
-            >
-              {isLoading ? (
-                <ActivityIndicator size={"small"} color={colors.white} />
-              ) : (
-                <Text style={styles.bottomButtonText}>
-                  {isEnrolled ? "Continue" : "Enroll Now"}
-                </Text>
-              )}
-            </TouchableOpacity>
-          ) : (
-            <></>
-          )}
-        </>}
+          <Icon
+            name={checkIfBookmarked() ? "bookmark" : "bookmark-o"}
+            size={24}
+            color={colors.primary}
+          />
+        </TouchableOpacity>
+        {loading ? (
+          <TouchableOpacity onPress={{}} style={[styles.bottomButton]}>
+            <ActivityIndicator size="small" color={colors.primary} />
+          </TouchableOpacity>
+        ) : (
+          <>
+            {course.price != "Coming Soon" ? (
+              <TouchableOpacity
+                // onPress={() => handleEnroll(course._id)}
+                onPress={() => handleAddToCart(course)}
+                style={[
+                  styles.bottomButton,
+                  isEnrolled ? styles.continueButton : styles.enrollButton,
+                ]}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size={"small"} color={colors.white} />
+                ) : (
+                  <Text style={styles.bottomButtonText}>
+                    {isEnrolled
+                      ? "Continue"
+                      : checkIfInCart()
+                        ? "Go To Cart"
+                        : "Add To Cart"}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ) : (
+              <></>
+            )}
+          </>
+        )}
       </View>
     </View>
   );
@@ -351,6 +456,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  loadingText: {
+    marginTop: 10,
+    fontSize: screenWidth * 0.04,
+    color: '#666',
+  },
+  errorText: {
+    fontSize: screenWidth * 0.04,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 25,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: screenWidth * 0.04,
+  },
 });
 
-export default CourseDetails;
+export default CourseDetails

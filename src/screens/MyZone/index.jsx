@@ -21,18 +21,21 @@ import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { backgroundColors, iconColors } from "./utils";
 
-const CourseCard = ({ course, index }) => {
+const CourseCard = ({ course, onPress, index }) => {
   const randomBgColor = backgroundColors[index % backgroundColors.length];
   const randomIconColor = iconColors[index % iconColors.length];
 
   return (
-    <TouchableOpacity style={[styles.card, { backgroundColor: randomBgColor }]}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.card, { backgroundColor: randomBgColor }]}
+    >
       <View
         style={[styles.iconContainer, { backgroundColor: randomIconColor }]}
       >
         <Ionicons name={course.icon || "play"} size={24} color="white" />
       </View>
-      <Text style={styles.cardTitle}>{course.title}</Text>
+      <Text style={styles.cardTitle}>{course.short_title}</Text>
       <Text style={styles.cardSubtitle}>
         {course.course_progress || course.progress || 0}% completed
       </Text>
@@ -55,7 +58,7 @@ const WorkshopCard = ({ workshop }) => (
 export default function LearningDashboard({ navigation }) {
   const state = useSelector((state) => state.bookmark);
   const dispatch = useDispatch();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const [myCourses, setMyCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,7 +96,11 @@ export default function LearningDashboard({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title={"My Zone"} onBack={() => navigation.goBack()} />
+      <Header
+        title={`Namaste ${user.full_name.split(" ")[0] || "Guest"}!`}
+        subtitle="My Zone"
+        onBack={() => navigation.goBack()}
+      />
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -109,13 +116,24 @@ export default function LearningDashboard({ navigation }) {
               <Text style={styles.loadingText}>Loading courses...</Text>
             </View>
           ) : (
-            <View style={styles.cardRow}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.cardRow}
+            >
               {myCourses[0] &&
                 myCourses?.map((course, index) => (
-                  <CourseCard key={course.id} course={course} index={index} />
+                  <CourseCard
+                    onPress={() =>
+                      navigation.navigate("CourseDetails", { course })
+                    }
+                    key={course._id}
+                    course={course}
+                    index={index}
+                  />
                 ))}
               {myCourses.length === 0 && <EmptyComponent />}
-            </View>
+            </ScrollView>
           )}
         </View>
 
@@ -200,18 +218,17 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   cardRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     gap: 12,
-    flexWrap: "wrap",
+    // flexWrap: "wrap",
     width: "100%",
   },
   card: {
-    flexBasis: "48%", // Changed from flex: 1 and width: "50%"
+    marginRight: 10,
     borderRadius: 12,
+    width: 150,
     padding: 16,
-    minHeight: 120,
-    justifyContent: "space-between",
+    height: 200,
+    // justifyContent: "space-between",
   },
   iconContainer: {
     width: 48,
