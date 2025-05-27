@@ -68,10 +68,11 @@ const ProfileScreen = () => {
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
 
+        <View style={{ height: 95 }} />
 
       </View>
       {/* Bottom Navigation */}
-      <BottomNavBar navigation={navigation} />
+      {/* <BottomNavBar navigation={navigation} /> */}
     </View>
   );
 };

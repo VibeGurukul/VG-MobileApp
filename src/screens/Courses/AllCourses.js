@@ -127,9 +127,9 @@ const AllCourses = ({ navigation }) => {
             </View>
           ))}
         </View>
-      </ScrollView>
+        <View style={{ height: 95 }} />
 
-      <BottomNavBar navigation={navigation} />
+      </ScrollView>
     </View>
   );
 };
