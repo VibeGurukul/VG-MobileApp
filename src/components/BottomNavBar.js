@@ -23,7 +23,7 @@ const BottomNavBar = ({ navigation, currentScreen }) => {
     {
       name: 'My Zone',
       icon: 'graduation-cap',
-      navigateTo: 'HomeScreen'
+      navigateTo: 'MyZone'
     },
     {
       name: 'Profile',

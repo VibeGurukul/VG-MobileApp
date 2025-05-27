@@ -18,4 +18,6 @@ export const colors = {
   success: "#4BB543",
   warning: "#FFC107",
   info: "#2196F3",
+
+  lightGray: "#d3d3d3"
 };
