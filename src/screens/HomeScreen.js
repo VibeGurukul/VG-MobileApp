@@ -4,13 +4,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavBar from '../components/BottomNavBar';
 import Header from '../components/Header';
 import HomeWhySection from '../components/HomeWhySection';
+import { useDispatch } from 'react-redux';
+import { fetchCartData } from '../store/slices/cart-slice';
 
 const HomeScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
 
+  const dispatch = useDispatch()
+
   useEffect(() => {
+
+    dispatch(fetchCartData());
+
     const fetchUserName = async () => {
       try {
         const storedFullName = await AsyncStorage.getItem('full_name');
@@ -24,7 +31,7 @@ const HomeScreen = ({ navigation }) => {
     };
 
     fetchUserName();
-  }, []);
+  }, [dispatch]);
 
   return (
     <View style={styles.container}>
@@ -73,10 +80,11 @@ const HomeScreen = ({ navigation }) => {
 
           <HomeWhySection />
         </View>
+        <View style={{ height: 95 }} />
       </ScrollView>
 
       {/* Bottom Navigation Bar */}
-      <BottomNavBar navigation={navigation} />
+      {/* <BottomNavBar navigation={navigation} /> */}
     </View>
   );
 };

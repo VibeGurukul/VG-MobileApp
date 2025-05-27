@@ -2,8 +2,15 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { colors } from '../assets/colors';
+import Typography from '../library/components/Typography';
+import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 
 const Header = ({ title, subtitle, onBack }) => {
+
+  const { cart } = useSelector(state => state.cart)
+  const navigation = useNavigation();
+
   return (
     <SafeAreaView style={[styles.header, !subtitle && styles.headerNarrow]}>
       {/* Title and Back Button Container */}
@@ -18,11 +25,16 @@ const Header = ({ title, subtitle, onBack }) => {
 
         {/* Title */}
         <Text style={styles.headerTitle}>{title}</Text>
-        {onBack && (
-          <TouchableOpacity style={{ width: '10%' }}>
-            <Icon name="caret-left" size={30} color={colors.primary} />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Cart')}
+          style={{ width: '10%', backgroundColor: colors.lightGray, width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 999 }}>
+          <Icon name="shopping-cart" size={20} color={colors.white} />
+          {cart.length ? <View style={{ backgroundColor: colors.error, width: 15, alignItems: 'center', justifyContent: 'center', height: 15, position: 'absolute', top: -2, right: 0, borderRadius: 999 }}>
+            <Typography style={{ color: colors.white, fontSize: 10 }}>
+              {cart.length}
+            </Typography>
+          </View> : null}
+        </TouchableOpacity>
       </View>
 
       {/* Subtitle (Optional) */}
@@ -52,6 +64,7 @@ const styles = StyleSheet.create({
   backButton: {
 
     justifyContent: 'center',
+    tintColor: colors.white
   },
   backButtonIcon: {
     left: 0,
