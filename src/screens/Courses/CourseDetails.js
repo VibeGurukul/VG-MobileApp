@@ -22,12 +22,16 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { Toast } from 'toastify-react-native';
 import { addBookmark, removeBookmark } from '../../store/slices/bookmarkSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '../../store/slices/cart-slice';
+import { addToCart, addToCartAsync } from '../../store/slices/cart-slice';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const CourseDetails = ({ route, navigation }) => {
   const dispatch = useDispatch()
+  const {
+    addingToCart,
+  } = useSelector((state) => state.cart);
+
 
   const state = useSelector(state => state.bookmark)
   const cartState = useSelector(state => state.cart)
@@ -60,6 +64,8 @@ const CourseDetails = ({ route, navigation }) => {
         }
       })
       const data = response.data;
+
+      console.log("har bar: ", data._id, params.course._id);
       setCourse(data)
 
     } catch (error) {
@@ -82,12 +88,18 @@ const CourseDetails = ({ route, navigation }) => {
   }
 
   const checkIfInCart = () => {
-    console.log("checkIfInCart", cartState);
+    if (cartState.length == 0) return
     let inCart = cartState.cart?.filter((item) => {
-      return item.course_id === course._id
+      return item?.course_id == course?._id
     });
+    console.log("inCart: ", inCart)
     return inCart.length ? true : false
   }
+
+  useEffect(() => {
+    console.log("cart: ", cartState, course?._id)
+    checkIfInCart()
+  }, [cartState, course])
 
   const onPressBookmark = () => {
     if (!checkIfBookmarked())
@@ -213,18 +225,9 @@ const CourseDetails = ({ route, navigation }) => {
         "preview_image": course.preview_image,
         "title": course.title
       }
-      const response = await axios.post(`${API.BASE_URL}/users/cart/add`, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      })
-      if (response.data) {
-        dispatch(addToCart(data))
-        Toast.success("Course added to cart successfully.");
-      } else {
-        console.log("err")
-      }
+      await dispatch(addToCartAsync(data)).unwrap();
     } catch (error) {
+      console.log("error: ", error)
       Alert.alert('Error', error.response?.data?.message || 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
@@ -236,7 +239,7 @@ const CourseDetails = ({ route, navigation }) => {
     return (
       <View style={styles.container}>
         <Header
-          title={`Namaste ${firstName || "Guest"}!`}
+          title={`Namaste!`}
           onBack={() => navigation.goBack()}
         />
         <View style={styles.loadingContainer}>
@@ -251,7 +254,7 @@ const CourseDetails = ({ route, navigation }) => {
     return (
       <View style={styles.container}>
         <Header
-          title={`Namaste ${firstName || "Guest"}!`}
+          title={`Namaste!`}
           onBack={() => navigation.goBack()}
         />
         <View style={styles.loadingContainer}>
@@ -270,7 +273,7 @@ const CourseDetails = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Header
-        title={`Namaste ${firstName || "Guest"}!`}
+        title={`Namaste!`}
         onBack={() => navigation.goBack()}
       />
 
@@ -334,7 +337,7 @@ const CourseDetails = ({ route, navigation }) => {
                   isEnrolled ? styles.continueButton : styles.enrollButton,
                 ]}
               >
-                {isLoading ? (
+                {isLoading || addingToCart ? (
                   <ActivityIndicator size={"small"} color={colors.white} />
                 ) : (
                   <Text style={styles.bottomButtonText}>

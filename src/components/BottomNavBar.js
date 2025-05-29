@@ -1,95 +1,135 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { colors } from '../assets/colors';
+import HomeScreen from '../screens/HomeScreen';
+import AllCourses from '../screens/Courses/AllCourses';
+import LearningDashboard from '../screens/MyZone';
+import ProfileScreen from '../screens/Profile/ProfileScreen';
+import Workshops from '../screens/Workshops';
 
-const BottomNavBar = ({ navigation, currentScreen }) => {
-  const navItems = [
-    {
-      name: 'Home',
-      icon: 'home',
-      navigateTo: 'HomeScreen'
-    },
-    {
-      name: 'Courses',
-      icon: 'book',
-      navigateTo: 'AllCourses'
-    },
-    {
-      name: 'Workshops',
-      icon: 'users',
-      navigateTo: 'HomeScreen'
-    },
-    {
-      name: 'My Zone',
-      icon: 'graduation-cap',
-      navigateTo: 'MyZone'
-    },
-    {
-      name: 'Profile',
-      icon: 'user',
-      navigateTo: 'ProfileScreen'
-    }
-  ];
+const Tab = createBottomTabNavigator();
 
+// Custom Tab Icon Component with circular background for active state
+const CustomTabIcon = ({ focused, iconName, color, size }) => {
   return (
-    <View style={styles.navContainer}>
-      {navItems.map((item, index) => {
-        const isActive = currentScreen === item.navigateTo;
-        return (
-          <TouchableOpacity
-            key={index}
-            style={styles.navItem}
-            onPress={() => navigation.navigate(item.navigateTo)}
-          >
-            <Icon
-              name={item.icon}
-              size={22}
-              color={isActive ? colors.background : 'rgba(255, 255, 255, 0.8)'}
-            />
-            <Text style={[
-              styles.navText,
-              isActive && styles.activeNavText
-            ]}>
-              {item.name}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
+    <View
+      style={{
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: focused ? 'rgba(255, 231, 96, 0.8)' : 'transparent', // Light yellow background when focused
+      }}
+    >
+      <Icon
+        name={iconName}
+        size={size}
+        color={focused ? colors.secondary : color} // Change icon color when focused for better contrast
+      />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  navContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: colors.secondary,
-    height: 81,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    paddingHorizontal: 10,
-  },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-  },
-  navText: {
-    color: 'white',
-    fontWeight: '500',
-    fontSize: 12,
-    marginTop: 5,
-  },
-  activeNavText: {
-    color: colors.background,
-    fontWeight: '700',
-  },
-});
+const BottomTabNavigator = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
 
-export default BottomNavBar;
+          switch (route.name) {
+            case 'Home':
+              iconName = 'home';
+              break;
+            case 'Courses':
+              iconName = 'book';
+              break;
+            case 'Workshops':
+              iconName = 'users';
+              break;
+            case 'MyZone':
+              iconName = 'graduation-cap';
+              break;
+            case 'Profile':
+              iconName = 'user';
+              break;
+            default:
+              iconName = 'home';
+          }
+
+          return (
+            <CustomTabIcon
+              focused={focused}
+              iconName={iconName}
+              color={color}
+              size={22}
+            />
+          );
+        },
+        tabBarActiveTintColor: 'rgba(255, 255, 255, 0.8)',
+        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.8)',
+        tabBarStyle: {
+          backgroundColor: colors.secondary,
+          height: 90,
+          borderTopLeftRadius: 25,
+          borderTopRightRadius: 25,
+          borderTopWidth: 0,
+          paddingBottom: 20,
+          paddingTop: 10,
+          position: 'absolute',
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+          marginTop: 5,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 5,
+        },
+        headerShown: false,
+      })}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarLabel: 'Home',
+        }}
+      />
+      <Tab.Screen
+        name="AllCourses"
+        component={AllCourses}
+        options={{
+          tabBarLabel: 'Courses',
+        }}
+      />
+      <Tab.Screen
+        name="Workshops"
+        component={HomeScreen}
+        options={{
+          tabBarLabel: 'Workshops',
+        }}
+      />
+      <Tab.Screen
+        name="MyZone"
+        component={LearningDashboard}
+        options={{
+          tabBarLabel: 'My Zone',
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Profile',
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
+
+export default BottomTabNavigator;

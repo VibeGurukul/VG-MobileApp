@@ -41,7 +41,7 @@ const ProfileScreen = () => {
     <View style={styles.container}>
       {/* Greeting Section */}
       <Header
-        title={`Namaste ${firstName || 'Guest'}!`}
+        title={`Namaste!`}
         subtitle="Continue your journey into the unknowns of Sanatan with us."
       />
       <View style={styles.content} >
@@ -68,10 +68,11 @@ const ProfileScreen = () => {
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
 
+        <View style={{ height: 95 }} />
 
       </View>
       {/* Bottom Navigation */}
-      <BottomNavBar navigation={navigation} />
+      {/* <BottomNavBar navigation={navigation} /> */}
     </View>
   );
 };
