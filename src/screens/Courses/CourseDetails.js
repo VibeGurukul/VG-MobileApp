@@ -239,7 +239,7 @@ const CourseDetails = ({ route, navigation }) => {
     return (
       <View style={styles.container}>
         <Header
-          title={`Namaste ${firstName || "Guest"}!`}
+          title={`Namaste!`}
           onBack={() => navigation.goBack()}
         />
         <View style={styles.loadingContainer}>
@@ -254,7 +254,7 @@ const CourseDetails = ({ route, navigation }) => {
     return (
       <View style={styles.container}>
         <Header
-          title={`Namaste ${firstName || "Guest"}!`}
+          title={`Namaste!`}
           onBack={() => navigation.goBack()}
         />
         <View style={styles.loadingContainer}>
@@ -273,7 +273,7 @@ const CourseDetails = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Header
-        title={`Namaste ${firstName || "Guest"}!`}
+        title={`Namaste!`}
         onBack={() => navigation.goBack()}
       />
 

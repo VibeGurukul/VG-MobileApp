@@ -37,7 +37,7 @@ const HomeScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Header */}
       <Header
-        title={`Namaste ${firstName || 'Guest'}!`}
+        title={`Namaste!`}
         subtitle="Continue your journey into the unknowns of Sanatan with us."
       />
 

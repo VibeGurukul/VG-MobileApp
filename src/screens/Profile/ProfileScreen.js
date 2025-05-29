@@ -41,7 +41,7 @@ const ProfileScreen = () => {
     <View style={styles.container}>
       {/* Greeting Section */}
       <Header
-        title={`Namaste ${firstName || 'Guest'}!`}
+        title={`Namaste!`}
         subtitle="Continue your journey into the unknowns of Sanatan with us."
       />
       <View style={styles.content} >

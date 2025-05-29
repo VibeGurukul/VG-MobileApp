@@ -71,7 +71,7 @@ const AllCourses = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Header
-        title={`Namaste ${firstName || 'Guest'}!`}
+        title={`Namaste!`}
         subtitle="All Courses"
         onBack={() => navigation.goBack()}
       />

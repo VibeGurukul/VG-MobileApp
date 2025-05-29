@@ -96,9 +96,9 @@ export default function LearningDashboard({ navigation }) {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Header
-        title={`Namaste ${user.full_name.split(" ")[0] || "Guest"}!`}
+        title={`Namaste!`}
         subtitle="My Zone"
         onBack={() => navigation.goBack()}
       />
@@ -166,7 +166,7 @@ export default function LearningDashboard({ navigation }) {
         <View style={{ height: 95 }}></View>
       </ScrollView>
       {/* <BottomNavBar navigation={navigation} /> */}
-    </SafeAreaView>
+    </View>
   );
 }
 

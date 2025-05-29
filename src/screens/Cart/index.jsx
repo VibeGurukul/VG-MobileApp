@@ -1,5 +1,4 @@
 import {
-  SafeAreaView,
   StyleSheet,
   View,
   TouchableOpacity,
@@ -20,13 +19,63 @@ import EmptyComponent from "../../components/EmptyComponent";
 const Cart = ({ navigation }) => {
   const cartState = useSelector((state) => state.cart);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const { user } = useAuth();
 
   const { width: screenWidth } = Dimensions.get("window");
   const isTablet = screenWidth > 768;
 
-  // Calculate total amount
+  // Function to calculate GST for individual item
+  const calculateGSTForItem = (price, gstRate = 18) => {
+    const gstAmount = (price * gstRate) / (100 + gstRate);
+    const coursePrice = price - gstAmount;
+    return {
+      coursePrice: coursePrice.toFixed(2),
+      gst: gstAmount.toFixed(2),
+      total: price.toFixed(2),
+    };
+  };
+
+  // Function to calculate GST and total cost including GST
+  const calculateGST = (cartItems, gstRate = 18) => {
+    const sessionNumber = 1; // You might need to adjust this based on your logic
+
+    const gstDetails = cartItems.map((item) => {
+      const price = item.workshop_id
+        ? parseFloat(item.price) * sessionNumber
+        : parseFloat(item.price);
+      return calculateGSTForItem(price, gstRate);
+    });
+
+    // Calculate total GST and course price excluding GST
+    const totalGST = gstDetails
+      .reduce((total, details) => total + parseFloat(details.gst), 0)
+      .toFixed(2);
+    const totalCoursePriceExGST = gstDetails
+      .reduce((total, details) => total + parseFloat(details.coursePrice), 0)
+      .toFixed(2);
+    const total = cartItems
+      .reduce((sum, item) => {
+        const itemPrice = item.workshop_id
+          ? parseFloat(item.price) * sessionNumber
+          : parseFloat(item.price);
+        return sum + itemPrice;
+      }, 0)
+      .toFixed(2);
+
+    return {
+      total,
+      coursePriceExGST: totalCoursePriceExGST,
+      gst: totalGST,
+    };
+  };
+
+  // Calculate total amount and breakdown
+  const priceBreakdown = useMemo(() => {
+    return calculateGST(cartState.cart);
+  }, [cartState.cart]);
+
   const totalAmount = useMemo(() => {
     return cartState.cart.reduce((sum, item) => sum + parseInt(item.price), 0);
   }, [cartState.cart]);
@@ -37,12 +86,44 @@ const Cart = ({ navigation }) => {
 
   const Footer = () => (
     <View style={styles.footer}>
+      {/* Expand/Collapse Button */}
+      <TouchableOpacity
+        style={styles.expandButton}
+        onPress={() => setIsExpanded(!isExpanded)}
+      >
+        <View style={styles.expandIndicator} />
+      </TouchableOpacity>
+
+      {/* Price Breakdown - Shows when expanded */}
+      {isExpanded && (
+        <View style={styles.breakdownContainer}>
+          <View style={styles.breakdownRow}>
+            <Typography style={styles.breakdownLabel}>
+              Course/Workshop Price:
+            </Typography>
+            <Typography style={styles.breakdownValue}>
+              ₹ {priceBreakdown.coursePriceExGST}/-
+            </Typography>
+          </View>
+          <View style={styles.breakdownRow}>
+            <Typography style={styles.breakdownLabel}>GST @ 18%:</Typography>
+            <Typography style={styles.breakdownValue}>
+              ₹ {priceBreakdown.gst}/-
+            </Typography>
+          </View>
+          <View style={styles.divider} />
+        </View>
+      )}
+
+      {/* Total Section */}
       <View style={styles.totalContainer}>
-        <Typography style={styles.orderTotalLabel}>Order Total:</Typography>
+        <Typography style={styles.orderTotalLabel}>Total:</Typography>
         <Typography style={styles.orderTotalAmount}>
-          ₹ {totalAmount}/-
+          ₹ {priceBreakdown.total}/-
         </Typography>
       </View>
+
+      {/* Payment Button */}
       <TouchableOpacity
         style={styles.paymentButton}
         onPress={() => {
@@ -58,9 +139,9 @@ const Cart = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Header
-        title={`Namaste ${user.full_name.split(" ")[0] || "Guest"}!`}
+        title={`Namaste!`}
         subtitle={"Cart"}
         onBack={() => navigation.goBack()}
       />
@@ -81,7 +162,7 @@ const Cart = ({ navigation }) => {
         />
       </View>
       {cartState.cart.length > 0 && <Footer />}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -126,6 +207,42 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
+  },
+  expandButton: {
+    alignItems: "center",
+    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  expandIndicator: {
+    width: "20%",
+    height: 5,
+    backgroundColor: colors.black,
+    borderRadius: 2,
+  },
+  breakdownContainer: {
+    marginBottom: 16,
+  },
+  breakdownRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  breakdownLabel: {
+    fontSize: 16,
+    color: colors.white,
+    fontWeight: "500",
+  },
+  breakdownValue: {
+    fontSize: 16,
+    color: colors.white,
+    fontWeight: "600",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.white,
+    opacity: 0.3,
+    marginVertical: 8,
   },
   totalContainer: {
     alignItems: "center",
