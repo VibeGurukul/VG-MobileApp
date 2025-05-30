@@ -109,7 +109,7 @@ const BottomTabNavigator = () => {
       />
       <Tab.Screen
         name="Workshops"
-        component={HomeScreen}
+        component={Workshops}
         options={{
           tabBarLabel: 'Workshops',
         }}
