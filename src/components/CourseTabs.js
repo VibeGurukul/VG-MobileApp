@@ -24,6 +24,9 @@ const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
   };
 
   const handleCourseClick = (section) => {
+    if (!player) {
+      return
+    }
     if (isEnrolled) {
       player.pause();
       navigation.navigate("MainVideoScreen", {
