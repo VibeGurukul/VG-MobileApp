@@ -9,6 +9,7 @@ import {
   Dimensions,
   Alert,
   Image,
+  Linking,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
@@ -29,17 +30,56 @@ const { width: screenWidth } = Dimensions.get("window");
 const WorkshopDetails = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const { addingToCart } = useSelector((state) => state.cart);
-
   const state = useSelector((state) => state.bookmark);
   const cartState = useSelector((state) => state.cart);
-
   const params = route.params;
 
   const [workshop, setWorkshop] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [workshopLoading, setWorkshopLoading] = useState(true);
+  const [enrolling, setEnrolling] = useState(false);
 
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+
+  const checkIfEnrolled = async () => {
+    try {
+      const url = `${API.BASE_URL}/check/workshop?user_email=${user.email}&workshop_id=${params.workshop._id}`;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = response.data;
+      setIsEnrolled(data.isEnrolled);
+      setWorkshopLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const enrollNow = async () => {
+    setEnrolling(true);
+    try {
+      const url = `${API.BASE_URL}/enroll/workshop`;
+      const body = {
+        user_email: user.email,
+        workshop_id: workshop._id,
+      };
+      const response = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = response.data;
+      setIsEnrolled(true);
+      Alert.alert("Success", "Successfully enrolled in the workshop!");
+    } catch (e) {
+      console.log(e);
+      Alert.alert("Error", "Failed to enroll. Please try again.");
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   const getWorkshopDetails = async () => {
     setWorkshopLoading(true);
@@ -53,14 +93,11 @@ const WorkshopDetails = ({ route, navigation }) => {
         }
       );
       const data = response.data;
-
       setWorkshop(data);
+      await checkIfEnrolled();
     } catch (error) {
-      console.log("error: ", error);
-      Alert.alert(
-        "Error",
-        "Failed to load workshop details. Please try again."
-      );
+      console.log(error);
+      Alert.alert("Error", "Failed to load workshop details.");
     } finally {
       setWorkshopLoading(false);
     }
@@ -90,17 +127,60 @@ const WorkshopDetails = ({ route, navigation }) => {
     else dispatch(removeBookmark(workshop?._id));
   };
 
-  const formatDate = (date) => {
-    const newDate = new Date(date);
-    const formattedDate = newDate.toLocaleString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    const inputDate = new Date(date);
+    const inputDay = new Date(inputDate);
+    inputDay.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((inputDay - today) / (1000 * 60 * 60 * 24));
+    const timeString = inputDate.toLocaleString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
-    return formattedDate;
+
+    if (diffDays === 0) return `Today at ${timeString}`;
+    if (diffDays === 1) return `Tomorrow at ${timeString}`;
+    if (diffDays > 1 && diffDays < 7) {
+      const weekday = inputDate.toLocaleString("en-US", { weekday: "long" });
+      return `${weekday} at ${timeString}`;
+    }
+    return inputDate.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  const checkIfLive = () => {
+    if (!workshop?.dates || !isEnrolled) return false;
+    const currentTime = new Date();
+    return workshop.dates.some((dateString) => {
+      const sessionStart = new Date(dateString);
+      const sessionEnd = new Date(sessionStart.getTime() + 60 * 60 * 1000);
+      return currentTime >= sessionStart && currentTime <= sessionEnd;
+    });
+  };
+
+  const checkIfEnded = () => {
+    if (!workshop?.dates) return false;
+    const now = new Date();
+    return workshop.dates.every((dateString) => {
+      const sessionEnd = new Date(
+        new Date(dateString).getTime() + 60 * 60 * 1000
+      );
+      return now > sessionEnd;
+    });
+  };
+
+  const handleJoinLive = () => {
+    Linking.openURL(workshop?.meeting_link);
   };
 
   const handleAddToCart = async (workshop) => {
@@ -119,13 +199,86 @@ const WorkshopDetails = ({ route, navigation }) => {
       };
       await dispatch(addToCartAsync(data)).unwrap();
     } catch (error) {
-      console.log("error: ", error);
+      console.log(error);
       Alert.alert(
         "Error",
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
+        error.response?.data?.message || "Something went wrong."
       );
     }
+  };
+
+  const renderActionButton = () => {
+    const isLive = checkIfLive();
+    const hasEnded = checkIfEnded();
+
+    if (isLive) {
+      return (
+        <TouchableOpacity
+          onPress={handleJoinLive}
+          style={[styles.bottomButton, styles.liveButton]}
+        >
+          <Text style={styles.bottomButtonText}>Join Live</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    if (hasEnded) {
+      return (
+        <TouchableOpacity
+          style={[styles.bottomButton, styles.endedButton]}
+          disabled={true}
+        >
+          <Text style={styles.bottomButtonText}>Ended</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    if (isEnrolled) {
+      return (
+        <TouchableOpacity style={[styles.bottomButton, styles.continueButton]}>
+          <Text style={styles.bottomButtonText}>View Upcoming</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    if (workshop.price === 0 || workshop.price === "0") {
+      return (
+        <TouchableOpacity
+          onPress={enrollNow}
+          style={[styles.bottomButton, styles.joinNowButton]}
+        >
+          {enrolling ? (
+            <ActivityIndicator size={"small"} color={colors.white} />
+          ) : (
+            <Text style={styles.bottomButtonText}>Join Now</Text>
+          )}
+        </TouchableOpacity>
+      );
+    }
+
+    if (checkIfInCart()) {
+      return (
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Cart")}
+          style={[styles.bottomButton, styles.cartButton]}
+        >
+          <Text style={styles.bottomButtonText}>Go To Cart</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    return (
+      <TouchableOpacity
+        onPress={() => handleAddToCart(workshop)}
+        style={[styles.bottomButton, styles.enrollButton]}
+      >
+        {addingToCart ? (
+          <ActivityIndicator size={"small"} color={colors.white} />
+        ) : (
+          <Text style={styles.bottomButtonText}>Add To Cart</Text>
+        )}
+      </TouchableOpacity>
+    );
   };
 
   if (workshopLoading) {
@@ -139,7 +292,6 @@ const WorkshopDetails = ({ route, navigation }) => {
     );
   }
 
-  // Show error state if workshop failed to load
   if (!workshop) {
     return (
       <View style={styles.container}>
@@ -162,10 +314,8 @@ const WorkshopDetails = ({ route, navigation }) => {
       <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Course Title */}
         <Text style={styles.courseTitle}>{workshop.title}</Text>
 
-        {/* Preview Video Placeholder */}
         <View style={styles.videoContainer}>
           <View style={styles.videoPlaceholder}>
             <Image
@@ -176,8 +326,11 @@ const WorkshopDetails = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* Price */}
-        <Text style={styles.priceText}>₹{workshop.price}/-</Text>
+        <Text style={styles.priceText}>
+          {workshop.price === 0 || workshop.price === "0"
+            ? "Free"
+            : `₹${workshop.price}/-`}
+        </Text>
 
         <View style={styles.card}>
           <Typography style={styles.sectionHeading}>Description</Typography>
@@ -208,33 +361,8 @@ const WorkshopDetails = ({ route, navigation }) => {
             color={colors.primary}
           />
         </TouchableOpacity>
-        {
-          <>
-            {workshop.price != "Coming Soon" ? (
-              <TouchableOpacity
-                onPress={() => handleAddToCart(workshop)}
-                style={[
-                  styles.bottomButton,
-                  isEnrolled ? styles.continueButton : styles.enrollButton,
-                ]}
-              >
-                {addingToCart ? (
-                  <ActivityIndicator size={"small"} color={colors.white} />
-                ) : (
-                  <Text style={styles.bottomButtonText}>
-                    {isEnrolled
-                      ? "Continue"
-                      : checkIfInCart()
-                      ? "Go To Cart"
-                      : "Add To Cart"}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            ) : (
-              <></>
-            )}
-          </>
-        }
+
+        {workshop.price !== "Coming Soon" && renderActionButton()}
       </View>
     </View>
   );
@@ -270,11 +398,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
   },
   content: {
-    padding: screenWidth * 0.05, // 5% of screen width
+    padding: screenWidth * 0.05,
     paddingBottom: 100,
   },
   courseTitle: {
-    fontSize: screenWidth * 0.06, // 6% of screen width
+    fontSize: screenWidth * 0.06,
     fontWeight: "bold",
     textAlign: "center",
     color: "#333",
@@ -287,14 +415,14 @@ const styles = StyleSheet.create({
   },
   videoPlaceholder: {
     width: "100%",
-    height: screenWidth * 0.5, // 50% of screen width
+    height: screenWidth * 0.5,
     backgroundColor: "#ccc",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 15,
   },
   placeholderText: {
-    fontSize: screenWidth * 0.04, // 4% of screen width
+    fontSize: screenWidth * 0.04,
     color: "#666",
   },
   metaContainer: {
@@ -303,7 +431,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   metaText: {
-    fontSize: screenWidth * 0.04, // 4% of screen width
+    fontSize: screenWidth * 0.04,
     color: "#666",
   },
   priceText: {
@@ -337,10 +465,22 @@ const styles = StyleSheet.create({
   enrollButton: {
     backgroundColor: "#000",
   },
+  joinNowButton: {
+    backgroundColor: "#007AFF",
+  },
+  liveButton: {
+    backgroundColor: "#FF3B30",
+  },
+  cartButton: {
+    backgroundColor: "#FF9500",
+  },
+  endedButton: {
+    backgroundColor: "#FF0000",
+  },
   bottomButtonText: {
     color: "white",
     fontWeight: "bold",
-    fontSize: screenWidth * 0.04, // 4% of screen width
+    fontSize: screenWidth * 0.04,
   },
   continueButton: {
     backgroundColor: "#32CD32",
