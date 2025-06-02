@@ -1,12 +1,12 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { colors } from '../assets/colors';
-import HomeScreen from '../screens/HomeScreen';
-import AllCourses from '../screens/Courses/AllCourses';
-import LearningDashboard from '../screens/MyZone';
-import ProfileScreen from '../screens/Profile/ProfileScreen';
-import Workshops from '../screens/Workshops';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { View } from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { colors } from "../../assets/colors";
+import HomeScreen from "../../screens/HomeScreen";
+import AllCourses from "../../screens/Courses/AllCourses";
+import LearningDashboard from "../../screens/MyZone";
+import ProfileScreen from "../../screens/Profile/ProfileScreen";
+import Workshops from "../../screens/workshop/Workshops";
 
 const Tab = createBottomTabNavigator();
 
@@ -15,12 +15,12 @@ const CustomTabIcon = ({ focused, iconName, color, size }) => {
   return (
     <View
       style={{
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: focused ? 'rgba(255, 231, 96, 0.8)' : 'transparent', // Light yellow background when focused
+        backgroundColor: focused ? "rgba(255, 231, 96, 0.8)" : "transparent", // Light yellow background when focused
       }}
     >
       <Icon
@@ -40,23 +40,23 @@ const BottomTabNavigator = () => {
           let iconName;
 
           switch (route.name) {
-            case 'Home':
-              iconName = 'home';
+            case "Home":
+              iconName = "home";
               break;
-            case 'Courses':
-              iconName = 'book';
+            case "AllCourses":
+              iconName = "book";
               break;
-            case 'Workshops':
-              iconName = 'users';
+            case "Workshops":
+              iconName = "users";
               break;
-            case 'MyZone':
-              iconName = 'graduation-cap';
+            case "MyZone":
+              iconName = "graduation-cap";
               break;
-            case 'Profile':
-              iconName = 'user';
+            case "Profile":
+              iconName = "user";
               break;
             default:
-              iconName = 'home';
+              iconName = "home";
           }
 
           return (
@@ -68,8 +68,8 @@ const BottomTabNavigator = () => {
             />
           );
         },
-        tabBarActiveTintColor: 'rgba(255, 255, 255, 0.8)',
-        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.8)',
+        tabBarActiveTintColor: "rgba(255, 255, 255, 0.8)",
+        tabBarInactiveTintColor: "rgba(255, 255, 255, 0.8)",
         tabBarStyle: {
           backgroundColor: colors.secondary,
           height: 90,
@@ -78,13 +78,13 @@ const BottomTabNavigator = () => {
           borderTopWidth: 0,
           paddingBottom: 20,
           paddingTop: 10,
-          position: 'absolute',
+          position: "absolute",
           elevation: 0,
           shadowOpacity: 0,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: "500",
           marginTop: 5,
         },
         tabBarItemStyle: {
@@ -97,35 +97,35 @@ const BottomTabNavigator = () => {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarLabel: 'Home',
+          tabBarLabel: "Home",
         }}
       />
       <Tab.Screen
         name="AllCourses"
         component={AllCourses}
         options={{
-          tabBarLabel: 'Courses',
+          tabBarLabel: "Courses",
         }}
       />
       <Tab.Screen
         name="Workshops"
-        component={HomeScreen}
+        component={Workshops}
         options={{
-          tabBarLabel: 'Workshops',
+          tabBarLabel: "Workshops",
         }}
       />
       <Tab.Screen
         name="MyZone"
         component={LearningDashboard}
         options={{
-          tabBarLabel: 'My Zone',
+          tabBarLabel: "My Zone",
         }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: 'Profile',
+          tabBarLabel: "Profile",
         }}
       />
     </Tab.Navigator>

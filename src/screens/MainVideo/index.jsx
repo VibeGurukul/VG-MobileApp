@@ -54,7 +54,6 @@ const MainVideoScreen = () => {
           },
         }
       );
-      console.log("res saved Data: ", response.data.progress);
       oldProg.current = response.data.progress;
     } catch (error) {
       console.log("error: ", error);

@@ -65,7 +65,6 @@ const CourseDetails = ({ route, navigation }) => {
       })
       const data = response.data;
 
-      console.log("har bar: ", data._id, params.course._id);
       setCourse(data)
 
     } catch (error) {
@@ -92,12 +91,10 @@ const CourseDetails = ({ route, navigation }) => {
     let inCart = cartState.cart?.filter((item) => {
       return item?.course_id == course?._id
     });
-    console.log("inCart: ", inCart)
     return inCart.length ? true : false
   }
 
   useEffect(() => {
-    console.log("cart: ", cartState, course?._id)
     checkIfInCart()
   }, [cartState, course])
 
@@ -108,7 +105,6 @@ const CourseDetails = ({ route, navigation }) => {
   }
 
   const checkEnrollmentStatus = async (userEmail, userToken) => {
-    console.log("rann: ,", userEmail)
     if (!userToken || !course) return;
 
     try {
