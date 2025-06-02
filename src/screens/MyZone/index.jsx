@@ -69,6 +69,7 @@ export default function LearningDashboard({ navigation }) {
   const { bookmarked } = state;
 
   const getMyCourses = async () => {
+    console.log("token: ", token);
     try {
       setIsLoading(true);
       const response = await axios.get(`${API.BASE_URL}/users/me/courses`, {
@@ -95,9 +96,9 @@ export default function LearningDashboard({ navigation }) {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Header
-        title={`Namaste ${user.full_name.split(" ")[0] || "Guest"}!`}
+        title={`Namaste!`}
         subtitle="My Zone"
         onBack={() => navigation.goBack()}
       />
@@ -162,10 +163,10 @@ export default function LearningDashboard({ navigation }) {
           ))}
           {!bookmarked.length && <EmptyComponent />}
         </View>
-        <View style={{ height: 90 }}></View>
+        <View style={{ height: 95 }}></View>
       </ScrollView>
-      <BottomNavBar navigation={navigation} />
-    </SafeAreaView>
+      {/* <BottomNavBar navigation={navigation} /> */}
+    </View>
   );
 }
 

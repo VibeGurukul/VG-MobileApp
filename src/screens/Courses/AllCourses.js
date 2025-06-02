@@ -71,7 +71,7 @@ const AllCourses = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Header
-        title={`Namaste ${firstName || 'Guest'}!`}
+        title={`Namaste!`}
         subtitle="All Courses"
         onBack={() => navigation.goBack()}
       />
@@ -127,9 +127,9 @@ const AllCourses = ({ navigation }) => {
             </View>
           ))}
         </View>
-      </ScrollView>
+        <View style={{ height: 95 }} />
 
-      <BottomNavBar navigation={navigation} />
+      </ScrollView>
     </View>
   );
 };
