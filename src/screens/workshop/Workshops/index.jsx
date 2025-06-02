@@ -12,14 +12,13 @@ import {
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Header from "../../components/Header";
-import BottomNavBar from "../../components/BottomNavBar";
-import { colors } from "../../assets/colors";
-import { API } from "../../constants";
+import Header from "../../../components/Header";
+import { colors } from "../../../assets/colors";
+import { API } from "../../../constants";
 
 const Workshops = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [courses, setCourses] = useState([]);
+  const [workshops, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [firstName, setFirstName] = useState("");
@@ -34,8 +33,8 @@ const Workshops = ({ navigation }) => {
         setCourses(response.data);
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching courses:", err);
-        setError("Failed to load courses. Please try again later.");
+        console.error("Error fetching workshops:", err);
+        setError("Failed to load workshops. Please try again later.");
         setLoading(false);
       }
     };
@@ -56,9 +55,9 @@ const Workshops = ({ navigation }) => {
     fetchUserName();
   }, []);
 
-  // Filter courses based on search query
-  const filteredCourses = courses.filter((course) =>
-    course.title.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter workshops based on search query
+  const filteredCourses = workshops.filter((workshop) =>
+    workshop.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {
@@ -101,17 +100,17 @@ const Workshops = ({ navigation }) => {
 
         <View
           style={[
-            styles.coursesContainer,
+            styles.workshopsContainer,
             isTablet && styles.tabletCoursesContainer,
           ]}
         >
-          {filteredCourses.map((course) => (
+          {filteredCourses.map((workshop) => (
             <View
-              key={course._id}
-              style={[styles.courseCard, isTablet && styles.tabletCourseCard]}
+              key={workshop._id}
+              style={[styles.workshopCard, isTablet && styles.tabletCourseCard]}
             >
               <Image
-                source={{ uri: course.preview_image }}
+                source={{ uri: workshop.preview_image }}
                 style={{
                   width: isTablet ? screenWidth * 0.4 : screenWidth * 0.8, // Adjust for tablet
                   height: isTablet ? screenWidth * 0.4 : screenWidth * 0.8, // Adjust height proportionally
@@ -126,11 +125,11 @@ const Workshops = ({ navigation }) => {
               <View style={styles.cardContent}>
                 <Text
                   style={[
-                    styles.courseTitle,
+                    styles.workshopTitle,
                     isTablet && styles.tabletCourseTitle,
                   ]}
                 >
-                  {course.title}
+                  {workshop.title}
                 </Text>
 
                 <View style={styles.priceAndButtonContainer}>
@@ -141,17 +140,17 @@ const Workshops = ({ navigation }) => {
                         isTablet && styles.tabletCurrentPrice,
                       ]}
                     >
-                      ₹{course.price}
+                      ₹{workshop.price}
                     </Text>
-                    {course.original_price &&
-                      course.original_price !== course.price && (
+                    {workshop.original_price &&
+                      workshop.original_price !== workshop.price && (
                         <Text
                           style={[
                             styles.originalPrice,
                             isTablet && styles.tabletOriginalPrice,
                           ]}
                         >
-                          ₹{course.original_price}
+                          ₹{workshop.original_price}
                         </Text>
                       )}
                   </View>
@@ -162,7 +161,9 @@ const Workshops = ({ navigation }) => {
                       isTablet && styles.tabletViewButton,
                     ]}
                     onPress={() =>
-                      navigation.navigate("WorkshopDetails", { course })
+                      navigation.navigate("WorkshopDetails", {
+                        workshop,
+                      })
                     }
                   >
                     <Text style={styles.buttonText}>View</Text>
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
     padding: 18,
     width: "80%",
   },
-  coursesContainer: {
+  workshopsContainer: {
     gap: 20,
   },
   tabletCoursesContainer: {
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
-  courseCard: {
+  workshopCard: {
     backgroundColor: "white",
     borderRadius: 25,
     overflow: "hidden",
@@ -229,12 +230,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   tabletCourseCard: {
-    width: "48%", // Display two courses side by side on tablets
+    width: "48%", // Display two workshops side by side on tablets
   },
   cardContent: {
     padding: 15,
   },
-  courseTitle: {
+  workshopTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",

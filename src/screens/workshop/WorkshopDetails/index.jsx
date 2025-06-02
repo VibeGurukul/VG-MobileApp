@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,26 +7,26 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
-  Button,
   Alert,
   Image,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
-import Header from "../../components/Header";
-import CourseTabs from "../../components/CourseTabs";
-import { colors } from "../../assets/colors";
-import { useAuth } from "../../context/AuthContext";
-import { API } from "../../constants";
-import { useVideoPlayer, VideoView } from "expo-video";
+import Header from "../../../components/Header";
+import { colors } from "../../../assets/colors";
+import { useAuth } from "../../../context/AuthContext";
+import { API } from "../../../constants";
 import { Toast } from "toastify-react-native";
-import { addBookmark, removeBookmark } from "../../store/slices/bookmarkSlice";
+import {
+  addBookmark,
+  removeBookmark,
+} from "../../../store/slices/bookmarkSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCartAsync } from "../../store/slices/cart-slice";
-import Typography from "../../library/components/Typography";
+import { addToCartAsync } from "../../../store/slices/cart-slice";
+import Typography from "../../../library/components/Typography";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+const { width: screenWidth } = Dimensions.get("window");
 
 const WorkshopDetails = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -36,24 +36,21 @@ const WorkshopDetails = ({ route, navigation }) => {
   const cartState = useSelector((state) => state.cart);
 
   const params = route.params;
-  const [firstName, setFirstName] = useState("");
-  const [course, setCourse] = useState(null);
+
+  const [workshop, setWorkshop] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [courseLoading, setCourseLoading] = useState(true);
-  const [progressList, setProgressList] = useState([]);
 
   const { user, token } = useAuth();
-
-  const [email, setEmail] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
 
   const getWorkshopDetails = async () => {
-    setCourseLoading(true); // Start loading
+    setCourseLoading(true);
     try {
       const response = await axios.get(
-        `${API.BASE_URL}/workshops/${params.course._id}`,
+        `${API.BASE_URL}/workshops/${params.workshop._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -62,10 +59,13 @@ const WorkshopDetails = ({ route, navigation }) => {
       );
       const data = response.data;
 
-      setCourse(data);
+      setWorkshop(data);
     } catch (error) {
-      console.log("error: ", error.response);
-      Alert.alert("Error", "Failed to load course details. Please try again.");
+      console.log("error: ", error);
+      Alert.alert(
+        "Error",
+        "Failed to load workshop details. Please try again."
+      );
     } finally {
       setCourseLoading(false);
     }
@@ -77,7 +77,7 @@ const WorkshopDetails = ({ route, navigation }) => {
 
   const checkIfBookmarked = () => {
     let hasBookmarked = state.bookmarked?.filter((bookmark) => {
-      return bookmark._id === course._id;
+      return bookmark._id === workshop._id;
     });
     return hasBookmarked.length ? true : false;
   };
@@ -85,31 +85,30 @@ const WorkshopDetails = ({ route, navigation }) => {
   const checkIfInCart = () => {
     if (cartState.length == 0) return;
     let inCart = cartState.cart?.filter((item) => {
-      return item?.workshop_id == course?._id;
+      return item?.workshop_id == workshop?._id;
     });
     return inCart.length ? true : false;
   };
 
   useEffect(() => {
     checkIfInCart();
-  }, [cartState, course]);
+  }, [cartState, workshop]);
 
   const onPressBookmark = () => {
-    if (!checkIfBookmarked()) dispatch(addBookmark(course));
-    else dispatch(removeBookmark(course?._id));
+    if (!checkIfBookmarked()) dispatch(addBookmark(workshop));
+    else dispatch(removeBookmark(workshop?._id));
   };
 
   const checkEnrollmentStatus = async (userEmail, userToken) => {
-    if (!userToken || !course) return;
+    if (!userToken || !workshop) return;
 
     try {
       const response = await axios.get(`${API.BASE_URL}/check-enroll`, {
-        params: { user_email: userEmail, course_id: course._id },
+        params: { user_email: userEmail, course_id: workshop._id },
       });
 
       if (response.data.isEnrolled) {
         setIsEnrolled(true);
-        getSectionProgress();
         setLoading(false);
       } else {
         setIsEnrolled(false);
@@ -118,32 +117,6 @@ const WorkshopDetails = ({ route, navigation }) => {
     } catch (error) {
       console.error("Error checking enrollment status:", error);
       setLoading(false);
-    }
-  };
-
-  const getSectionProgress = async () => {
-    try {
-      let response = await axios.get(
-        `${API.BASE_URL}/users/progress/${course?._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setProgressList(response.data);
-    } catch (error) {
-      console.log(
-        "error is: ",
-        error.response.data,
-        " test: ",
-        `${API.BASE_URL}/users/progress/${course?._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
     }
   };
 
@@ -157,13 +130,7 @@ const WorkshopDetails = ({ route, navigation }) => {
         const storedEmail = storedValues[1][1];
         const storedToken = storedValues[2][1];
 
-        if (storedFullName) {
-          const firstName = storedFullName.split(" ")[0];
-          setFirstName(firstName);
-        }
-
         if (storedEmail && storedToken) {
-          setEmail(storedEmail);
           checkEnrollmentStatus(storedEmail, storedToken);
         }
       } catch (error) {
@@ -172,40 +139,22 @@ const WorkshopDetails = ({ route, navigation }) => {
     };
 
     fetchUserData();
-  }, [course]);
+  }, [workshop]);
 
-  const handleEnroll = async (courseId) => {
-    if (isEnrolled) return;
-    setIsLoading(true);
-    try {
-      const data = {
-        user_email: user.email,
-        course_id: courseId,
-      };
-      const response = await axios.post(`${API.BASE_URL}/enroll`, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.data) {
-        Toast.success("You have successfully enrolled in the course.");
-        await checkEnrollmentStatus(user.email, token);
-      } else {
-        console.log("err");
-      }
-    } catch (error) {
-      Alert.alert(
-        "Error",
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-    } finally {
-      setIsLoading(false);
-    }
+  const formatDate = (date) => {
+    const newDate = new Date(date);
+    const formattedDate = newDate.toLocaleString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return formattedDate;
   };
 
-  const handleAddToCart = async (course) => {
+  const handleAddToCart = async (workshop) => {
     if (isEnrolled) return;
     if (checkIfInCart()) {
       navigation.navigate("Cart");
@@ -214,11 +163,11 @@ const WorkshopDetails = ({ route, navigation }) => {
     setIsLoading(true);
     try {
       const data = {
-        workshop_id: course._id,
-        price: course.price,
-        short_title: course.short_title,
-        preview_image: course.preview_image,
-        title: course.title,
+        workshop_id: workshop._id,
+        price: workshop.price,
+        short_title: workshop.short_title,
+        preview_image: workshop.preview_image,
+        title: workshop.title,
       };
       await dispatch(addToCartAsync(data)).unwrap();
     } catch (error) {
@@ -244,13 +193,13 @@ const WorkshopDetails = ({ route, navigation }) => {
     );
   }
 
-  // Show error state if course failed to load
-  if (!course) {
+  // Show error state if workshop failed to load
+  if (!workshop) {
     return (
       <View style={styles.container}>
         <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
         <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Failed to load course details</Text>
+          <Text style={styles.errorText}>Failed to load workshop details</Text>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={getWorkshopDetails}
@@ -268,13 +217,13 @@ const WorkshopDetails = ({ route, navigation }) => {
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Course Title */}
-        <Text style={styles.courseTitle}>{course.title}</Text>
+        <Text style={styles.courseTitle}>{workshop.title}</Text>
 
         {/* Preview Video Placeholder */}
         <View style={styles.videoContainer}>
           <View style={styles.videoPlaceholder}>
             <Image
-              source={{ uri: course.preview_image }}
+              source={{ uri: workshop.preview_image }}
               width={"100%"}
               height={"100%"}
             />
@@ -288,23 +237,26 @@ const WorkshopDetails = ({ route, navigation }) => {
         </View>
 
         {/* Price */}
-        <Text style={styles.priceText}>₹{course.price}/-</Text>
+        <Text style={styles.priceText}>₹{workshop.price}/-</Text>
 
-        {/* <CourseTabs
-          course={course}
-          isEnrolled={isEnrolled}
-          player={undefined}
-          progressList={progressList}
-        /> */}
-        <View>
+        <View style={styles.card}>
           <Typography style={styles.sectionHeading}>Description</Typography>
           <Typography style={styles.sectionText}>
-            {course.description}
+            {workshop.description}
           </Typography>
+          <Typography style={styles.sectionHeading}>Age</Typography>
+          <Typography style={styles.sectionText}>{workshop.age}</Typography>
+
+          <Typography style={styles.sectionHeading}>Dates</Typography>
+          {workshop.dates &&
+            workshop.dates.map((date) => (
+              <Typography key={date} style={styles.sectionText}>
+                {formatDate(date)}
+              </Typography>
+            ))}
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
           onPress={onPressBookmark}
@@ -322,10 +274,9 @@ const WorkshopDetails = ({ route, navigation }) => {
           </TouchableOpacity>
         ) : (
           <>
-            {course.price != "Coming Soon" ? (
+            {workshop.price != "Coming Soon" ? (
               <TouchableOpacity
-                // onPress={() => handleEnroll(course._id)}
-                onPress={() => handleAddToCart(course)}
+                onPress={() => handleAddToCart(workshop)}
                 style={[
                   styles.bottomButton,
                   isEnrolled ? styles.continueButton : styles.enrollButton,
@@ -360,6 +311,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 50,
+  },
+  card: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 20,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
   },
   video: {
     width: 350,
