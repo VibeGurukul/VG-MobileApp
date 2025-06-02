@@ -10,14 +10,12 @@ import {
   Alert,
   Image,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import Header from "../../../components/Header";
 import { colors } from "../../../assets/colors";
 import { useAuth } from "../../../context/AuthContext";
 import { API } from "../../../constants";
-import { Toast } from "toastify-react-native";
 import {
   addBookmark,
   removeBookmark,
@@ -39,15 +37,12 @@ const WorkshopDetails = ({ route, navigation }) => {
 
   const [workshop, setWorkshop] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [courseLoading, setCourseLoading] = useState(true);
+  const [workshopLoading, setWorkshopLoading] = useState(true);
 
-  const { user, token } = useAuth();
-
-  const [isLoading, setIsLoading] = useState(false);
+  const { token } = useAuth();
 
   const getWorkshopDetails = async () => {
-    setCourseLoading(true);
+    setWorkshopLoading(true);
     try {
       const response = await axios.get(
         `${API.BASE_URL}/workshops/${params.workshop._id}`,
@@ -67,7 +62,7 @@ const WorkshopDetails = ({ route, navigation }) => {
         "Failed to load workshop details. Please try again."
       );
     } finally {
-      setCourseLoading(false);
+      setWorkshopLoading(false);
     }
   };
 
@@ -90,56 +85,10 @@ const WorkshopDetails = ({ route, navigation }) => {
     return inCart.length ? true : false;
   };
 
-  useEffect(() => {
-    checkIfInCart();
-  }, [cartState, workshop]);
-
   const onPressBookmark = () => {
     if (!checkIfBookmarked()) dispatch(addBookmark(workshop));
     else dispatch(removeBookmark(workshop?._id));
   };
-
-  const checkEnrollmentStatus = async (userEmail, userToken) => {
-    if (!userToken || !workshop) return;
-
-    try {
-      const response = await axios.get(`${API.BASE_URL}/check-enroll`, {
-        params: { user_email: userEmail, course_id: workshop._id },
-      });
-
-      if (response.data.isEnrolled) {
-        setIsEnrolled(true);
-        setLoading(false);
-      } else {
-        setIsEnrolled(false);
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error("Error checking enrollment status:", error);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const keys = ["full_name", "email", "access_token"];
-        const storedValues = await AsyncStorage.multiGet(keys);
-
-        const storedFullName = storedValues[0][1];
-        const storedEmail = storedValues[1][1];
-        const storedToken = storedValues[2][1];
-
-        if (storedEmail && storedToken) {
-          checkEnrollmentStatus(storedEmail, storedToken);
-        }
-      } catch (error) {
-        console.error("Error retrieving user data from AsyncStorage:", error);
-      }
-    };
-
-    fetchUserData();
-  }, [workshop]);
 
   const formatDate = (date) => {
     const newDate = new Date(date);
@@ -160,7 +109,6 @@ const WorkshopDetails = ({ route, navigation }) => {
       navigation.navigate("Cart");
       return;
     }
-    setIsLoading(true);
     try {
       const data = {
         workshop_id: workshop._id,
@@ -177,12 +125,10 @@ const WorkshopDetails = ({ route, navigation }) => {
         error.response?.data?.message ||
           "Something went wrong. Please try again."
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  if (courseLoading) {
+  if (workshopLoading) {
     return (
       <View style={styles.container}>
         <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
@@ -230,12 +176,6 @@ const WorkshopDetails = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* Rating and Duration */}
-        <View style={styles.metaContainer}>
-          <Text style={styles.metaText}>⭐ 4.5 Rating</Text>
-          <Text style={styles.metaText}>⏳ 8 Hours Duration</Text>
-        </View>
-
         {/* Price */}
         <Text style={styles.priceText}>₹{workshop.price}/-</Text>
 
@@ -268,11 +208,7 @@ const WorkshopDetails = ({ route, navigation }) => {
             color={colors.primary}
           />
         </TouchableOpacity>
-        {loading ? (
-          <TouchableOpacity onPress={{}} style={[styles.bottomButton]}>
-            <ActivityIndicator size="small" color={colors.primary} />
-          </TouchableOpacity>
-        ) : (
+        {
           <>
             {workshop.price != "Coming Soon" ? (
               <TouchableOpacity
@@ -282,7 +218,7 @@ const WorkshopDetails = ({ route, navigation }) => {
                   isEnrolled ? styles.continueButton : styles.enrollButton,
                 ]}
               >
-                {isLoading || addingToCart ? (
+                {addingToCart ? (
                   <ActivityIndicator size={"small"} color={colors.white} />
                 ) : (
                   <Text style={styles.bottomButtonText}>
@@ -298,7 +234,7 @@ const WorkshopDetails = ({ route, navigation }) => {
               <></>
             )}
           </>
-        )}
+        }
       </View>
     </View>
   );

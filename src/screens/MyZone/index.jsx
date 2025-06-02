@@ -14,7 +14,6 @@ import { removeBookmark } from "../../store/slices/bookmarkSlice";
 import Header from "../../components/Header";
 import { colors } from "../../assets/colors";
 import EmptyComponent from "../../components/EmptyComponent";
-import BottomNavBar from "../../components/BottomNavBar";
 import { useEffect, useState } from "react";
 import { API } from "../../constants";
 import { useAuth } from "../../context/AuthContext";
@@ -55,7 +54,7 @@ const WorkshopCard = ({ workshop }) => (
   </TouchableOpacity>
 );
 
-export default function LearningDashboard({ navigation }) {
+export default function MyZone({ navigation }) {
   const state = useSelector((state) => state.bookmark);
   const dispatch = useDispatch();
   const { token, user } = useAuth();
@@ -69,7 +68,6 @@ export default function LearningDashboard({ navigation }) {
   const { bookmarked } = state;
 
   const getMyCourses = async () => {
-    console.log("token: ", token);
     try {
       setIsLoading(true);
       const response = await axios.get(`${API.BASE_URL}/users/me/courses`, {
@@ -77,9 +75,7 @@ export default function LearningDashboard({ navigation }) {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("response: ", response.data);
       if (response.data && response.data[0]) {
-        console.log("aya");
         setMyCourses(response.data || []);
       } else {
         setMyCourses([]);
@@ -153,9 +149,16 @@ export default function LearningDashboard({ navigation }) {
           <Text style={styles.sectionTitle}>Bookmarks</Text>
           {bookmarked.map((bookmark) => (
             <BookmarkCard
-              onPress={() =>
-                navigation.navigate("CourseDetails", { course: bookmark })
-              }
+              onPress={() => {
+                if (bookmark?.meeting_link) {
+                  console.log("detected meeting link");
+                  navigation.navigate("WorkshopDetails", {
+                    workshop: bookmark,
+                  });
+                } else {
+                  navigation.navigate("CourseDetails", { course: bookmark });
+                }
+              }}
               key={bookmark?._id}
               item={bookmark}
               removeBookMark={() => removeBookMark(bookmark?._id)}
@@ -165,7 +168,6 @@ export default function LearningDashboard({ navigation }) {
         </View>
         <View style={{ height: 95 }}></View>
       </ScrollView>
-      {/* <BottomNavBar navigation={navigation} /> */}
     </View>
   );
 }
@@ -229,7 +231,6 @@ const styles = StyleSheet.create({
     width: 150,
     padding: 16,
     height: 200,
-    // justifyContent: "space-between",
   },
   iconContainer: {
     width: 48,

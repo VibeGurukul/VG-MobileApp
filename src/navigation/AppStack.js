@@ -2,8 +2,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import CourseDetails from "../screens/Courses/CourseDetails";
 import MainVideoScreen from "../screens/MainVideo";
 import Cart from "../screens/Cart";
-import BottomTabNavigator from "../components/BottomNavBar";
-import WorkshopDetails from "../screens/WorkshopDetails";
+import BottomTabNavigator from "../components/BottomNavigation";
+import WorkshopDetails from "../screens/workshop/WorkshopDetails";
 
 const Stack = createStackNavigator();
 
