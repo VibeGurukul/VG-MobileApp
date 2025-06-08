@@ -10,6 +10,7 @@ import ToastManager from "toastify-react-native";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor, store } from "./src/store";
+import LoadingSpinnerWebView from "./src/components/Loader";
 
 const RootStack = createStackNavigator();
 
@@ -27,9 +28,7 @@ const RootNavigation = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.splashContainer}>
-        <ActivityIndicator size="large" color="#fdbb2d" />
-      </View>
+      <LoadingSpinnerWebView />
     );
   }
 
@@ -41,7 +40,6 @@ const RootNavigation = () => {
       ) : (
         <RootStack.Screen name="Auth" component={AuthStack} />
       )}
-
     </RootStack.Navigator>
   );
 };
@@ -61,11 +59,3 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  splashContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ff7961",
-  },
-});

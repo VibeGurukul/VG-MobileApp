@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "../../../components/Header";
 import { colors } from "../../../assets/colors";
 import { API } from "../../../constants";
+import LoadingSpinnerWebView from "../../../components/Loader";
 
 const Workshops = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,11 +62,7 @@ const Workshops = ({ navigation }) => {
   );
 
   if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
+    return <LoadingSpinnerWebView />;
   }
 
   if (error) {
@@ -109,11 +106,12 @@ const Workshops = ({ navigation }) => {
               key={workshop._id}
               style={[styles.workshopCard, isTablet && styles.tabletCourseCard]}
             >
+              {console.log("workshop.preview_image: ", workshop.preview_image)}
               <Image
                 source={{ uri: workshop.preview_image }}
                 style={{
-                  width: isTablet ? screenWidth * 0.4 : screenWidth * 0.8, // Adjust for tablet
-                  height: isTablet ? screenWidth * 0.4 : screenWidth * 0.8, // Adjust height proportionally
+                  width: isTablet ? screenWidth * 0.4 : screenWidth * 0.8,
+                  height: isTablet ? screenWidth * 0.4 : screenWidth * 0.8,
                   borderRadius: 25,
                   alignSelf: "center",
                   marginTop: screenWidth * 0.05,

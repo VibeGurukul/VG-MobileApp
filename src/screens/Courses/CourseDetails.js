@@ -23,6 +23,7 @@ import { Toast } from 'toastify-react-native';
 import { addBookmark, removeBookmark } from '../../store/slices/bookmarkSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, addToCartAsync } from '../../store/slices/cart-slice';
+import LoadingSpinnerWebView from '../../components/Loader';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -238,9 +239,7 @@ const CourseDetails = ({ route, navigation }) => {
           title={`Namaste!`}
           onBack={() => navigation.goBack()}
         />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <LoadingSpinnerWebView />
       </View>
     );
   }
