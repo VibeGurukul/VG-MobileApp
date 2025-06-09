@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BottomNavBar from '../components/BottomNavBar';
 import Header from '../components/Header';
 import HomeWhySection from '../components/HomeWhySection';
 import { useDispatch } from 'react-redux';
@@ -83,8 +82,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={{ height: 95 }} />
       </ScrollView>
 
-      {/* Bottom Navigation Bar */}
-      {/* <BottomNavBar navigation={navigation} /> */}
+
     </View>
   );
 };

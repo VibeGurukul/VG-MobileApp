@@ -3,7 +3,6 @@ import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity,
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
-import BottomNavBar from '../../components/BottomNavBar';
 import { colors } from '../../assets/colors';
 import { API } from '../../constants';
 

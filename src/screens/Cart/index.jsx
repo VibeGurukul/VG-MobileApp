@@ -156,7 +156,7 @@ const Cart = ({ navigation }) => {
         <FlatList
           data={cartState.cart}
           renderItem={renderItem}
-          keyExtractor={(item, index) => item.course_id}
+          keyExtractor={(item, index) => item.course_id || item.workshop_id}
           contentContainerStyle={styles.flatListContent}
           ListEmptyComponent={() => <EmptyComponent />}
         />

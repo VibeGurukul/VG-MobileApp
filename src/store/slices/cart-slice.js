@@ -17,7 +17,6 @@ export const fetchCartData = createAsyncThunk(
                 },
             });
             const data = response.data;
-            console.log("data: ", data)
             return data;
         } catch (error) {
             return rejectWithValue(error.message);
@@ -60,7 +59,6 @@ export const removeFromCartAsync = createAsyncThunk(
             });
 
             const data = response.data;
-            console.log("data: ", data)
             return { course_id, workshop_id };
         } catch (error) {
             return rejectWithValue(error.message);

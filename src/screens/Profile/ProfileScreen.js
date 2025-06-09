@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, CommonActions } from '@react-navigation/native';
-import BottomNavBar from '../../components/BottomNavBar';
 import Header from '../../components/Header';
 import { useAuth } from '../../context/AuthContext';
 import { colors } from '../../assets/colors';
@@ -71,8 +70,6 @@ const ProfileScreen = () => {
         <View style={{ height: 95 }} />
 
       </View>
-      {/* Bottom Navigation */}
-      {/* <BottomNavBar navigation={navigation} /> */}
     </View>
   );
 };
