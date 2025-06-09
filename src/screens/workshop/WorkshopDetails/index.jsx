@@ -24,6 +24,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { addToCartAsync } from "../../../store/slices/cart-slice";
 import Typography from "../../../library/components/Typography";
+import LoadingSpinnerWebView from "../../../components/Loader";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -285,9 +286,7 @@ const WorkshopDetails = ({ route, navigation }) => {
     return (
       <View style={styles.container}>
         <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <LoadingSpinnerWebView />
       </View>
     );
   }

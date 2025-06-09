@@ -5,14 +5,13 @@ import {
   TextInput,
   Dimensions,
 } from "react-native";
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { colors } from "../../assets/colors";
 import Header from "../../components/Header";
 import { FlatList } from "react-native-gesture-handler";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Typography from "../../library/components/Typography";
 import { useAuth } from "../../context/AuthContext";
-import { removeFromCartAsync } from "../../store/slices/cart-slice";
 import CartItem from "./components/CartItem";
 import EmptyComponent from "../../components/EmptyComponent";
 

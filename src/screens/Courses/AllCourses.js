@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
 import { colors } from '../../assets/colors';
 import { API } from '../../constants';
+import LoadingSpinnerWebView from '../../components/Loader';
 
 const AllCourses = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,9 +54,7 @@ const AllCourses = ({ navigation }) => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
+      <LoadingSpinnerWebView />
     );
   }
 

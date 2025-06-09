@@ -1,61 +1,72 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import PasswordInput from '../components/PasswordInput';
-import { useAuth } from '../context/AuthContext';
-import { colors } from '../assets/colors';
-import { API } from '../constants';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import PasswordInput from "../../components/PasswordInput";
+import { useAuth } from "../../context/AuthContext";
+import { colors } from "../../assets/colors";
+import { API } from "../../constants";
 
 const RegisterScreen = () => {
   const route = useRoute();
   const { email } = route.params || {};
   const navigation = useNavigation();
-  const { login } = useAuth()
-  const [fullName, setFullName] = useState('');
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth();
+  const [fullName, setFullName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       const response = await axios.post(`${API.BASE_URL}/register/`, {
         email: email,
         password: password,
         full_name: fullName,
-        mobile_number: mobileNumber
+        mobile_number: mobileNumber,
       });
 
-      if (response.data.token_type = 'bearer') {
+      if ((response.data.token_type = "bearer")) {
         await login(response.data);
       } else {
-        setErrorMessage('Failed to Create account. Please try again later.');
-        Alert.alert('Error', errorMessage);
+        setErrorMessage("Failed to Create account. Please try again later.");
+        Alert.alert("Error", errorMessage);
       }
     } catch (error) {
-      console.error("Registration Error:", error?.response?.data || error?.message || error);
+      console.error(
+        "Registration Error:",
+        error?.response?.data || error?.message || error
+      );
 
       if (error.response) {
-        setErrorMessage(error.response.data?.message || 'Registration failed. Please check your credentials.');
+        setErrorMessage(
+          error.response.data?.message ||
+            "Registration failed. Please check your credentials."
+        );
       } else {
-        setErrorMessage('Network error. Please try again.');
+        setErrorMessage("Network error. Please try again.");
       }
-      Alert.alert('Error', errorMessage);
+      Alert.alert("Error", errorMessage);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   };
   return (
     <View style={styles.container}>
-
-      <Image
-        source={require('../assets/logo.png')}
-        style={styles.logo}
-      />
+      <Image source={require("../../assets/logo.png")} style={styles.logo} />
 
       <View style={styles.card}>
         <Text style={styles.title}>Welcome To Vibe Gurukul</Text>
@@ -77,7 +88,7 @@ const RegisterScreen = () => {
           placeholder="Mobile"
           value={mobileNumber}
           onChangeText={(text) => {
-            const numericValue = text.replace(/[^0-9]/g, '');
+            const numericValue = text.replace(/[^0-9]/g, "");
             setMobileNumber(numericValue);
           }}
           keyboardType="phone-pad"
@@ -85,13 +96,16 @@ const RegisterScreen = () => {
         />
         <PasswordInput password={password} setPassword={setPassword} />
 
-        <TouchableOpacity style={[styles.button, isLoading && { opacity: 0.5 }]}
+        <TouchableOpacity
+          style={[styles.button, isLoading && { opacity: 0.5 }]}
           disabled={isLoading}
-          onPress={handleSubmit}>
-          {isLoading ? <ActivityIndicator
-            size={'small'}
-            color={colors.white}
-          /> : <Text style={styles.buttonText}>Create an account</Text>}
+          onPress={handleSubmit}
+        >
+          {isLoading ? (
+            <ActivityIndicator size={"small"} color={colors.white} />
+          ) : (
+            <Text style={styles.buttonText}>Create an account</Text>
+          )}
         </TouchableOpacity>
 
         <View style={styles.divider}>
@@ -115,77 +129,77 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.primary,
-    alignItems: 'center',
+    alignItems: "center",
     paddingTop: 50,
   },
   logo: {
     width: 100,
     height: 100,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     marginBottom: 20,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 50,
     padding: 20,
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     marginTop: 20,
   },
   title: {
     fontSize: 25,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 50,
     marginBottom: 30,
-    textAlign: 'center',
-    color: '#000',
+    textAlign: "center",
+    color: "#000",
   },
   secondaryText: {
     fontSize: 20,
-    textAlign: 'center',
-    color: '#1c1c1c',
+    textAlign: "center",
+    color: "#1c1c1c",
     fontWeight: 400,
     marginBottom: 10,
   },
   input: {
-    width: '100%',
+    width: "100%",
     padding: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 10,
     marginBottom: 10,
   },
   button: {
-    width: '100%',
+    width: "100%",
     padding: 15,
     backgroundColor: colors.secondary,
     borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 10
+    alignItems: "center",
+    marginBottom: 10,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 20,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
   },
   dividerText: {
     marginHorizontal: 10,
-    color: '#999',
+    color: "#999",
     fontSize: 14,
   },
   socialContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 10,
   },
   socialButton: {
