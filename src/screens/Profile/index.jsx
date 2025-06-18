@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import Header from '../../components/Header';
@@ -37,7 +37,7 @@ const ProfileScreen = () => {
 
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Greeting Section */}
       <Header
         title={`Namaste!`}
@@ -70,7 +70,7 @@ const ProfileScreen = () => {
         <View style={{ height: 95 }} />
 
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

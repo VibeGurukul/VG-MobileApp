@@ -9,6 +9,7 @@ import {
   Dimensions,
   Button,
   Alert,
+  SafeAreaView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -234,13 +235,13 @@ const CourseDetails = ({ route, navigation }) => {
   // Show loading screen while course is being fetched
   if (courseLoading) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <Header
           title={`Namaste!`}
           onBack={() => navigation.goBack()}
         />
         <LoadingSpinnerWebView />
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -266,9 +267,10 @@ const CourseDetails = ({ route, navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Header
         title={`Namaste!`}
+
         onBack={() => navigation.goBack()}
       />
 
@@ -350,7 +352,7 @@ const CourseDetails = ({ route, navigation }) => {
           </>
         )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

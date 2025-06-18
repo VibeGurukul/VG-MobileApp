@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Dimensions, SafeAreaView } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
@@ -67,7 +67,7 @@ const AllCourses = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Header
         title={`Namaste!`}
         subtitle="All Courses"
@@ -128,7 +128,7 @@ const AllCourses = ({ navigation }) => {
         <View style={{ height: 95 }} />
 
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
