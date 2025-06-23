@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -31,11 +32,20 @@ const LoginScreen = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API.BASE_URL}/login/`, {
-        email: email,
-        password: password,
-      });
+      const response = await axios.post(
+        `${API.BASE_URL}/login/`,
+        {
+          email: email,
+          password: password,
+        },
+        {
+          headers: {
+            "X-Client-Type": "mobile",
+          },
+        }
+      );
 
+      console.log("data: ", response.data.access_token);
       if (response.data.access_token) {
         await login(response.data);
       } else {
@@ -65,7 +75,7 @@ const LoginScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Image source={require("../../assets/logo.png")} style={styles.logo} />
 
       <View style={styles.card}>
@@ -129,7 +139,7 @@ const LoginScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

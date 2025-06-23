@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
+  SafeAreaView,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -74,7 +75,7 @@ const Workshops = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Header
         title={`Namaste!`}
         subtitle="All Workshops"
@@ -173,7 +174,7 @@ const Workshops = ({ navigation }) => {
         </View>
         <View style={{ height: 95 }} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -10,6 +10,7 @@ import {
   Alert,
   Image,
   Linking,
+  SafeAreaView,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
@@ -284,10 +285,10 @@ const WorkshopDetails = ({ route, navigation }) => {
 
   if (workshopLoading) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
         <LoadingSpinnerWebView />
-      </View>
+      </SafeAreaView>
     );
   }
 

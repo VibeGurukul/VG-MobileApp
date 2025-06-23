@@ -9,6 +9,7 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import axios from "axios";
 import InfoModal from "../../components/Modal/InfoModal";
@@ -61,7 +62,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Image source={require("../../assets/logo.png")} style={styles.logo} />
       <View style={styles.card}>
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -110,7 +111,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

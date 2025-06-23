@@ -17,7 +17,7 @@ const Header = ({ title, subtitle, onBack }) => {
   const navigation = useNavigation();
 
   return (
-    <SafeAreaView style={[styles.header, !subtitle && styles.headerNarrow]}>
+    <View style={[styles.header]}>
       {/* Title and Back Button Container */}
       <View style={[styles.titleContainer, !subtitle && { marginBottom: 20 }]}>
         <TouchableOpacity onPress={onBack} style={{ width: "20%" }}>
@@ -69,15 +69,14 @@ const Header = ({ title, subtitle, onBack }) => {
 
       {/* Subtitle (Optional) */}
       {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.primary,
-    padding: 20,
-    paddingTop: 55,
+    padding: 10,
     borderBottomLeftRadius: 50,
     borderBottomRightRadius: 50,
     alignItems: "center",

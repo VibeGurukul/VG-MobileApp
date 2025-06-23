@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  SafeAreaView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "../../components/Header";
@@ -41,7 +42,7 @@ const HomeScreen = ({ navigation }) => {
   }, [dispatch]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <Header
         title={`Namaste!`}
@@ -100,7 +101,7 @@ const HomeScreen = ({ navigation }) => {
         </View>
         <View style={{ height: 95 }} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -16,8 +16,8 @@ export const AuthProvider = ({ children }) => {
             const loginTime = new Date().toISOString();
             await AsyncStorage.multiSet([
                 ['access_token', data.access_token],
-                ['email', data.email],
-                ['full_name', data.full_name],
+                // ['email', data.email],
+                // ['full_name', data.full_name],
                 ['login_time', loginTime]
             ]);
 

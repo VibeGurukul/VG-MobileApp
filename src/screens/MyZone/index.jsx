@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ActivityIndicator,
+  SafeAreaViewBase,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BookmarkCard from "./components/BookMarkCard";
@@ -92,7 +93,7 @@ export default function MyZone({ navigation }) {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Header
         title={`Namaste!`}
         subtitle="My Zone"
@@ -168,7 +169,7 @@ export default function MyZone({ navigation }) {
         </View>
         <View style={{ height: 95 }}></View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
