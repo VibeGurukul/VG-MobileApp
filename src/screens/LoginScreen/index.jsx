@@ -45,7 +45,6 @@ const LoginScreen = () => {
         }
       );
 
-      console.log("data: ", response.data.access_token);
       if (response.data.access_token) {
         await login(response.data);
       } else {

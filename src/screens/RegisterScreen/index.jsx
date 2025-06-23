@@ -33,12 +33,20 @@ const RegisterScreen = () => {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${API.BASE_URL}/register/`, {
-        email: email,
-        password: password,
-        full_name: fullName,
-        mobile_number: mobileNumber,
-      });
+      const response = await axios.post(
+        `${API.BASE_URL}/register/`,
+        {
+          email: email,
+          password: password,
+          full_name: fullName,
+          mobile_number: mobileNumber,
+        },
+        {
+          headers: {
+            "X-Client-Type": "mobile",
+          },
+        }
+      );
 
       if ((response.data.token_type = "bearer")) {
         await login(response.data);
@@ -75,18 +83,21 @@ const RegisterScreen = () => {
         <TextInput
           style={styles.input}
           placeholder="Email address"
+          placeholderTextColor={"gray"}
           value={email}
           editable={false}
         />
         <TextInput
           style={styles.input}
           placeholder="Full Name"
+          placeholderTextColor={"gray"}
           value={fullName}
           onChangeText={setFullName}
         />
         <TextInput
           style={styles.input}
           placeholder="Mobile"
+          placeholderTextColor={"gray"}
           value={mobileNumber}
           onChangeText={(text) => {
             const numericValue = text.replace(/[^0-9]/g, "");
