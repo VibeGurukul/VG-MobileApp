@@ -1,5 +1,5 @@
 import React from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator, StyleSheet, SafeAreaView, StatusBar } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
 import SplashScreen from "./src/screens/SplashScreen";
@@ -11,6 +11,7 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor, store } from "./src/store";
 import LoadingSpinnerWebView from "./src/components/Loader";
+import { colors } from "./src/assets/colors";
 
 const RootStack = createStackNavigator();
 
@@ -46,16 +47,22 @@ const RootNavigation = () => {
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <AuthProvider>
-          <NavigationContainer>
-            <RootNavigation />
-            <ToastManager />
-          </NavigationContainer>
-        </AuthProvider>
-      </PersistGate>
-    </Provider>
+    <>
+      <StatusBar
+        backgroundColor={colors.primary}
+        barStyle="light-content"
+      />
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <AuthProvider>
+            <NavigationContainer>
+              <RootNavigation />
+              <ToastManager />
+            </NavigationContainer>
+          </AuthProvider>
+        </PersistGate>
+      </Provider>
+    </>
   );
 }
 

@@ -1,0 +1,232 @@
+import { StyleSheet } from "react-native";
+import { colors } from "../../../assets/colors";
+
+export const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#f8f9fa",
+    },
+    scrollView: {
+        flex: 1,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+    },
+    loadingCard: {
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        padding: 40,
+        alignItems: "center",
+        marginBottom: 20,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    loadingText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: colors.textSecondary,
+        textAlign: "center",
+    },
+    errorCard: {
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        padding: 24,
+        alignItems: "center",
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: colors.error,
+    },
+    errorText: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: colors.error,
+        marginTop: 12,
+        textAlign: "center",
+    },
+    errorSubtext: {
+        fontSize: 14,
+        color: colors.textSecondary,
+        marginTop: 8,
+        textAlign: "center",
+    },
+    retryButton: {
+        backgroundColor: colors.primary,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 8,
+        marginTop: 16,
+    },
+    retryButtonText: {
+        color: colors.white,
+        fontWeight: "600",
+    },
+    card: {
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        marginBottom: 20,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    cardHeader: {
+        padding: 24,
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12,
+    },
+    cardHeaderTitle: {
+        fontSize: 20,
+        fontWeight: "600",
+        color: colors.white,
+        marginBottom: 8,
+    },
+    cardHeaderSubtitle: {
+        fontSize: 14,
+        color: colors.white,
+        opacity: 0.9,
+        marginBottom: 4,
+    },
+    cardContent: {
+        padding: 24,
+    },
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: colors.textPrimary,
+        marginBottom: 20,
+        padding: 24,
+        paddingBottom: 0,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: colors.textPrimary,
+        marginBottom: 16,
+    },
+    courseItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 16,
+    },
+    courseItemBorder: {
+        borderBottomWidth: 1,
+        borderBottomColor: colors.lightGray,
+    },
+    courseInfo: {
+        flex: 1,
+    },
+    courseTitle: {
+        fontSize: 16,
+        fontWeight: "500",
+        color: colors.textPrimary,
+        marginBottom: 4,
+    },
+    courseSubtitle: {
+        fontSize: 14,
+        color: colors.textTertiary,
+    },
+    coursePrice: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: colors.textPrimary,
+    },
+    priceBreakdown: {
+        paddingHorizontal: 24,
+        paddingBottom: 24,
+    },
+    priceRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 12,
+    },
+    priceLabel: {
+        fontSize: 16,
+        color: colors.textSecondary,
+    },
+    priceValue: {
+        fontSize: 16,
+        fontWeight: "500",
+        color: colors.textPrimary,
+    },
+    priceDivider: {
+        height: 1,
+        backgroundColor: colors.lightGray,
+        marginVertical: 8,
+    },
+    totalLabel: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: colors.textPrimary,
+    },
+    totalValue: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: colors.textPrimary,
+    },
+    securityNotice: {
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: colors.lightGray,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+    },
+    securityText: {
+        fontSize: 14,
+        color: colors.textSecondary,
+        flex: 1,
+    },
+    payButton: {
+        borderRadius: 12,
+        marginBottom: 20,
+        shadowColor: colors.primary,
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    payButtonDisabled: {
+        shadowOpacity: 0,
+        elevation: 0,
+    },
+    payButtonGradient: {
+        borderRadius: 12,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+    },
+    payButtonContent: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+    },
+    payButtonText: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: colors.white,
+    },
+    footerText: {
+        textAlign: "center",
+        fontSize: 12,
+        color: colors.textTertiary,
+        marginBottom: 30,
+        lineHeight: 16,
+    },
+});

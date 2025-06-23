@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
+  SafeAreaView,
 } from "react-native";
 import { useState, useMemo } from "react";
 import { colors } from "../../assets/colors";
@@ -14,6 +15,7 @@ import Typography from "../../library/components/Typography";
 import { useAuth } from "../../context/AuthContext";
 import CartItem from "./components/CartItem";
 import EmptyComponent from "../../components/EmptyComponent";
+import { cartSlice } from "../../store/slices/cart-slice";
 
 const Cart = ({ navigation }) => {
   const cartState = useSelector((state) => state.cart);
@@ -126,8 +128,7 @@ const Cart = ({ navigation }) => {
       <TouchableOpacity
         style={styles.paymentButton}
         onPress={() => {
-          // Handle payment navigation
-          console.log("Navigate to payment");
+          navigation.navigate("Checkout", { routeCourseData: cartState.cart });
         }}
       >
         <Typography style={styles.paymentButtonText}>
@@ -138,7 +139,7 @@ const Cart = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Header
         title={`Namaste!`}
         subtitle={"Cart"}
@@ -161,7 +162,7 @@ const Cart = ({ navigation }) => {
         />
       </View>
       {cartState.cart.length > 0 && <Footer />}
-    </View>
+    </SafeAreaView>
   );
 };
 

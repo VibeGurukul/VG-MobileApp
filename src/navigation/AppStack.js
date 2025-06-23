@@ -4,6 +4,7 @@ import MainVideoScreen from "../screens/MainVideo";
 import Cart from "../screens/Cart";
 import BottomTabNavigator from "../components/BottomNavigation";
 import WorkshopDetails from "../screens/workshop/WorkshopDetails";
+import CheckoutScreen from "../screens/Payment/CheckoutPage";
 
 const Stack = createStackNavigator();
 
@@ -14,6 +15,7 @@ export default function AppStack() {
             <Stack.Screen name="CourseDetails" component={CourseDetails} />
             <Stack.Screen name="MainVideoScreen" component={MainVideoScreen} />
             <Stack.Screen name="Cart" component={Cart} />
+            <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="WorkshopDetails" component={WorkshopDetails} />
         </Stack.Navigator>
     );
