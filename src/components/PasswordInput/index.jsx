@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { colors } from "../../assets/colors";
 
 const PasswordInput = ({ password, setPassword }) => {
   const [secureText, setSecureText] = useState(true);
@@ -10,6 +11,7 @@ const PasswordInput = ({ password, setPassword }) => {
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor={"gray"}
         value={password}
         onChangeText={setPassword}
         autoCapitalize="none"
@@ -38,6 +40,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     padding: 15,
+    color: colors.black,
   },
   icon: {
     padding: 10,

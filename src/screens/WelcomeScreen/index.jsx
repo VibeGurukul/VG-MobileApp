@@ -62,6 +62,7 @@ const WelcomeScreen = () => {
         <TextInput
           style={styles.input}
           placeholder="Email address"
+          placeholderTextColor={"gray"}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"

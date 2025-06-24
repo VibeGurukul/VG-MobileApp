@@ -76,6 +76,40 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateMobile = async (newMobile) => {
+        try {
+            const response = await axios.put(
+                `${API.BASE_URL}/users/me/mobile`,
+                {
+                    token: token,
+                    new_mobile: newMobile,
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.data) {
+                // Update the mobile number in AsyncStorage
+                await AsyncStorage.setItem('mobile_number', newMobile);
+
+                // Update the user state
+                setUser(prevUser => ({
+                    ...prevUser,
+                    mobile_number: newMobile
+                }));
+
+                Toast.success("Mobile number updated successfully!");
+                return { success: true, data: response.data };
+            }
+        } catch (error) {
+            Toast.error(error.response?.data?.detail || "Something went wrong!");
+            return { success: false, error: errorMessage };
+        }
+    };
 
     const logoutCookie = async () => {
         try {
@@ -85,7 +119,6 @@ export const AuthProvider = ({ children }) => {
             throw error;
         }
     };
-
 
     const logout = async () => {
         try {
@@ -162,7 +195,8 @@ export const AuthProvider = ({ children }) => {
                 user,
                 isLoading,
                 login,
-                logout
+                logout,
+                updateMobile
             }}
         >
             {children}

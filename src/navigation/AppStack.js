@@ -5,6 +5,8 @@ import Cart from "../screens/Cart";
 import BottomTabNavigator from "../components/BottomNavigation";
 import WorkshopDetails from "../screens/workshop/WorkshopDetails";
 import CheckoutScreen from "../screens/Payment/CheckoutPage";
+import UpdateMobile from "../screens/UpdateScreen/UpdateMobile";
+import UpdatePassword from "../screens/UpdateScreen/UpdatePassword";
 
 const Stack = createStackNavigator();
 
@@ -17,6 +19,8 @@ export default function AppStack() {
             <Stack.Screen name="Cart" component={Cart} />
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="WorkshopDetails" component={WorkshopDetails} />
+            <Stack.Screen name="UpdateMobile" component={UpdateMobile} />
+            <Stack.Screen name="UpdatePassword" component={UpdatePassword} />
         </Stack.Navigator>
     );
 }
