@@ -5,12 +5,11 @@ import { colors } from "../../assets/colors";
 import HomeScreen from "../../screens/HomeScreen";
 import AllCourses from "../../screens/Courses/AllCourses";
 import LearningDashboard from "../../screens/MyZone";
-import ProfileScreen from "../../screens/Profile/ProfileScreen";
+import ProfileScreen from "../../screens/Profile";
 import Workshops from "../../screens/workshop/Workshops";
 
 const Tab = createBottomTabNavigator();
 
-// Custom Tab Icon Component with circular background for active state
 const CustomTabIcon = ({ focused, iconName, color, size }) => {
   return (
     <View
