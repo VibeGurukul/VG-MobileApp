@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
@@ -25,6 +24,7 @@ import InfoModal from '../../../components/Modal/InfoModal';
 import axios from 'axios';
 import { GST_RATE, SESSION_NUMBER, RAZORPAY_KEY } from '../../../constants';
 import { styles } from './styles';
+import Typography from '../../../library/components/Typography';
 
 const CheckoutScreen = ({ navigation }) => {
   const route = useRoute();
@@ -355,13 +355,15 @@ const CheckoutScreen = ({ navigation }) => {
         {state.error && !state.isCreatingOrder && (
           <View style={styles.errorCard}>
             <Ionicons name="alert-circle" size={24} color={colors.error} />
-            <Text style={styles.errorText}>Failed to create order</Text>
-            <Text style={styles.errorSubtext}>{state.error}</Text>
+            <Typography style={styles.errorText}>
+              Failed to create order
+            </Typography>
+            <Typography style={styles.errorSubtext}>{state.error}</Typography>
             <TouchableOpacity
               style={styles.retryButton}
               onPress={handleRetryCreateOrder}
             >
-              <Text style={styles.retryButtonText}>Retry</Text>
+              <Typography style={styles.retryButtonText}>Retry</Typography>
             </TouchableOpacity>
           </View>
         )}
@@ -374,17 +376,21 @@ const CheckoutScreen = ({ navigation }) => {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Text style={styles.cardHeaderTitle}>Order Summary</Text>
-              <Text style={styles.cardHeaderSubtitle}>
+              <Typography style={styles.cardHeaderTitle}>
+                Order Summary
+              </Typography>
+              <Typography style={styles.cardHeaderSubtitle}>
                 Order ID: {state.orderData.order_id}
-              </Text>
-              <Text style={styles.cardHeaderSubtitle}>
+              </Typography>
+              <Typography style={styles.cardHeaderSubtitle}>
                 Status: {state.orderData.status}
-              </Text>
+              </Typography>
             </LinearGradient>
 
             <View style={styles.cardContent}>
-              <Text style={styles.sectionTitle}>Course Details</Text>
+              <Typography style={styles.sectionTitle}>
+                Course Details
+              </Typography>
 
               {courseData?.map((course, index) => (
                 <View
@@ -395,14 +401,18 @@ const CheckoutScreen = ({ navigation }) => {
                   ]}
                 >
                   <View style={styles.courseInfo}>
-                    <Text style={styles.courseTitle}>{course.title}</Text>
-                    <Text style={styles.courseSubtitle}>
+                    <Typography style={styles.courseTitle}>
+                      {course.title}
+                    </Typography>
+                    <Typography style={styles.courseSubtitle}>
                       {course.short_title}
-                    </Text>
+                    </Typography>
                   </View>
                   {console.log('enrollmentResults: ', course?.price)}
                   {course && course?.price && (
-                    <Text style={styles.coursePrice}>₹{course.price}</Text>
+                    <Typography style={styles.coursePrice}>
+                      ₹{course.price}
+                    </Typography>
                   )}
                 </View>
               ))}
@@ -412,31 +422,39 @@ const CheckoutScreen = ({ navigation }) => {
 
         {state.orderData && gstCalculation && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Price Breakdown</Text>
+            <Typography style={styles.cardTitle}>Price Breakdown</Typography>
 
             <View style={styles.priceBreakdown}>
               <View style={styles.priceRow}>
-                <Text style={styles.priceLabel}>Course Price (Excl. GST)</Text>
-                <Text style={styles.priceValue}>
+                <Typography style={styles.priceLabel}>
+                  Course Price (Excl. GST)
+                </Typography>
+                <Typography style={styles.priceValue}>
                   ₹{gstCalculation.coursePriceExGST}
-                </Text>
+                </Typography>
               </View>
 
               <View style={styles.priceRow}>
-                <Text style={styles.priceLabel}>GST (18%)</Text>
-                <Text style={styles.priceValue}>₹{gstCalculation.gst}</Text>
+                <Typography style={styles.priceLabel}>GST (18%)</Typography>
+                <Typography style={styles.priceValue}>
+                  ₹{gstCalculation.gst}
+                </Typography>
               </View>
 
               <View style={styles.priceDivider} />
 
               <View style={styles.priceRow}>
-                <Text style={styles.totalLabel}>Total Amount</Text>
-                <Text style={styles.totalValue}>₹{gstCalculation.total}</Text>
+                <Typography style={styles.totalLabel}>Total Amount</Typography>
+                <Typography style={styles.totalValue}>
+                  ₹{gstCalculation.total}
+                </Typography>
               </View>
 
               <View style={styles.priceRow}>
-                <Text style={styles.priceLabel}>Order Amount</Text>
-                <Text style={styles.priceValue}>₹{state.orderData.amount}</Text>
+                <Typography style={styles.priceLabel}>Order Amount</Typography>
+                <Typography style={styles.priceValue}>
+                  ₹{state.orderData.amount}
+                </Typography>
               </View>
             </View>
           </View>
@@ -467,11 +485,11 @@ const CheckoutScreen = ({ navigation }) => {
                 {state.isProcessing || state.isVerifyingPayment ? (
                   <>
                     <ActivityIndicator size="small" color={colors.white} />
-                    <Text style={styles.payButtonText}>
+                    <Typography style={styles.payButtonText}>
                       {state.isVerifyingPayment
                         ? 'Verifying...'
                         : 'Processing...'}
-                    </Text>
+                    </Typography>
                   </>
                 ) : (
                   <>
@@ -480,9 +498,9 @@ const CheckoutScreen = ({ navigation }) => {
                       size={20}
                       color={colors.white}
                     />
-                    <Text style={styles.payButtonText}>
+                    <Typography style={styles.payButtonText}>
                       Pay Now ₹{state.orderData.amount}
-                    </Text>
+                    </Typography>
                   </>
                 )}
               </View>
@@ -490,9 +508,9 @@ const CheckoutScreen = ({ navigation }) => {
           </TouchableOpacity>
         )}
 
-        <Text style={styles.footerText}>
+        <Typography style={styles.footerText}>
           By proceeding, you agree to our Terms of Service and Privacy Policy
-        </Text>
+        </Typography>
       </ScrollView>
 
       <InfoModal

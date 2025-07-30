@@ -1,26 +1,20 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-} from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { colors } from "../../assets/colors";
-import Typography from "../../library/components/Typography";
-import { useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { colors } from '../../assets/colors';
+import Typography from '../../library/components/Typography';
+import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 
 const Header = ({ title, subtitle, onBack }) => {
-  const { cart } = useSelector((state) => state.cart);
+  const { cart } = useSelector(state => state.cart);
   const navigation = useNavigation();
 
   return (
     <View style={[styles.header]}>
       {/* Title and Back Button Container */}
       <View style={[styles.titleContainer, !subtitle && { marginBottom: 20 }]}>
-        <TouchableOpacity onPress={onBack} style={{ width: "20%" }}>
+        <TouchableOpacity onPress={onBack} style={{ width: '20%' }}>
           {onBack && (
             <View style={styles.backButton}>
               <Icon name="caret-left" size={30} color="black" />
@@ -29,17 +23,16 @@ const Header = ({ title, subtitle, onBack }) => {
         </TouchableOpacity>
 
         {/* Title */}
-        <Text style={styles.headerTitle}>{title}</Text>
-        <View style={{ width: "20%", alignItems: "flex-end" }}>
+        <Typography style={styles.headerTitle}>{title}</Typography>
+        <View style={{ width: '20%', alignItems: 'flex-end' }}>
           <TouchableOpacity
-            onPress={() => navigation.navigate("Cart")}
+            onPress={() => navigation.navigate('Cart')}
             style={{
-              width: "50%",
               backgroundColor: colors.lightGray,
               width: 40,
               height: 40,
-              alignItems: "center",
-              justifyContent: "center",
+              alignItems: 'center',
+              justifyContent: 'center',
               borderRadius: 999,
             }}
           >
@@ -49,10 +42,10 @@ const Header = ({ title, subtitle, onBack }) => {
                 style={{
                   backgroundColor: colors.error,
                   width: 15,
-                  alignItems: "center",
-                  justifyContent: "center",
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   height: 15,
-                  position: "absolute",
+                  position: 'absolute',
                   top: -2,
                   right: 0,
                   borderRadius: 999,
@@ -68,7 +61,9 @@ const Header = ({ title, subtitle, onBack }) => {
       </View>
 
       {/* Subtitle (Optional) */}
-      {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
+      {subtitle && (
+        <Typography style={styles.headerSubtitle}>{subtitle}</Typography>
+      )}
     </View>
   );
 };
@@ -79,39 +74,39 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomLeftRadius: 50,
     borderBottomRightRadius: 50,
-    alignItems: "center",
+    alignItems: 'center',
   },
   headerNarrow: {
     paddingTop: 50,
   },
   titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
     paddingHorizontal: 20,
   },
   backButton: {
-    justifyContent: "center",
+    justifyContent: 'center',
     tintColor: colors.white,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
   },
   backButtonIcon: {
     left: 0,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: "bold",
-    width: "60%",
-    color: "white",
-    textAlign: "center",
+    fontWeight: 'bold',
+    width: '60%',
+    color: 'white',
+    textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 16,
-    color: "white",
+    color: 'white',
     opacity: 0.9,
-    textAlign: "center",
-    width: "80%",
+    textAlign: 'center',
+    width: '80%',
     marginBottom: 10,
   },
 });

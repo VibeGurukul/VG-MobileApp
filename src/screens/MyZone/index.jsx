@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   SafeAreaView,
@@ -20,6 +19,7 @@ import { API } from '../../constants';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import { backgroundColors, iconColors } from './utils';
+import Typography from '../../library/components/Typography';
 
 const CourseCard = ({ course, onPress, index }) => {
   const randomBgColor = backgroundColors[index % backgroundColors.length];
@@ -35,10 +35,10 @@ const CourseCard = ({ course, onPress, index }) => {
       >
         <Ionicons name={course.icon || 'play'} size={24} color="white" />
       </View>
-      <Text style={styles.cardTitle}>{course.short_title}</Text>
-      <Text style={styles.cardSubtitle}>
+      <Typography style={styles.cardTitle}>{course.short_title}</Typography>
+      <Typography style={styles.cardSubtitle}>
         {course.course_progress || course.progress || 0}% completed
-      </Text>
+      </Typography>
     </TouchableOpacity>
   );
 };
@@ -50,8 +50,8 @@ const WorkshopCard = ({ workshop }) => (
     <View style={[styles.iconContainer, { backgroundColor: workshop.color }]}>
       <Ionicons name={workshop.icon} size={24} color="white" />
     </View>
-    <Text style={styles.cardTitle}>{workshop.title}</Text>
-    <Text style={styles.cardSubtitle}>{workshop.date}</Text>
+    <Typography style={styles.cardTitle}>{workshop.title}</Typography>
+    <Typography style={styles.cardSubtitle}>{workshop.date}</Typography>
   </TouchableOpacity>
 );
 
@@ -104,14 +104,18 @@ export default function MyZone({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Courses enrolled in</Text>
+          <Typography style={styles.sectionTitle}>
+            Courses enrolled in
+          </Typography>
           {isLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator
                 size="large"
                 color={colors.primary || '#FF6B6B'}
               />
-              <Text style={styles.loadingText}>Loading courses...</Text>
+              <Typography style={styles.loadingText}>
+                Loading courses...
+              </Typography>
             </View>
           ) : (
             <ScrollView
@@ -137,7 +141,7 @@ export default function MyZone({ navigation }) {
 
         {/* Workshops Section */}
         {/* <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Upcoming workshops</Text>
+          <Typography style={styles.sectionTitle}>Upcoming workshops</Typography>
           <View style={styles.cardRow}>
             {workshopsData.map((workshop) => (
               <WorkshopCard key={workshop.id} workshop={workshop} />
@@ -147,7 +151,7 @@ export default function MyZone({ navigation }) {
 
         {/* Bookmarks Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Bookmarks</Text>
+          <Typography style={styles.sectionTitle}>Bookmarks</Typography>
           {bookmarked.map(bookmark => (
             <BookmarkCard
               onPress={() => {

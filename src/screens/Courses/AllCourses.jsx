@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   Image,
   StyleSheet,
   ScrollView,
@@ -12,6 +11,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import axios from 'axios';
+import Typography from '../../library/components/Typography';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
 import { colors } from '../../assets/colors';
@@ -69,7 +69,7 @@ const AllCourses = ({ navigation }) => {
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
+        <Typography style={styles.errorText}>{error}</Typography>
       </View>
     );
   }
@@ -121,35 +121,35 @@ const AllCourses = ({ navigation }) => {
               />
 
               <View style={styles.cardContent}>
-                <Text
+                <Typography
                   style={[
                     styles.courseTitle,
                     isTablet && styles.tabletCourseTitle,
                   ]}
                 >
                   {course.title}
-                </Text>
+                </Typography>
 
                 <View style={styles.priceAndButtonContainer}>
                   <View style={styles.priceContainer}>
-                    <Text
+                    <Typography
                       style={[
                         styles.currentPrice,
                         isTablet && styles.tabletCurrentPrice,
                       ]}
                     >
                       ₹{course.price}
-                    </Text>
+                    </Typography>
                     {course.original_price &&
                       course.original_price !== course.price && (
-                        <Text
+                        <Typography
                           style={[
                             styles.originalPrice,
                             isTablet && styles.tabletOriginalPrice,
                           ]}
                         >
                           ₹{course.original_price}
-                        </Text>
+                        </Typography>
                       )}
                   </View>
 
@@ -162,7 +162,7 @@ const AllCourses = ({ navigation }) => {
                       navigation.navigate('CourseDetails', { course })
                     }
                   >
-                    <Text style={styles.buttonText}>View</Text>
+                    <Typography style={styles.buttonText}>View</Typography>
                   </TouchableOpacity>
                 </View>
               </View>

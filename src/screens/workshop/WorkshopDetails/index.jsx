@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -219,7 +218,7 @@ const WorkshopDetails = ({ route, navigation }) => {
           onPress={() => navigation.navigate('ZoomSdk')}
           style={[styles.bottomButton, styles.liveButton]}
         >
-          <Text style={styles.bottomButtonText}>Join Live</Text>
+          <Typography style={styles.bottomButtonText}>Join Live</Typography>
         </TouchableOpacity>
       );
     }
@@ -230,7 +229,7 @@ const WorkshopDetails = ({ route, navigation }) => {
           style={[styles.bottomButton, styles.endedButton]}
           disabled={true}
         >
-          <Text style={styles.bottomButtonText}>Ended</Text>
+          <Typography style={styles.bottomButtonText}>Ended</Typography>
         </TouchableOpacity>
       );
     }
@@ -238,7 +237,7 @@ const WorkshopDetails = ({ route, navigation }) => {
     if (isEnrolled) {
       return (
         <TouchableOpacity style={[styles.bottomButton, styles.continueButton]}>
-          <Text style={styles.bottomButtonText}>View Upcoming</Text>
+          <Typography style={styles.bottomButtonText}>View Upcoming</Typography>
         </TouchableOpacity>
       );
     }
@@ -252,7 +251,7 @@ const WorkshopDetails = ({ route, navigation }) => {
           {enrolling ? (
             <ActivityIndicator size={'small'} color={colors.white} />
           ) : (
-            <Text style={styles.bottomButtonText}>Join Now</Text>
+            <Typography style={styles.bottomButtonText}>Join Now</Typography>
           )}
         </TouchableOpacity>
       );
@@ -264,7 +263,7 @@ const WorkshopDetails = ({ route, navigation }) => {
           onPress={() => navigation.navigate('Cart')}
           style={[styles.bottomButton, styles.cartButton]}
         >
-          <Text style={styles.bottomButtonText}>Go To Cart</Text>
+          <Typography style={styles.bottomButtonText}>Go To Cart</Typography>
         </TouchableOpacity>
       );
     }
@@ -277,7 +276,7 @@ const WorkshopDetails = ({ route, navigation }) => {
         {addingToCart ? (
           <ActivityIndicator size={'small'} color={colors.white} />
         ) : (
-          <Text style={styles.bottomButtonText}>Add To Cart</Text>
+          <Typography style={styles.bottomButtonText}>Add To Cart</Typography>
         )}
       </TouchableOpacity>
     );
@@ -297,12 +296,14 @@ const WorkshopDetails = ({ route, navigation }) => {
       <View style={styles.container}>
         <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
         <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Failed to load workshop details</Text>
+          <Typography style={styles.errorText}>
+            Failed to load workshop details
+          </Typography>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={getWorkshopDetails}
           >
-            <Text style={styles.retryButtonText}>Retry</Text>
+            <Typography style={styles.retryButtonText}>Retry</Typography>
           </TouchableOpacity>
         </View>
       </View>
@@ -314,7 +315,7 @@ const WorkshopDetails = ({ route, navigation }) => {
       <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.courseTitle}>{workshop.title}</Text>
+        <Typography style={styles.courseTitle}>{workshop.title}</Typography>
 
         <View style={styles.videoContainer}>
           <View style={styles.videoPlaceholder}>
@@ -326,11 +327,11 @@ const WorkshopDetails = ({ route, navigation }) => {
           </View>
         </View>
 
-        <Text style={styles.priceText}>
+        <Typography style={styles.priceText}>
           {workshop.price === 0 || workshop.price === '0'
             ? 'Free'
             : `₹${workshop.price}/-`}
-        </Text>
+        </Typography>
 
         <View style={styles.card}>
           <Typography style={styles.sectionHeading}>Description</Typography>

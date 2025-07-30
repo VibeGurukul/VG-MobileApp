@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
-  Image,
   SafeAreaView,
   ScrollView,
-  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
 import { useAuth } from '../../context/AuthContext';
 import { colors } from '../../assets/colors';
+import Typography from '../../library/components/Typography';
 
 const ProfileScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
@@ -63,51 +60,55 @@ const ProfileScreen = ({ navigation }) => {
         <View style={styles.profileCard}>
           <View style={styles.profileImageContainer}>
             <View style={styles.profileImageWrapper}>
-              <Text style={styles.profileInitials}>
+              <Typography style={styles.profileInitials}>
                 {getInitials(user?.full_name)}
-              </Text>
+              </Typography>
             </View>
             <View style={styles.onlineIndicator} />
           </View>
 
-          <Text style={styles.userName}>{user?.full_name || 'User Name'}</Text>
-          <Text style={styles.userEmail}>
+          <Typography style={styles.userName}>
+            {user?.full_name || 'User Name'}
+          </Typography>
+          <Typography style={styles.userEmail}>
             {user?.email || 'user@example.com'}
-          </Text>
+          </Typography>
 
           {/* Stats Row */}
           {/* <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}></Text>
-              <Text style={styles.statLabel}></Text>
+              <Typography style={styles.statNumber}></Typography>
+              <Typography style={styles.statLabel}></Typography>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}></Text>
-              <Text style={styles.statLabel}></Text>
+              <Typography style={styles.statNumber}></Typography>
+              <Typography style={styles.statLabel}></Typography>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}></Text>
-              <Text style={styles.statLabel}></Text>
+              <Typography style={styles.statNumber}></Typography>
+              <Typography style={styles.statLabel}></Typography>
             </View>
           </View> */}
         </View>
 
         {/* User Information Section */}
         <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>Personal Information</Text>
+          <Typography style={styles.sectionTitle}>
+            Personal Information
+          </Typography>
 
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               <View style={styles.infoIcon}>
-                <Text style={styles.iconText}>👤</Text>
+                <Typography style={styles.iconText}>👤</Typography>
               </View>
               <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Full Name</Text>
-                <Text style={styles.infoValue}>
+                <Typography style={styles.infoLabel}>Full Name</Typography>
+                <Typography style={styles.infoValue}>
                   {user?.full_name || 'Not provided'}
-                </Text>
+                </Typography>
               </View>
             </View>
 
@@ -115,13 +116,13 @@ const ProfileScreen = ({ navigation }) => {
 
             <View style={styles.infoRow}>
               <View style={styles.infoIcon}>
-                <Text style={styles.iconText}>📧</Text>
+                <Typography style={styles.iconText}>📧</Typography>
               </View>
               <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Email Address</Text>
-                <Text style={styles.infoValue}>
+                <Typography style={styles.infoLabel}>Email Address</Typography>
+                <Typography style={styles.infoValue}>
                   {user?.email || 'Not provided'}
-                </Text>
+                </Typography>
               </View>
             </View>
 
@@ -129,13 +130,13 @@ const ProfileScreen = ({ navigation }) => {
 
             <View style={styles.infoRow}>
               <View style={styles.infoIcon}>
-                <Text style={styles.iconText}>📱</Text>
+                <Typography style={styles.iconText}>📱</Typography>
               </View>
               <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Mobile Number</Text>
-                <Text style={styles.infoValue}>
+                <Typography style={styles.infoLabel}>Mobile Number</Typography>
+                <Typography style={styles.infoValue}>
                   {user?.mobile_number || 'Not provided'}
-                </Text>
+                </Typography>
               </View>
             </View>
           </View>
@@ -143,7 +144,7 @@ const ProfileScreen = ({ navigation }) => {
 
         {/* Action Buttons */}
         <View style={styles.actionsSection}>
-          <Text style={styles.sectionTitle}>Account Settings</Text>
+          <Typography style={styles.sectionTitle}>Account Settings</Typography>
 
           <TouchableOpacity
             onPress={() => navigation.navigate('UpdatePassword')}
@@ -151,15 +152,17 @@ const ProfileScreen = ({ navigation }) => {
           >
             <View style={styles.actionButtonContent}>
               <View style={styles.actionIcon}>
-                <Text style={styles.actionIconText}>🔐</Text>
+                <Typography style={styles.actionIconText}>🔐</Typography>
               </View>
               <View style={styles.actionTextContainer}>
-                <Text style={styles.actionTitle}>Update Password</Text>
-                <Text style={styles.actionSubtitle}>
+                <Typography style={styles.actionTitle}>
+                  Update Password
+                </Typography>
+                <Typography style={styles.actionSubtitle}>
                   Change your account password
-                </Text>
+                </Typography>
               </View>
-              <Text style={styles.actionArrow}>→</Text>
+              <Typography style={styles.actionArrow}>→</Typography>
             </View>
           </TouchableOpacity>
 
@@ -169,15 +172,17 @@ const ProfileScreen = ({ navigation }) => {
           >
             <View style={styles.actionButtonContent}>
               <View style={styles.actionIcon}>
-                <Text style={styles.actionIconText}>📱</Text>
+                <Typography style={styles.actionIconText}>📱</Typography>
               </View>
               <View style={styles.actionTextContainer}>
-                <Text style={styles.actionTitle}>Update Mobile</Text>
-                <Text style={styles.actionSubtitle}>
+                <Typography style={styles.actionTitle}>
+                  Update Mobile
+                </Typography>
+                <Typography style={styles.actionSubtitle}>
                   Change your mobile number
-                </Text>
+                </Typography>
               </View>
-              <Text style={styles.actionArrow}>→</Text>
+              <Typography style={styles.actionArrow}>→</Typography>
             </View>
           </TouchableOpacity>
         </View>
@@ -188,7 +193,7 @@ const ProfileScreen = ({ navigation }) => {
             style={styles.signOutButton}
             onPress={handleSignOut}
           >
-            <Text style={styles.signOutText}>Sign Out</Text>
+            <Typography style={styles.signOutText}>Sign Out</Typography>
           </TouchableOpacity>
         </View>
 
