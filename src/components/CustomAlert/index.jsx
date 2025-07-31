@@ -2,21 +2,20 @@ import React from 'react';
 import {
   Modal,
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  Animated,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '../../assets/colors';
+import Typography from '../../library/components/Typography';
 
 const { width } = Dimensions.get('window');
 
 const CustomAlert = ({
   visible,
-  type = 'info', // 'success', 'error', 'warning', 'info'
+  type = 'info',
   title,
   message,
   primaryButton,
@@ -89,10 +88,10 @@ const CustomAlert = ({
           </View>
 
           {/* Title */}
-          {title && <Text style={styles.title}>{title}</Text>}
+          {title && <Typography style={styles.title}>{title}</Typography>}
 
           {/* Message */}
-          {message && <Text style={styles.message}>{message}</Text>}
+          {message && <Typography style={styles.message}>{message}</Typography>}
 
           {/* Buttons */}
           <View style={styles.buttonContainer}>
@@ -102,9 +101,9 @@ const CustomAlert = ({
                 onPress={secondaryButton.onPress}
                 activeOpacity={0.8}
               >
-                <Text style={styles.secondaryButtonText}>
+                <Typography style={styles.secondaryButtonText}>
                   {secondaryButton.text}
-                </Text>
+                </Typography>
               </TouchableOpacity>
             )}
 
@@ -124,9 +123,9 @@ const CustomAlert = ({
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                 >
-                  <Text style={styles.primaryButtonText}>
+                  <Typography style={styles.primaryButtonText}>
                     {primaryButton.text}
-                  </Text>
+                  </Typography>
                 </LinearGradient>
               </TouchableOpacity>
             )}

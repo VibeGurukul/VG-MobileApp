@@ -1,16 +1,17 @@
-import React from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { colors } from "../../assets/colors";
+import React from 'react';
+import { Modal, View, TouchableOpacity, StyleSheet } from 'react-native';
+import Typography from '../../library/components/Typography';
+import { colors } from '../../assets/colors';
 
 const InfoModal = ({ title, description, visible, onClose }) => {
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.modal}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.message}>{description}</Text>
+          <Typography style={styles.title}>{title}</Typography>
+          <Typography style={styles.message}>{description}</Typography>
           <TouchableOpacity onPress={onClose} style={styles.button}>
-            <Text style={styles.buttonText}>OK</Text>
+            <Typography style={styles.buttonText}>OK</Typography>
           </TouchableOpacity>
         </View>
       </View>
@@ -21,25 +22,25 @@ const InfoModal = ({ title, description, visible, onClose }) => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modal: {
-    width: "80%",
-    backgroundColor: "white",
+    width: '80%',
+    backgroundColor: 'white',
     borderRadius: 15,
     padding: 20,
-    alignItems: "center",
+    alignItems: 'center',
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 10,
   },
   message: {
     fontSize: 16,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 20,
   },
   button: {
@@ -49,8 +50,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonText: {
-    color: "white",
-    fontWeight: "bold",
+    color: 'white',
+    fontWeight: 'bold',
     fontSize: 16,
   },
 });

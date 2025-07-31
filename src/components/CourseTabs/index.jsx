@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import Typography from '../../library/components/Typography';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { colors } from '../../assets/colors';
 import { useNavigation } from '@react-navigation/native';
@@ -55,7 +50,7 @@ const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
           }
           onPress={() => setActiveTab('Description')}
         >
-          <Text
+          <Typography
             style={
               activeTab === 'Description'
                 ? styles.activeTabText
@@ -63,7 +58,7 @@ const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
             }
           >
             Description
-          </Text>
+          </Typography>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -72,7 +67,7 @@ const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
           }
           onPress={() => setActiveTab('Playlist')}
         >
-          <Text
+          <Typography
             style={
               activeTab === 'Playlist'
                 ? styles.activeTabText
@@ -80,7 +75,7 @@ const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
             }
           >
             Playlist
-          </Text>
+          </Typography>
         </TouchableOpacity>
       </View>
 
@@ -88,14 +83,18 @@ const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
       <View style={styles.card}>
         {activeTab === 'Description' ? (
           <>
-            <Text style={styles.sectionHeading}>Description</Text>
-            <Text style={styles.sectionText}>{course.description}</Text>
+            <Typography style={styles.sectionHeading}>Description</Typography>
+            <Typography style={styles.sectionText}>
+              {course.description}
+            </Typography>
 
-            <Text style={styles.sectionHeading}>Learnings</Text>
-            <Text style={styles.sectionText}>{course.learnings}</Text>
+            <Typography style={styles.sectionHeading}>Learnings</Typography>
+            <Typography style={styles.sectionText}>
+              {course.learnings}
+            </Typography>
 
-            <Text style={styles.sectionHeading}>USP</Text>
-            <Text style={styles.sectionText}>{course.usp}</Text>
+            <Typography style={styles.sectionHeading}>USP</Typography>
+            <Typography style={styles.sectionText}>{course.usp}</Typography>
           </>
         ) : (
           <View style={styles.playlistContainer}>
@@ -122,7 +121,9 @@ const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
                     />
                   </View>
                   <View style={styles.episodeContent}>
-                    <Text style={styles.episodeText}>{section.heading}</Text>
+                    <Typography style={styles.episodeText}>
+                      {section.heading}
+                    </Typography>
 
                     {isEnrolled && (
                       <View style={styles.progressContainer}>
@@ -134,9 +135,9 @@ const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
                             ]}
                           />
                         </View>
-                        <Text style={styles.progressText}>
+                        <Typography style={styles.progressText}>
                           {progress}% completed
-                        </Text>
+                        </Typography>
                       </View>
                     )}
                   </View>

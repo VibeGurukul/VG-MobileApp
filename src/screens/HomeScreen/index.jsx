@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
   Image,
@@ -13,6 +12,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
 import HomeWhySection from '../../components/HomeWhySection';
+import Typography from '../../library/components/Typography';
 import { useDispatch } from 'react-redux';
 import { fetchCartData } from '../../store/slices/cart-slice';
 
@@ -66,7 +66,9 @@ const HomeScreen = ({ navigation }) => {
         >
           {/* Course Card */}
           <View style={[styles.section, isTablet && styles.tabletSection]}>
-            <Text style={styles.sectionTitle}>Explore our courses</Text>
+            <Typography style={styles.sectionTitle}>
+              Explore our courses
+            </Typography>
             <View style={[styles.card, isTablet && styles.tabletCard]}>
               <Image
                 source={require('../../assets/BloomingBuds.webp')}
@@ -77,14 +79,16 @@ const HomeScreen = ({ navigation }) => {
                 style={styles.ctaButton}
                 onPress={() => navigation.navigate('AllCourses')}
               >
-                <Text style={styles.ctaButtonText}>Explore</Text>
+                <Typography style={styles.ctaButtonText}>Explore</Typography>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Workshop Card */}
           <View style={[styles.section, isTablet && styles.tabletSection]}>
-            <Text style={styles.sectionTitle}>Take part in our Workshops</Text>
+            <Typography style={styles.sectionTitle}>
+              Take part in our Workshops
+            </Typography>
             <View style={[styles.card, isTablet && styles.tabletCard]}>
               <Image
                 source={require('../../assets/BloomingBuds.webp')}
@@ -92,7 +96,7 @@ const HomeScreen = ({ navigation }) => {
                 resizeMode="cover"
               />
               <TouchableOpacity style={styles.ctaButton}>
-                <Text style={styles.ctaButtonText}>Join</Text>
+                <Typography style={styles.ctaButtonText}>Join</Typography>
               </TouchableOpacity>
             </View>
           </View>

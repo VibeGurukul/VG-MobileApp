@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -25,6 +24,7 @@ import { addBookmark, removeBookmark } from '../../store/slices/bookmarkSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, addToCartAsync } from '../../store/slices/cart-slice';
 import LoadingSpinnerWebView from '../../components/Loader';
+import Typography from '../../library/components/Typography';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -260,12 +260,14 @@ const CourseDetails = ({ route, navigation }) => {
       <View style={styles.container}>
         <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
         <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Failed to load course details</Text>
+          <Typography style={styles.errorText}>
+            Failed to load course details
+          </Typography>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={getCourseDetails}
           >
-            <Text style={styles.retryButtonText}>Retry</Text>
+            <Typography style={styles.retryButtonText}>Retry</Typography>
           </TouchableOpacity>
         </View>
       </View>
@@ -278,7 +280,7 @@ const CourseDetails = ({ route, navigation }) => {
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Course Title */}
-        <Text style={styles.courseTitle}>{course.title}</Text>
+        <Typography style={styles.courseTitle}>{course.title}</Typography>
 
         {/* Preview Video */}
         <View style={styles.videoContainer}>
@@ -301,19 +303,21 @@ const CourseDetails = ({ route, navigation }) => {
                 playInBackground={false}
               />
             ) : (
-              <Text style={styles.placeholderText}>No preview available</Text>
+              <Typography style={styles.placeholderText}>
+                No preview available
+              </Typography>
             )}
           </View>
         </View>
 
         {/* Rating and Duration */}
         <View style={styles.metaContainer}>
-          <Text style={styles.metaText}>⭐ 4.5 Rating</Text>
-          <Text style={styles.metaText}>⏳ 8 Hours Duration</Text>
+          <Typography style={styles.metaText}>⭐ 4.5 Rating</Typography>
+          <Typography style={styles.metaText}>⏳ 8 Hours Duration</Typography>
         </View>
 
         {/* Price */}
-        <Text style={styles.priceText}>₹{course.price}/-</Text>
+        <Typography style={styles.priceText}>₹{course.price}/-</Typography>
 
         <CourseTabs
           course={course}
@@ -352,13 +356,13 @@ const CourseDetails = ({ route, navigation }) => {
                 {isLoading || addingToCart ? (
                   <ActivityIndicator size={'small'} color={colors.white} />
                 ) : (
-                  <Text style={styles.bottomButtonText}>
+                  <Typography style={styles.bottomButtonText}>
                     {isEnrolled
                       ? 'Continue'
                       : checkIfInCart()
                       ? 'Go To Cart'
                       : 'Add To Cart'}
-                  </Text>
+                  </Typography>
                 )}
               </TouchableOpacity>
             ) : (

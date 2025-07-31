@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -23,6 +22,7 @@ import {
   VideoAspect,
   ZoomView,
 } from '@zoom/react-native-videosdk';
+import Typography from '../../library/components/Typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconAwesome from 'react-native-vector-icons/FontAwesome5';
 import LinearGradient from 'react-native-linear-gradient';
@@ -92,9 +92,9 @@ const MeetingTimer = ({ sessionStartTime }) => {
   return (
     <View style={styles.recordingIndicator}>
       <View style={styles.recordingDot} />
-      <Text style={styles.recordingText}>
+      <Typography style={styles.recordingText}>
         {formatDuration(sessionStartTime)}
-      </Text>
+      </Typography>
     </View>
   );
 };
@@ -502,9 +502,9 @@ const ZoomVideoCall = () => {
             color="#FFC107"
             style={styles.spinnerIcon}
           />
-          <Text style={styles.connectionStatusText}>
+          <Typography style={styles.connectionStatusText}>
             Connecting to session...
-          </Text>
+          </Typography>
         </View>
       );
     }
@@ -518,7 +518,9 @@ const ZoomVideoCall = () => {
             color="#FF5722"
             style={styles.spinnerIcon}
           />
-          <Text style={styles.connectionStatusText}>{connectionError}</Text>
+          <Typography style={styles.connectionStatusText}>
+            {connectionError}
+          </Typography>
         </View>
       );
     }
@@ -546,9 +548,9 @@ const ZoomVideoCall = () => {
     >
       <View style={styles.headerLeft}>
         <Icon name="group" size={20} color="#e0e0e0" />
-        <Text style={styles.headerText}>
+        <Typography style={styles.headerText}>
           {users.length} participant{users.length !== 1 ? 's' : ''}
-        </Text>
+        </Typography>
       </View>
       <View style={styles.headerCenter}>
         <MeetingTimer sessionStartTime={sessionStartTime} />
@@ -594,9 +596,9 @@ const ZoomVideoCall = () => {
             style={styles.videoTileOverlay}
           >
             <View style={styles.participantInfo}>
-              <Text style={styles.participantName} numberOfLines={1}>
+              <Typography style={styles.participantName} numberOfLines={1}>
                 {user.userName || `User ${index + 1}`}
-              </Text>
+              </Typography>
               <View style={styles.participantStatus}>
                 {user.audioStatus?.isMuted && (
                   <Icon name="mic-off" size={14} color="#f44336" />
@@ -609,7 +611,7 @@ const ZoomVideoCall = () => {
           </LinearGradient>
           {user.isMyself && (
             <View style={styles.selfIndicator}>
-              <Text style={styles.selfIndicatorText}>You</Text>
+              <Typography style={styles.selfIndicatorText}>You</Typography>
             </View>
           )}
         </View>
@@ -656,9 +658,9 @@ const ZoomVideoCall = () => {
             size={24}
             color={isAudioOn ? '#ffffff' : '#ff5252'}
           />
-          <Text style={styles.controlButtonText}>
+          <Typography style={styles.controlButtonText}>
             {isAudioOn ? 'Mute' : 'Unmute'}
-          </Text>
+          </Typography>
         </TouchableOpacity>
 
         {/* Video Control */}
@@ -675,15 +677,15 @@ const ZoomVideoCall = () => {
             size={24}
             color={isVideoOn ? '#ffffff' : '#ff5252'}
           />
-          <Text style={styles.controlButtonText}>
+          <Typography style={styles.controlButtonText}>
             {isVideoOn ? 'Stop Video' : 'Start Video'}
-          </Text>
+          </Typography>
         </TouchableOpacity>
 
         {/* Screen Share */}
         <TouchableOpacity style={styles.controlButton} activeOpacity={0.7}>
           <Icon name="screen-share" size={24} color="#ffffff" />
-          <Text style={styles.controlButtonText}>Share</Text>
+          <Typography style={styles.controlButtonText}>Share</Typography>
         </TouchableOpacity>
 
         {/* Participants */}
@@ -691,10 +693,12 @@ const ZoomVideoCall = () => {
           <Icon name="group" size={24} color="#ffffff" />
           {users.length > 0 && (
             <View style={styles.participantBadge}>
-              <Text style={styles.participantBadgeText}>{users.length}</Text>
+              <Typography style={styles.participantBadgeText}>
+                {users.length}
+              </Typography>
             </View>
           )}
-          <Text style={styles.controlButtonText}>Participants</Text>
+          <Typography style={styles.controlButtonText}>Participants</Typography>
         </TouchableOpacity>
       </View>
 
@@ -705,7 +709,7 @@ const ZoomVideoCall = () => {
         activeOpacity={0.8}
       >
         <Icon name="call-end" size={24} color="#ffffff" />
-        <Text style={styles.leaveButtonText}>Leave</Text>
+        <Typography style={styles.leaveButtonText}>Leave</Typography>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -727,9 +731,9 @@ const ZoomVideoCall = () => {
           ) : (
             <View style={styles.loadingVideoContainer}>
               <Icon name="videocam" size={48} color="#666" />
-              <Text style={styles.loadingVideoText}>
+              <Typography style={styles.loadingVideoText}>
                 Waiting for others to join...
-              </Text>
+              </Typography>
             </View>
           )}
         </TouchableOpacity>
@@ -754,8 +758,10 @@ const ZoomVideoCall = () => {
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
-          <Text style={styles.title}>Vibe Gurukul</Text>
-          <Text style={styles.subtitle}>Welcome to Your Workshop Session</Text>
+          <Typography style={styles.title}>Vibe Gurukul</Typography>
+          <Typography style={styles.subtitle}>
+            Welcome to Your Workshop Session
+          </Typography>
         </Animated.View>
 
         <Animated.View style={[styles.statusCard, { opacity: fadeAnim }]}>
@@ -767,30 +773,30 @@ const ZoomVideoCall = () => {
                   { backgroundColor: isConnecting ? '#FFC107' : '#28a745' },
                 ]}
               />
-              <Text style={styles.statusTitle}>
+              <Typography style={styles.statusTitle}>
                 {isConnecting ? 'Initiating Connection' : 'Ready to Join'}
-              </Text>
+              </Typography>
             </View>
-            <Text style={styles.currentTimeText}>
+            <Typography style={styles.currentTimeText}>
               {new Date().toLocaleTimeString()}
-            </Text>
+            </Typography>
           </View>
 
           <View style={styles.sessionInfo}>
-            <Text style={styles.sessionName}>
+            <Typography style={styles.sessionName}>
               Session: {SESSION_CONFIG.sessionName}
-            </Text>
-            <Text style={styles.sessionDetails}>
+            </Typography>
+            <Typography style={styles.sessionDetails}>
               Organizer: {SESSION_CONFIG.userName} (You)
-            </Text>
-            <Text style={styles.sessionDetails}>
+            </Typography>
+            <Typography style={styles.sessionDetails}>
               Duration: Max {SESSION_CONFIG.sessionIdleTimeoutMins} minutes
-            </Text>
+            </Typography>
             {/* Display the current user's ID here if available */}
             {myUserId && (
-              <Text style={styles.sessionDetails}>
+              <Typography style={styles.sessionDetails}>
                 Your User ID: {myUserId}
-              </Text>
+              </Typography>
             )}
           </View>
         </Animated.View>
@@ -820,9 +826,9 @@ const ZoomVideoCall = () => {
                 color="#ffffff"
                 solid={isConnecting}
               />
-              <Text style={styles.joinButtonText}>
+              <Typography style={styles.joinButtonText}>
                 {isConnecting ? 'Connecting...' : 'Join Session Now'}
-              </Text>
+              </Typography>
             </View>
           </TouchableOpacity>
         </Animated.View>
@@ -845,7 +851,7 @@ const VideoPlaceholder = ({ text }) => (
     <View style={styles.videoIcon}>
       <Icon name="videocam" size={40} color="#888" />
     </View>
-    <Text style={styles.videoPlaceholderText}>{text}</Text>
+    <Typography style={styles.videoPlaceholderText}>{text}</Typography>
   </View>
 );
 
@@ -1095,7 +1101,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Join Screen Styles (Refined)
   container: {
     flex: 1,
   },
