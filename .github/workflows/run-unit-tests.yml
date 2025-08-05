@@ -23,8 +23,8 @@ jobs:
 
     - name: Checkout unit-testing branch
       run: |
-        git fetch origin unit-testing:unit-testing
-        git checkout unit-testing
+        git fetch origin unit-tests:unit-tests
+        git checkout unit-tests
 
     - name: Install dependencies
       run: npm install  
