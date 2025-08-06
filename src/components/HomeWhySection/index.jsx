@@ -71,7 +71,48 @@ const learnings = [
   },
 ];
 
-const HomeWhySection = () => {
+const HomeWhySection = ({ colors }) => {
+  const styles = StyleSheet.create({
+    container: {
+      marginTop: 10,
+      paddingHorizontal: 10,
+    },
+    sectionTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginTop: 20,
+      marginBottom: 20,
+      color: colors.textPrimary,
+    },
+    cardContainer: {
+      gap: 15,
+    },
+    card: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 12,
+      padding: 20,
+      alignItems: 'center',
+      boxShadow: `0 0 8px ${colors.cardShadow}`,
+    },
+    icon: {
+      width: 50,
+      height: 50,
+      marginBottom: 10,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    cardDescription: {
+      fontSize: 14,
+      color: colors.textTertiary,
+      textAlign: 'center',
+      marginTop: 5,
+    },
+  });
   return (
     <View style={styles.container}>
       <Typography style={styles.sectionTitle}>What We Offer?</Typography>
@@ -125,51 +166,5 @@ const HomeWhySection = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 10,
-    paddingHorizontal: 10,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 20,
-    color: '#000',
-  },
-  cardContainer: {
-    gap: 15,
-  },
-  card: {
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  icon: {
-    width: 50,
-    height: 50,
-    marginBottom: 10,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
-    textAlign: 'center',
-  },
-  cardDescription: {
-    fontSize: 14,
-    color: '#555',
-    textAlign: 'center',
-    marginTop: 5,
-  },
-});
 
 export default HomeWhySection;

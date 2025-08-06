@@ -1,7 +1,9 @@
-import React from "react";
-import { WebView } from "react-native-webview";
+import React from 'react';
+import { WebView } from 'react-native-webview';
+import { useTheme } from '../../context/ThemeContext';
 
 const LoadingSpinnerWebView = () => {
+  const { colors } = useTheme();
   const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
@@ -16,7 +18,7 @@ const LoadingSpinnerWebView = () => {
           justify-content: center;
           align-items: center;
           height: 100vh;
-          background-color: #e3e4e8;
+          background-color: ${colors.backgroundSecondary};
         }
        .spinner-container {
     display: flex;
@@ -26,8 +28,8 @@ const LoadingSpinnerWebView = () => {
   }
   
   :root {
-	--bg: #e3e4e8;
-	--fg: #17181c;
+	--bg: ${colors.backgroundSecondary};
+	--fg: ${colors.black};
 	--dur: 8s;
 }
 
@@ -103,7 +105,7 @@ const LoadingSpinnerWebView = () => {
 }
 .hexagon__sector:before, .hexagon__sector:after {
 	animation-name: ripple;
-	background-color: currentColor;
+	background-color: ${colors.black};
 	border-radius: 0.1em;
 	content: "";
 	display: block;
@@ -120,8 +122,8 @@ const LoadingSpinnerWebView = () => {
 /* Dark theme */
 @media (prefers-color-scheme: dark) {
 	:root {
-		--bg: #17181c;
-		--fg: #e3e4e8;
+		--bg: ${colors.black};
+		--fg: ${colors.backgroundSecondary};
 	}
 }
 /* Animations */
@@ -255,7 +257,7 @@ const LoadingSpinnerWebView = () => {
 
   return (
     <WebView
-      originWhitelist={["*"]}
+      originWhitelist={['*']}
       source={{ html: htmlContent }}
       style={{ flex: 1 }}
       scalesPageToFit={true}

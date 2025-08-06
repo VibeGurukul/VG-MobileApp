@@ -11,8 +11,8 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor, store } from "./src/store";
 import LoadingSpinnerWebView from "./src/components/Loader";
-import { colors } from "./src/assets/colors";
 import { ZoomVideoSdkProvider } from "@zoom/react-native-videosdk";
+import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
 
 const RootStack = createStackNavigator();
 
@@ -27,6 +27,7 @@ const FadeTransition = {
 
 const RootNavigation = () => {
   const { isAuthenticated, isLoading } = useAuth()
+  const { colors } = useTheme()
 
   if (isLoading) {
     return (
@@ -35,16 +36,18 @@ const RootNavigation = () => {
   }
 
   const ZOOM_CONFIG = {
-    appType: 1, // Or your specific app type
+    appType: 1,
     domain: 'zoom.us',
     enableLogDirPath: true,
     logLevel: 'info',
-    // Add appGroupId for iOS if applicable:
-    // appGroupId: '{Your Apple Group ID here}', // Required for iOS, but doesn't hurt Android
   };
 
   return (
     <ZoomVideoSdkProvider config={ZOOM_CONFIG}>
+      <StatusBar
+        backgroundColor={colors?.primary}
+        barStyle="light-content"
+      />
       <RootStack.Navigator screenOptions={{ headerShown: false, ...FadeTransition }}>
         {isLoading && <RootStack.Screen name="Splash" component={SplashScreen} />}
         {isAuthenticated ? (
@@ -60,18 +63,17 @@ const RootNavigation = () => {
 export default function App() {
   return (
     <>
-      <StatusBar
-        backgroundColor={colors.primary}
-        barStyle="light-content"
-      />
+
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <AuthProvider>
-            <NavigationContainer>
-              <RootNavigation />
-              <ToastManager />
-            </NavigationContainer>
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <NavigationContainer>
+                <RootNavigation />
+                <ToastManager />
+              </NavigationContainer>
+            </AuthProvider>
+          </ThemeProvider>
         </PersistGate>
       </Provider>
     </>

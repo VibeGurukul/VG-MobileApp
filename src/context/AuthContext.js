@@ -106,7 +106,8 @@ export const AuthProvider = ({ children }) => {
                 return { success: true, data: response.data };
             }
         } catch (error) {
-            Toast.error(error.response?.data?.detail || "Something went wrong!");
+            const errorMessage = error.response?.data?.detail || "Something went wrong!";
+            Toast.error(errorMessage);
             return { success: false, error: errorMessage };
         }
     };

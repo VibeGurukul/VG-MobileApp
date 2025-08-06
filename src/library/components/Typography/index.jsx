@@ -1,8 +1,8 @@
-import { Text } from "react-native";
+import { Text } from 'react-native';
 
-const Typography = ({ children, style }) => {
+const Typography = ({ children, style, onPress }) => {
   return (
-    <Text style={[style]} allowFontScaling={false}>
+    <Text onPress={onPress} style={[style]} allowFontScaling={false}>
       {children}
     </Text>
   );
