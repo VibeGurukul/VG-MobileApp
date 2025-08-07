@@ -8,11 +8,14 @@ import {
   ActivityIndicator,
   Dimensions,
   SafeAreaView,
+  Platform,
+  Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import RazorpayCheckout from 'react-native-razorpay';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// import { colors } from '../../../assets/colors';
+import TouchID from 'react-native-touch-id';
+
 import { useRoute } from '@react-navigation/native';
 import { API } from '../../../constants';
 import { useAuth } from '../../../context/AuthContext';
@@ -31,6 +34,7 @@ const CheckoutScreen = ({ navigation }) => {
   const { token, user } = useAuth();
   const dispatch = useDispatch();
   const { colors } = useTheme();
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -252,14 +256,33 @@ const CheckoutScreen = ({ navigation }) => {
       marginBottom: 30,
       lineHeight: 16,
     },
+    biometricNotice: {
+      backgroundColor: colors.white,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    biometricText: {
+      fontSize: 14,
+      color: colors.textPrimary,
+      flex: 1,
+    },
   });
 
   const [state, setState] = useState({
     isProcessing: false,
     isCreatingOrder: false,
     isVerifyingPayment: false,
+    isAuthenticating: false,
     orderData: null,
     error: null,
+    biometricSupported: false,
+    biometricType: null,
   });
 
   const [modalState, setModalState] = useState({
@@ -290,6 +313,142 @@ const CheckoutScreen = ({ navigation }) => {
       description: '',
     });
   }, []);
+
+  const checkBiometricSupport = useCallback(async () => {
+    try {
+      const biometryType = await TouchID.isSupported();
+      updateState({
+        biometricSupported: true,
+        biometricType: biometryType,
+      });
+    } catch (error) {
+      console.log('Biometric not supported:', error);
+      updateState({
+        biometricSupported: false,
+        biometricType: null,
+      });
+    }
+  }, [updateState]);
+
+  // Biometric authentication function
+  const authenticateWithBiometric = useCallback(async () => {
+    return new Promise((resolve, reject) => {
+      updateState({ isAuthenticating: true });
+
+      const optionalConfigObject = {
+        title: 'Secure Payment Authentication',
+        subTitle: Platform.select({
+          ios: 'Authenticate with Face ID to proceed with payment',
+          android: 'Authenticate with fingerprint to proceed with payment',
+        }),
+        imageColor: colors.primary,
+        imageErrorColor: colors.error,
+        sensorDescription: 'Touch sensor',
+        sensorErrorDescription: 'Failed',
+        cancelText: 'Cancel',
+        fallbackLabel: Platform.select({
+          ios: 'Show Passcode',
+          android: 'Use Password',
+        }),
+        unifiedErrors: false,
+        passcodeFallback: true,
+      };
+
+      TouchID.authenticate(
+        'Authenticate to complete your secure payment',
+        optionalConfigObject,
+      )
+        .then(success => {
+          console.log('Authentication Successful');
+          updateState({ isAuthenticating: false });
+          resolve(true);
+        })
+        .catch(error => {
+          console.log('Authentication Failed:', error);
+          updateState({ isAuthenticating: false });
+
+          if (
+            error.name === 'LAErrorUserCancel' ||
+            error.name === 'UserCancel'
+          ) {
+            reject(new Error('Authentication was cancelled by user'));
+          } else if (
+            error.name === 'LAErrorUserFallback' ||
+            error.name === 'UserFallback'
+          ) {
+            reject(new Error('User chose to use passcode'));
+          } else if (
+            error.name === 'LAErrorBiometryNotAvailable' ||
+            error.name === 'BiometryNotAvailable'
+          ) {
+            reject(new Error('Biometric authentication is not available'));
+          } else if (
+            error.name === 'LAErrorBiometryNotEnrolled' ||
+            error.name === 'BiometryNotEnrolled'
+          ) {
+            reject(
+              new Error(
+                'No biometrics enrolled. Please set up biometric authentication in device settings',
+              ),
+            );
+          } else {
+            reject(new Error(error.message || 'Authentication failed'));
+          }
+        });
+    });
+  }, [colors, updateState]);
+
+  const authenticateWithPassword = useCallback(async () => {
+    return new Promise((resolve, reject) => {
+      Alert.prompt(
+        'Security Verification',
+        'Enter your device password or PIN to continue with payment:',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => reject(new Error('Authentication cancelled')),
+            style: 'cancel',
+          },
+          {
+            text: 'Verify',
+            onPress: password => {
+              if (password && password.length > 0) {
+                resolve(true);
+              } else {
+                reject(new Error('Password is required'));
+              }
+            },
+          },
+        ],
+        'secure-text',
+      );
+    });
+  }, []);
+
+  const performAuthentication = useCallback(async () => {
+    try {
+      if (state.biometricSupported) {
+        await authenticateWithBiometric();
+      } else {
+        await authenticateWithPassword();
+      }
+      return true;
+    } catch (error) {
+      if (error.message.includes('passcode') && state.biometricSupported) {
+        try {
+          await authenticateWithPassword();
+          return true;
+        } catch (passwordError) {
+          throw passwordError;
+        }
+      }
+      throw error;
+    }
+  }, [
+    state.biometricSupported,
+    authenticateWithBiometric,
+    authenticateWithPassword,
+  ]);
 
   const calculateGSTForItem = useCallback((price, gstRate = GST_RATE) => {
     const gstAmount = (price * gstRate) / (100 + gstRate);
@@ -385,7 +544,7 @@ const CheckoutScreen = ({ navigation }) => {
     } finally {
       updateState({ isCreatingOrder: false });
     }
-  }, [courseData, token, updateState, showModal, hideModal]);
+  }, [courseData, token, updateState, showModal]);
 
   const verifyPayment = useCallback(
     async paymentData => {
@@ -428,7 +587,7 @@ const CheckoutScreen = ({ navigation }) => {
         updateState({ isVerifyingPayment: false });
       }
     },
-    [token, navigation, updateState, showModal, hideModal],
+    [token, updateState, showModal],
   );
 
   const enrollUserAfterPayment = useCallback(async () => {
@@ -492,7 +651,6 @@ const CheckoutScreen = ({ navigation }) => {
           } else if (enrolledItem.workshop_id) {
             dispatch(removeFromCart(enrolledItem.workshop_id));
           }
-        } else {
         }
       });
 
@@ -501,21 +659,26 @@ const CheckoutScreen = ({ navigation }) => {
       );
 
       if (failedEnrollments.length > 0) {
+        console.log('Some enrollments failed');
       }
     } catch (error) {
       console.log('error: ', error);
     }
   }, [courseData, token, user, dispatch]);
 
+  // Enhanced handlePayNow with biometric authentication
   const handlePayNow = useCallback(async () => {
     if (!state.orderData) {
       showModal('Order Not Ready', 'Please create an order first');
       return;
     }
 
-    updateState({ isProcessing: true });
-
     try {
+      // Perform authentication first
+      await performAuthentication();
+
+      updateState({ isProcessing: true });
+
       const options = {
         description: 'Credits towards consultation',
         currency: state.orderData?.currency,
@@ -532,23 +695,39 @@ const CheckoutScreen = ({ navigation }) => {
       };
 
       const paymentResult = await RazorpayCheckout.open(options);
-
       await verifyPayment(paymentResult);
     } catch (error) {
-      if (error.code === 'PAYMENT_CANCELLED') {
+      if (error.message.includes('cancelled')) {
+        showModal(
+          'Authentication Cancelled',
+          'Payment was cancelled during authentication',
+        );
+      } else if (error.code === 'PAYMENT_CANCELLED') {
         showModal('Payment Cancelled', 'Payment was cancelled by user');
+      } else if (error.message.includes('Authentication')) {
+        showModal('Authentication Failed', error.message);
       } else {
         showModal('Payment Failed', 'Payment could not be processed');
       }
     } finally {
       updateState({ isProcessing: false });
     }
-  }, [state.orderData, verifyPayment, updateState, showModal, hideModal]);
+  }, [
+    state.orderData,
+    performAuthentication,
+    verifyPayment,
+    updateState,
+    showModal,
+  ]);
 
   const handleRetryCreateOrder = useCallback(() => {
     updateState({ error: null, orderData: null });
     createOrder();
   }, [createOrder, updateState]);
+
+  useEffect(() => {
+    checkBiometricSupport();
+  }, [checkBiometricSupport]);
 
   useEffect(() => {
     if (!state.orderData && !state.error && !state.isCreatingOrder) {
@@ -561,6 +740,22 @@ const CheckoutScreen = ({ navigation }) => {
   if (state.isCreatingOrder) {
     return <LoadingSpinnerWebView />;
   }
+
+  const getBiometricIcon = () => {
+    if (Platform.OS === 'ios') {
+      return state.biometricType === 'FaceID' ? 'scan' : 'finger-print';
+    }
+    return 'finger-print';
+  };
+
+  const getBiometricText = () => {
+    if (Platform.OS === 'ios') {
+      return state.biometricType === 'FaceID'
+        ? 'Face ID authentication required for secure payment'
+        : 'Touch ID authentication required for secure payment';
+    }
+    return 'Fingerprint authentication required for secure payment';
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -631,7 +826,6 @@ const CheckoutScreen = ({ navigation }) => {
                       {course.short_title}
                     </Typography>
                   </View>
-                  {console.log('enrollmentResults: ', course?.price)}
                   {course && course?.price && (
                     <Typography style={styles.coursePrice}>
                       ₹{course.price}
@@ -683,14 +877,36 @@ const CheckoutScreen = ({ navigation }) => {
           </View>
         )}
 
+        {/* Biometric Security Notice */}
+        {state.orderData && (
+          <View style={styles.biometricNotice}>
+            <Ionicons
+              name={getBiometricIcon()}
+              size={24}
+              color={colors.primary}
+            />
+            <Typography style={styles.biometricText}>
+              {state.biometricSupported
+                ? getBiometricText()
+                : 'Password authentication required for secure payment'}
+            </Typography>
+          </View>
+        )}
+
         {state.orderData && (
           <TouchableOpacity
             style={[
               styles.payButton,
-              (state.isProcessing || state.isVerifyingPayment) &&
+              (state.isProcessing ||
+                state.isVerifyingPayment ||
+                state.isAuthenticating) &&
                 styles.payButtonDisabled,
             ]}
-            disabled={state.isProcessing || state.isVerifyingPayment}
+            disabled={
+              state.isProcessing ||
+              state.isVerifyingPayment ||
+              state.isAuthenticating
+            }
             onPress={handlePayNow}
             activeOpacity={0.8}
           >
@@ -701,11 +917,15 @@ const CheckoutScreen = ({ navigation }) => {
               end={{ x: 1, y: 0 }}
             >
               <View style={styles.payButtonContent}>
-                {state.isProcessing || state.isVerifyingPayment ? (
+                {state.isProcessing ||
+                state.isVerifyingPayment ||
+                state.isAuthenticating ? (
                   <>
                     <ActivityIndicator size="small" color={colors.white} />
                     <Typography style={styles.payButtonText}>
-                      {state.isVerifyingPayment
+                      {state.isAuthenticating
+                        ? 'Authenticating...'
+                        : state.isVerifyingPayment
                         ? 'Verifying...'
                         : 'Processing...'}
                     </Typography>
@@ -713,12 +933,12 @@ const CheckoutScreen = ({ navigation }) => {
                 ) : (
                   <>
                     <Ionicons
-                      name="card-outline"
+                      name="shield-checkmark-outline"
                       size={20}
                       color={colors.white}
                     />
                     <Typography style={styles.payButtonText}>
-                      Pay Now ₹{state.orderData.amount}
+                      Secure Pay ₹{state.orderData.amount}
                     </Typography>
                   </>
                 )}
@@ -728,7 +948,8 @@ const CheckoutScreen = ({ navigation }) => {
         )}
 
         <Typography style={styles.footerText}>
-          By proceeding, you agree to our Terms of Service and Privacy Policy
+          By proceeding, you agree to our Terms of Service and Privacy Policy.
+          {'\n'}Your payment is secured with biometric authentication.
         </Typography>
       </ScrollView>
 
