@@ -27,7 +27,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconAwesome from 'react-native-vector-icons/FontAwesome5';
 import LinearGradient from 'react-native-linear-gradient';
 
-// Enable LayoutAnimation for Android
 if (
   Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental

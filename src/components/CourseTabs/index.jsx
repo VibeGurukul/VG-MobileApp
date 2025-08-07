@@ -2,15 +2,125 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import Typography from '../../library/components/Typography';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { colors } from '../../assets/colors';
+// import { colors } from '../../assets/colors';
 import { useNavigation } from '@react-navigation/native';
 import { Toast } from 'toastify-react-native';
+import { useTheme } from '../../context/ThemeContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
   const [activeTab, setActiveTab] = useState('Description');
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = StyleSheet.create({
+    tabContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      backgroundColor: colors.cardBackground,
+
+      borderRadius: 25,
+      marginVertical: 10,
+      padding: 5,
+      overflow: 'hidden',
+      boxShadow: `0 0 8px ${colors.cardShadow}`,
+    },
+    activeTab: {
+      backgroundColor: colors.secondary,
+      padding: 10,
+      flex: 1,
+      alignItems: 'center',
+      borderRadius: 25,
+    },
+    inactiveTab: {
+      backgroundColor: colors.cardBackground,
+      padding: 10,
+      flex: 1,
+      alignItems: 'center',
+    },
+    activeTabText: {
+      fontWeight: 'bold',
+      color: colors.white,
+      fontSize: screenWidth * 0.04,
+    },
+    inactiveTabText: {
+      color: colors.textPrimary,
+      fontWeight: 'bold',
+      fontSize: screenWidth * 0.04,
+    },
+    card: {
+      backgroundColor: colors.cardBackground,
+
+      borderRadius: 15,
+      padding: 20,
+      boxShadow: `0 0 8px ${colors.cardShadow}`,
+    },
+    sectionHeading: {
+      fontSize: screenWidth * 0.05,
+      fontWeight: '800',
+      color: colors.textSecondary,
+      marginTop: 15,
+      marginBottom: 10,
+      textAlign: 'center',
+    },
+    sectionText: {
+      fontSize: screenWidth * 0.035,
+      color: colors.textTertiary,
+      lineHeight: 22,
+      textAlign: 'center',
+    },
+    episodeCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.cardBackground,
+      padding: 12,
+      borderRadius: 15,
+      marginBottom: 12,
+      boxShadow: `0 0 5px ${colors.cardShadow} inset`,
+    },
+    iconContainer: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 10,
+    },
+    iconContainerEnrolled: {
+      backgroundColor: colors.successDark,
+    },
+    iconContainerLocked: {
+      backgroundColor: colors.gray600,
+    },
+    episodeContent: {
+      flex: 1,
+    },
+    episodeText: {
+      fontSize: screenWidth * 0.035,
+      fontWeight: 'bold',
+      color: colors.textSecondary,
+      marginBottom: 6,
+    },
+    progressContainer: {
+      marginTop: 4,
+    },
+    progressBarBackground: {
+      height: 6,
+      backgroundColor: colors.gray500,
+      borderRadius: 3,
+      overflow: 'hidden',
+    },
+    progressBarFill: {
+      height: '100%',
+      backgroundColor: colors.secondary,
+    },
+    progressText: {
+      fontSize: screenWidth * 0.03,
+      color: colors.textTertiary,
+      marginTop: 2,
+    },
+  });
 
   // Function to get progress for a specific section
   const getSectionProgress = sectionId => {
@@ -150,118 +260,5 @@ const CourseTabs = ({ course, isEnrolled, player, progressList }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    marginVertical: 10,
-    padding: 5,
-  },
-  activeTab: {
-    backgroundColor: colors.secondary,
-    padding: 10,
-    flex: 1,
-    alignItems: 'center',
-    borderRadius: 25,
-  },
-  inactiveTab: {
-    backgroundColor: '#fff',
-    padding: 10,
-    flex: 1,
-    alignItems: 'center',
-  },
-  activeTabText: {
-    fontWeight: 'bold',
-    color: colors.white,
-    fontSize: screenWidth * 0.04,
-  },
-  inactiveTabText: {
-    color: '#1c1c1c',
-    fontWeight: 'bold',
-    fontSize: screenWidth * 0.04,
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-  },
-  sectionHeading: {
-    fontSize: screenWidth * 0.05,
-    fontWeight: '800',
-    color: '#333',
-    marginTop: 15,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  sectionText: {
-    fontSize: screenWidth * 0.035, // 3.5% of screen width
-    color: '#666',
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-  episodeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 15,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  iconContainer: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#FF6B6B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  iconContainerEnrolled: {
-    backgroundColor: '#32CD32',
-  },
-  iconContainerLocked: {
-    backgroundColor: '#888888',
-  },
-  episodeContent: {
-    flex: 1,
-  },
-  episodeText: {
-    fontSize: screenWidth * 0.035,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 6,
-  },
-  progressContainer: {
-    marginTop: 4,
-  },
-  progressBarBackground: {
-    height: 6,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: colors.secondary,
-  },
-  progressText: {
-    fontSize: screenWidth * 0.03,
-    color: '#666',
-    marginTop: 2,
-  },
-});
 
 export default CourseTabs;

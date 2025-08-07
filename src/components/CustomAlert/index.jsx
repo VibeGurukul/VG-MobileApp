@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors } from '../../assets/colors';
+// import { colors } from '../../assets/colors';
 import Typography from '../../library/components/Typography';
+import { useTheme } from '../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -23,6 +24,103 @@ const CustomAlert = ({
   onDismiss,
   showCloseButton = true,
 }) => {
+  const { colors } = useTheme();
+  const styles = StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    alertContainer: {
+      backgroundColor: 'white',
+      borderRadius: 16,
+      padding: 24,
+      width: width * 0.85,
+      maxWidth: 400,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 12,
+      elevation: 8,
+    },
+    closeButton: {
+      position: 'absolute',
+      top: 16,
+      right: 16,
+      zIndex: 1,
+      padding: 4,
+    },
+    iconContainer: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.textPrimary,
+      textAlign: 'center',
+      marginBottom: 8,
+      lineHeight: 26,
+    },
+    message: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: 24,
+      lineHeight: 22,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      width: '100%',
+      gap: 12,
+    },
+    button: {
+      flex: 1,
+      height: 48,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    primaryButton: {
+      overflow: 'hidden',
+    },
+    primaryButtonWithSecondary: {
+      flex: 1.2,
+    },
+    primaryButtonGradient: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 12,
+    },
+    primaryButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    secondaryButton: {
+      backgroundColor: colors.lightGray,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    secondaryButtonText: {
+      color: colors.textPrimary,
+      fontSize: 16,
+      fontWeight: '500',
+    },
+  });
+
   const getIconConfig = () => {
     switch (type) {
       case 'success':
@@ -135,101 +233,5 @@ const CustomAlert = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  alertContainer: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 24,
-    width: width * 0.85,
-    maxWidth: 400,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    zIndex: 1,
-    padding: 4,
-  },
-  iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 8,
-    lineHeight: 26,
-  },
-  message: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    width: '100%',
-    gap: 12,
-  },
-  button: {
-    flex: 1,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  primaryButton: {
-    overflow: 'hidden',
-  },
-  primaryButtonWithSecondary: {
-    flex: 1.2,
-  },
-  primaryButtonGradient: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
-  },
-  primaryButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    backgroundColor: colors.lightGray,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  secondaryButtonText: {
-    color: colors.textPrimary,
-    fontSize: 16,
-    fontWeight: '500',
-  },
-});
 
 export default CustomAlert;

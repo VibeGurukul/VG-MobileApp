@@ -12,10 +12,11 @@ import {
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../../components/Header';
-import { colors } from '../../../assets/colors';
+// import { colors } from '../../../assets/colors';
 import { API } from '../../../constants';
 import LoadingSpinnerWebView from '../../../components/Loader';
 import Typography from '../../../library/components/Typography';
+import { useTheme } from '../../../context/ThemeContext';
 
 const Workshops = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,6 +27,126 @@ const Workshops = ({ navigation }) => {
 
   const { width: screenWidth } = Dimensions.get('window');
   const isTablet = screenWidth > 768;
+  const { colors } = useTheme();
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    content: {
+      padding: 20,
+      paddingBottom: 80,
+    },
+    tabletContent: {
+      padding: 40,
+    },
+    searchBar: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 25,
+      padding: 15,
+      fontSize: 16,
+      marginBottom: 20,
+      boxShadow: `0 0 8px ${colors.cardShadow}`,
+      alignSelf: 'center',
+      width: '100%',
+    },
+    tabletSearchBar: {
+      fontSize: 20,
+      padding: 18,
+      width: '80%',
+    },
+    workshopsContainer: {
+      gap: 20,
+    },
+    tabletCoursesContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+    },
+    workshopCard: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 25,
+      overflow: 'hidden',
+      boxShadow: `0 0 8px ${colors.cardShadow}`,
+      width: '100%',
+    },
+    tabletCourseCard: {
+      width: '48%',
+    },
+    cardContent: {
+      padding: 15,
+    },
+    workshopTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+      marginBottom: 10,
+      textAlign: 'center',
+    },
+    tabletCourseTitle: {
+      fontSize: 22,
+    },
+    priceAndButtonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 10,
+      flexWrap: 'wrap',
+    },
+    priceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 15,
+    },
+    currentPrice: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.primary,
+      marginRight: 10,
+    },
+    tabletCurrentPrice: {
+      fontSize: 18,
+    },
+    originalPrice: {
+      fontSize: 14,
+      color: colors.gray600,
+      textDecorationLine: 'line-through',
+    },
+    tabletOriginalPrice: {
+      fontSize: 16,
+    },
+    viewButton: {
+      backgroundColor: colors.black,
+      paddingVertical: 12,
+      paddingHorizontal: 25,
+      borderRadius: 10,
+      alignSelf: 'flex-end',
+    },
+    tabletViewButton: {
+      paddingVertical: 14,
+      paddingHorizontal: 30,
+    },
+    buttonText: {
+      color: colors.white,
+      fontWeight: 'bold',
+      fontSize: 14,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    errorText: {
+      fontSize: 16,
+      color: colors.primary,
+    },
+  });
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -75,11 +196,7 @@ const Workshops = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header
-        title={`Namaste!`}
-        subtitle="All Workshops"
-        onBack={() => navigation.goBack()}
-      />
+      <Header title={`Namaste!`} subtitle="All Workshops" />
 
       <ScrollView
         contentContainerStyle={[
@@ -90,11 +207,10 @@ const Workshops = ({ navigation }) => {
         <TextInput
           style={[styles.searchBar, isTablet && styles.tabletSearchBar]}
           placeholder="Search something..."
-          placeholderTextColor="#999"
+          placeholderTextColor={colors.textQuaternary}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-
         <View
           style={[
             styles.workshopsContainer,
@@ -176,132 +292,5 @@ const Workshops = ({ navigation }) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F0F0F0',
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 80,
-  },
-  tabletContent: {
-    padding: 40,
-  },
-  searchBar: {
-    backgroundColor: 'white',
-    borderRadius: 25,
-    padding: 15,
-    fontSize: 16,
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  tabletSearchBar: {
-    fontSize: 20,
-    padding: 18,
-    width: '80%',
-  },
-  workshopsContainer: {
-    gap: 20,
-  },
-  tabletCoursesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  workshopCard: {
-    backgroundColor: 'white',
-    borderRadius: 25,
-    overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    width: '100%',
-  },
-  tabletCourseCard: {
-    width: '48%', // Display two workshops side by side on tablets
-  },
-  cardContent: {
-    padding: 15,
-  },
-  workshopTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  tabletCourseTitle: {
-    fontSize: 22,
-  },
-  priceAndButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
-    flexWrap: 'wrap',
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  currentPrice: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.primary,
-    marginRight: 10,
-  },
-  tabletCurrentPrice: {
-    fontSize: 18,
-  },
-  originalPrice: {
-    fontSize: 14,
-    color: '#999',
-    textDecorationLine: 'line-through',
-  },
-  tabletOriginalPrice: {
-    fontSize: 16,
-  },
-  viewButton: {
-    backgroundColor: '#000',
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-    alignSelf: 'flex-end',
-  },
-  tabletViewButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 30,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    fontSize: 16,
-    color: colors.primary,
-  },
-});
 
 export default Workshops;
