@@ -1,5 +1,5 @@
-import React from "react";
-import { View, ActivityIndicator, StyleSheet, SafeAreaView, StatusBar } from "react-native";
+import React, { useEffect } from "react";
+import { View, ActivityIndicator, StyleSheet, SafeAreaView, StatusBar, Alert } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
 import SplashScreen from "./src/screens/SplashScreen";
@@ -13,6 +13,8 @@ import { persistor, store } from "./src/store";
 import LoadingSpinnerWebView from "./src/components/Loader";
 import { ZoomVideoSdkProvider } from "@zoom/react-native-videosdk";
 import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
+import JailMonkey from 'jail-monkey';
+import RNExitApp from 'react-native-exit-app';
 
 const RootStack = createStackNavigator();
 
@@ -28,6 +30,24 @@ const FadeTransition = {
 const RootNavigation = () => {
   const { isAuthenticated, isLoading } = useAuth()
   const { colors } = useTheme()
+
+  // This effect runs once when the component mounts to check for a compromised device.
+  useEffect(() => {
+    // JailMonkey.trustFall() is a comprehensive check for both jailbroken/rooted devices
+    // and mock location status.
+    const isCompromised = JailMonkey.trustFall();
+
+    if (isCompromised) {
+      // If the device is compromised, show an alert and exit the app.
+      // This is a critical security measure to protect your app and user data.
+      Alert.alert(
+        'Security Alert',
+        'For your security, this application cannot be run on a compromised device. The app will now close.',
+        [{ text: 'Exit', onPress: () => RNExitApp.exitApp() }],
+        { cancelable: false } // User cannot dismiss the alert without exiting.
+      );
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -63,7 +83,6 @@ const RootNavigation = () => {
 export default function App() {
   return (
     <>
-
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <ThemeProvider>
@@ -79,4 +98,3 @@ export default function App() {
     </>
   );
 }
-

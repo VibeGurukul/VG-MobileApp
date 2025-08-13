@@ -6,32 +6,599 @@ import {
   StyleSheet,
   StatusBar,
   ActivityIndicator,
-  Dimensions,
   SafeAreaView,
+  Platform,
+  Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import RazorpayCheckout from 'react-native-razorpay';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// import { colors } from '../../../assets/colors';
+import TouchID from 'react-native-touch-id';
+import axios from 'axios';
+
 import { useRoute } from '@react-navigation/native';
-import { API } from '../../../constants';
-import { useAuth } from '../../../context/AuthContext';
 import { useDispatch } from 'react-redux';
+import { useAuth } from '../../../context/AuthContext';
+import { useTheme } from '../../../context/ThemeContext';
 import { removeFromCart } from '../../../store/slices/cart-slice';
+import {
+  API,
+  GST_RATE,
+  RAZORPAY_KEY,
+  SESSION_NUMBER,
+} from '../../../constants';
+
 import Header from '../../../components/Header';
 import LoadingSpinnerWebView from '../../../components/Loader';
 import InfoModal from '../../../components/Modal/InfoModal';
-import axios from 'axios';
-import { GST_RATE, SESSION_NUMBER, RAZORPAY_KEY } from '../../../constants';
 import Typography from '../../../library/components/Typography';
-import { useTheme } from '../../../context/ThemeContext';
+
+const AUTH_CACHE_DURATION = 3 * 60 * 1000;
 
 const CheckoutScreen = ({ navigation }) => {
   const route = useRoute();
   const { token, user } = useAuth();
   const dispatch = useDispatch();
   const { colors } = useTheme();
-  const styles = StyleSheet.create({
+  const { routeCourseData: courseData } = route?.params || {};
+
+  const [state, setState] = useState({
+    isProcessing: false,
+    isCreatingOrder: false,
+    isVerifyingPayment: false,
+    isAuthenticating: false,
+    orderData: null,
+    error: null,
+    biometricSupported: false,
+    biometricType: null,
+    authenticationTimestamp: null,
+  });
+
+  const [modalState, setModalState] = useState({
+    visible: false,
+    title: '',
+    description: '',
+  });
+
+  const updateState = useCallback(updates => {
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  const showModal = useCallback((title, description) => {
+    setModalState({ visible: true, title, description });
+  }, []);
+
+  const hideModal = useCallback(() => {
+    if (modalState.title.includes('Successful')) {
+      navigation.goBack();
+    }
+    setModalState({ visible: false, title: '', description: '' });
+  }, [modalState.title, navigation]);
+
+  const checkBiometricSupport = useCallback(async () => {
+    try {
+      const biometryType = await TouchID.isSupported({ unifiedErrors: false });
+      updateState({
+        biometricSupported: true,
+        biometricType: biometryType,
+      });
+    } catch (error) {
+      console.log('Biometric support check failed:', error.name);
+      updateState({
+        biometricSupported: false,
+        biometricType: null,
+      });
+    }
+  }, [updateState]);
+
+  const triggerSecureAuthentication = useCallback(async () => {
+    return new Promise((resolve, reject) => {
+      updateState({ isAuthenticating: true });
+
+      const config = {
+        title: 'Secure Payment Authentication',
+        imageColor: colors.primary,
+        imageErrorColor: colors.error,
+        sensorDescription: 'Touch sensor',
+        sensorErrorDescription: 'Authentication failed',
+        cancelText: 'Cancel',
+        passcodeFallback: true,
+        unifiedErrors: false,
+      };
+
+      TouchID.authenticate(
+        'Authenticate to complete your secure payment',
+        config,
+      )
+        .then(success => {
+          console.log('Authentication Successful');
+          updateState({
+            isAuthenticating: false,
+            authenticationTimestamp: Date.now(),
+          });
+          resolve(true);
+        })
+        .catch(error => {
+          console.log('Authentication Failed:', error.name);
+          updateState({
+            isAuthenticating: false,
+          });
+
+          let errorMessage = 'Authentication failed. Please try again.';
+          if (
+            error.name === 'LAErrorUserCancel' ||
+            error.name === 'UserCancel'
+          ) {
+            errorMessage = 'Authentication was cancelled.';
+          } else if (
+            error.name === 'LAErrorBiometryNotEnrolled' ||
+            error.name === 'BiometryNotEnrolled'
+          ) {
+            Alert.alert(
+              'Security Not Set Up',
+              'Please enable a screen lock (PIN, Pattern, or Biometrics) on your device to make secure payments.',
+              [{ text: 'OK' }],
+            );
+            errorMessage = 'No security method is enrolled on this device.';
+          } else if (error.name === 'LAErrorAuthenticationFailed') {
+            errorMessage = 'Authentication did not match. Please try again.';
+          }
+          reject(new Error(errorMessage));
+        });
+    });
+  }, [colors, updateState]);
+
+  const performAuthentication = useCallback(async () => {
+    if (
+      state.authenticationTimestamp &&
+      Date.now() - state.authenticationTimestamp < AUTH_CACHE_DURATION
+    ) {
+      console.log('Using cached authentication.');
+      return true;
+    }
+
+    try {
+      await triggerSecureAuthentication();
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }, [state.authenticationTimestamp, triggerSecureAuthentication]);
+
+  const calculateGST = useCallback(cartItems => {
+    if (!cartItems || cartItems.length === 0)
+      return { total: 0, coursePriceExGST: 0, gst: 0 };
+    const total = cartItems.reduce((sum, item) => {
+      const itemPrice = item.workshop_id
+        ? parseFloat(item.price) * SESSION_NUMBER
+        : parseFloat(item.price);
+      return sum + itemPrice;
+    }, 0);
+    const gstAmount = (total * GST_RATE) / (100 + GST_RATE);
+    const totalCoursePriceExGST = total - gstAmount;
+    return {
+      total: parseFloat(total.toFixed(2)),
+      coursePriceExGST: parseFloat(totalCoursePriceExGST.toFixed(2)),
+      gst: parseFloat(gstAmount.toFixed(2)),
+    };
+  }, []);
+
+  const createOrder = useCallback(async () => {
+    updateState({ isCreatingOrder: true, error: null });
+    try {
+      const totalAmount = courseData.reduce(
+        (sum, course) =>
+          sum +
+          (course.workshop_id
+            ? parseFloat(course.price) * SESSION_NUMBER
+            : parseFloat(course.price)),
+        0,
+      );
+      const payload = { amount: totalAmount, currency: 'INR' };
+
+      const courseIds = courseData
+        .filter(c => c.course_id)
+        .map(c => c.course_id);
+      const workshopIds = courseData
+        .filter(c => c.workshop_id)
+        .map(c => c.workshop_id);
+
+      if (courseIds.length > 0) payload.course_id = courseIds;
+      if (workshopIds.length > 0) payload.workshop_id = workshopIds;
+
+      const response = await axios.post(
+        `${API.BASE_URL}/payments/create-order`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      updateState({ orderData: response.data });
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to create order';
+      updateState({ error: errorMessage });
+      showModal('Order Creation Failed', errorMessage);
+    } finally {
+      updateState({ isCreatingOrder: false });
+    }
+  }, [courseData, token, updateState, showModal]);
+
+  const enrollUserAfterPayment = useCallback(async () => {
+    if (!user?.email || !courseData) return;
+    try {
+      const courses = courseData.filter(item => item.course_id);
+      const workshops = courseData.filter(item => item.workshop_id);
+
+      const enrollmentPromises = [
+        ...courses.map(course =>
+          axios.post(
+            `${API.BASE_URL}/enroll`,
+            { user_email: user.email, course_id: course.course_id },
+            { headers: { Authorization: `Bearer ${token}` } },
+          ),
+        ),
+        ...workshops.map(workshop =>
+          axios.post(
+            `${API.BASE_URL}/enroll/workshop`,
+            { user_email: user.email, workshop_id: workshop.workshop_id },
+            { headers: { Authorization: `Bearer ${token}` } },
+          ),
+        ),
+      ];
+
+      const results = await Promise.allSettled(enrollmentPromises);
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          const item =
+            index < courses.length
+              ? courses[index]
+              : workshops[index - courses.length];
+          dispatch(removeFromCart(item.course_id || item.workshop_id));
+        } else {
+          console.error(
+            'Enrollment failed:',
+            result.reason?.response?.data || result.reason.message,
+          );
+        }
+      });
+    } catch (error) {
+      console.error('An error occurred during the enrollment process:', error);
+    }
+  }, [courseData, token, user, dispatch]);
+
+  const verifyPayment = useCallback(
+    async paymentData => {
+      updateState({ isVerifyingPayment: true });
+      try {
+        await axios.post(
+          `${API.BASE_URL}/payments/verify-payment`,
+          paymentData,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+
+        await enrollUserAfterPayment();
+        showModal(
+          'Payment Successful!',
+          `You have been enrolled successfully!\nPayment ID: ${paymentData.razorpay_payment_id}`,
+        );
+        // updateState({ authenticationTimestamp: null });
+      } catch (error) {
+        showModal(
+          'Payment Verification Failed',
+          `Your payment was processed, but we had trouble verifying it. Please contact support. Error: ${error.message}`,
+        );
+        // updateState({ authenticationTimestamp: null });
+        throw error;
+      } finally {
+        updateState({ isVerifyingPayment: false });
+      }
+    },
+    [token, enrollUserAfterPayment, showModal, updateState],
+  );
+
+  const handlePayNow = useCallback(async () => {
+    if (!state.orderData) {
+      showModal('Order Not Ready', 'Please wait or retry creating the order.');
+      return;
+    }
+    try {
+      await performAuthentication();
+      updateState({ isProcessing: true });
+
+      const options = {
+        description: 'Vibe Gurukul Learning Credits',
+        currency: state.orderData.currency,
+        key: RAZORPAY_KEY,
+        amount: state.orderData.amount * 100, // Amount must be in paise
+        name: 'Vibe Gurukul',
+        order_id: state.orderData.order_id,
+        prefill: {
+          email: user.email,
+          contact: user.mobile_number,
+          name: user.full_name,
+        },
+        theme: { color: colors.primary },
+      };
+
+      const paymentResult = await RazorpayCheckout.open(options);
+      await verifyPayment(paymentResult);
+    } catch (error) {
+      console.log('handlePayNow Error:', error);
+      if (error?.code === 'PAYMENT_CANCELLED') {
+        showModal('Payment Cancelled', 'The payment process was cancelled.');
+      } else if (error.message && error.message.includes('Authentication')) {
+        showModal('Authentication Error', error.message);
+      } else {
+        showModal('Error', error.message || 'An unexpected error occurred.');
+        // updateState({ authenticationTimestamp: null });
+      }
+    } finally {
+      updateState({ isProcessing: false });
+    }
+  }, [
+    state.orderData,
+    user,
+    colors.primary,
+    performAuthentication,
+    verifyPayment,
+    updateState,
+    showModal,
+  ]);
+
+  const handleRetryCreateOrder = useCallback(() => {
+    updateState({ error: null, orderData: null });
+    createOrder();
+  }, [createOrder, updateState]);
+
+  useEffect(() => {
+    checkBiometricSupport();
+  }, [checkBiometricSupport]);
+
+  useEffect(() => {
+    if (
+      courseData &&
+      !state.orderData &&
+      !state.error &&
+      !state.isCreatingOrder
+    ) {
+      createOrder();
+    }
+
+    return () => {
+      updateState({ authenticationTimestamp: null });
+    };
+  }, [
+    courseData,
+    createOrder,
+    state.orderData,
+    state.error,
+    state.isCreatingOrder,
+    // Removed updateState from dependencies to prevent unnecessary cleanup
+  ]);
+
+  const gstCalculation = calculateGST(courseData);
+
+  const getBiometricIcon = () => {
+    if (Platform.OS === 'ios' && state.biometricType === 'FaceID')
+      return 'scan';
+    return 'finger-print';
+  };
+
+  const getBiometricText = () => {
+    if (state.biometricSupported) {
+      const platformText =
+        Platform.OS === 'ios'
+          ? state.biometricType === 'FaceID'
+            ? 'Face ID'
+            : 'Touch ID'
+          : 'Fingerprint';
+      return `${platformText} or device passcode for secure payment.`;
+    }
+    return 'Device credentials (PIN/Pattern/Password) required for secure payment.';
+  };
+
+  if (!courseData || (state.isCreatingOrder && !state.orderData)) {
+    return <LoadingSpinnerWebView />;
+  }
+
+  return (
+    <SafeAreaView style={styles(colors).container}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      <Header
+        title="Namaste"
+        subtitle="Checkout"
+        onBack={() => navigation.goBack()}
+      />
+
+      <ScrollView
+        style={styles(colors).scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {state.error && !state.isCreatingOrder && (
+          <View style={styles(colors).errorCard}>
+            <Ionicons name="alert-circle" size={24} color={colors.error} />
+            <Typography style={styles(colors).errorText}>
+              Failed to create order
+            </Typography>
+            <Typography style={styles(colors).errorSubtext}>
+              {state.error}
+            </Typography>
+            <TouchableOpacity
+              style={styles(colors).retryButton}
+              onPress={handleRetryCreateOrder}
+            >
+              <Typography style={styles(colors).retryButtonText}>
+                Retry
+              </Typography>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {state.orderData && (
+          <>
+            <View style={styles(colors).card}>
+              <LinearGradient
+                colors={[colors.primary, colors.secondary]}
+                style={styles(colors).cardHeader}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Typography style={styles(colors).cardHeaderTitle}>
+                  Order Summary
+                </Typography>
+                <Typography style={styles(colors).cardHeaderSubtitle}>
+                  Order ID: {state.orderData.order_id}
+                </Typography>
+              </LinearGradient>
+              <View style={styles(colors).cardContent}>
+                {courseData?.map((course, index) => (
+                  <View
+                    key={course.course_id || course.workshop_id}
+                    style={[
+                      styles(colors).courseItem,
+                      index < courseData.length - 1 &&
+                        styles(colors).courseItemBorder,
+                    ]}
+                  >
+                    <View style={styles(colors).courseInfo}>
+                      <Typography style={styles(colors).courseTitle}>
+                        {course.title}
+                      </Typography>
+                      <Typography style={styles(colors).courseSubtitle}>
+                        {course.short_title}
+                      </Typography>
+                    </View>
+                    <Typography style={styles(colors).coursePrice}>
+                      ₹
+                      {course.workshop_id
+                        ? parseFloat(course.price) * SESSION_NUMBER
+                        : course.price}
+                    </Typography>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {gstCalculation && (
+              <View style={styles(colors).card}>
+                <Typography style={styles(colors).cardTitle}>
+                  Price Breakdown
+                </Typography>
+                <View style={styles(colors).priceBreakdown}>
+                  <View style={styles(colors).priceRow}>
+                    <Typography style={styles(colors).priceLabel}>
+                      Subtotal
+                    </Typography>
+                    <Typography style={styles(colors).priceValue}>
+                      ₹{gstCalculation.coursePriceExGST}
+                    </Typography>
+                  </View>
+                  <View style={styles(colors).priceRow}>
+                    <Typography style={styles(colors).priceLabel}>
+                      GST (18%)
+                    </Typography>
+                    <Typography style={styles(colors).priceValue}>
+                      ₹{gstCalculation.gst}
+                    </Typography>
+                  </View>
+                  <View style={styles(colors).priceDivider} />
+                  <View style={styles(colors).priceRow}>
+                    <Typography style={styles(colors).totalLabel}>
+                      Total Payable
+                    </Typography>
+                    <Typography style={styles(colors).totalValue}>
+                      ₹{gstCalculation.total}
+                    </Typography>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            <View style={styles(colors).biometricNotice}>
+              <Ionicons
+                name={getBiometricIcon()}
+                size={24}
+                color={colors.primary}
+              />
+              <Typography style={styles(colors).biometricText}>
+                {getBiometricText()}
+              </Typography>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles(colors).payButton,
+                (state.isProcessing ||
+                  state.isVerifyingPayment ||
+                  state.isAuthenticating) &&
+                  styles(colors).payButtonDisabled,
+              ]}
+              disabled={
+                state.isProcessing ||
+                state.isVerifyingPayment ||
+                state.isAuthenticating
+              }
+              onPress={handlePayNow}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={[colors.primary, colors.secondary]}
+                style={styles(colors).payButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <View style={styles(colors).payButtonContent}>
+                  {state.isAuthenticating ||
+                  state.isProcessing ||
+                  state.isVerifyingPayment ? (
+                    <>
+                      <ActivityIndicator size="small" color={colors.white} />
+                      <Typography style={styles(colors).payButtonText}>
+                        {state.isAuthenticating
+                          ? 'Authenticating...'
+                          : state.isVerifyingPayment
+                          ? 'Verifying...'
+                          : 'Processing...'}
+                      </Typography>
+                    </>
+                  ) : (
+                    <>
+                      <Ionicons
+                        name="shield-checkmark-outline"
+                        size={20}
+                        color={colors.white}
+                      />
+                      <Typography style={styles(colors).payButtonText}>
+                        Secure Pay ₹{state.orderData.amount}
+                      </Typography>
+                    </>
+                  )}
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          </>
+        )}
+
+        <Typography style={styles(colors).footerText}>
+          By proceeding, you agree to our Terms of Service and Privacy Policy.
+          Your payment is secured by your device's lock screen credentials.
+        </Typography>
+      </ScrollView>
+
+      <InfoModal
+        visible={modalState.visible}
+        title={modalState.title}
+        description={modalState.description}
+        onClose={hideModal}
+      />
+    </SafeAreaView>
+  );
+};
+
+const styles = colors =>
+  StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.backgroundSecondary,
@@ -40,20 +607,6 @@ const CheckoutScreen = ({ navigation }) => {
       flex: 1,
       paddingHorizontal: 20,
       paddingTop: 20,
-    },
-    loadingCard: {
-      backgroundColor: colors.white,
-      borderRadius: 12,
-      padding: 40,
-      alignItems: 'center',
-      marginBottom: 20,
-      boxShadow: `0 0 8px ${colors.cardShadow}`,
-    },
-    loadingText: {
-      marginTop: 16,
-      fontSize: 16,
-      color: colors.textSecondary,
-      textAlign: 'center',
     },
     errorCard: {
       backgroundColor: colors.white,
@@ -129,12 +682,6 @@ const CheckoutScreen = ({ navigation }) => {
       padding: 24,
       paddingBottom: 0,
     },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      marginBottom: 16,
-    },
     courseItem: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -197,20 +744,20 @@ const CheckoutScreen = ({ navigation }) => {
       fontWeight: '600',
       color: colors.textPrimary,
     },
-    securityNotice: {
+    biometricNotice: {
       backgroundColor: colors.white,
       borderRadius: 12,
       padding: 16,
       marginBottom: 20,
       borderWidth: 1,
-      borderColor: colors.lightGray,
+      borderColor: colors.primary,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
     },
-    securityText: {
+    biometricText: {
       fontSize: 14,
-      color: colors.textSecondary,
+      color: colors.textPrimary,
       flex: 1,
     },
     payButton: {
@@ -253,493 +800,5 @@ const CheckoutScreen = ({ navigation }) => {
       lineHeight: 16,
     },
   });
-
-  const [state, setState] = useState({
-    isProcessing: false,
-    isCreatingOrder: false,
-    isVerifyingPayment: false,
-    orderData: null,
-    error: null,
-  });
-
-  const [modalState, setModalState] = useState({
-    visible: false,
-    title: '',
-    description: '',
-  });
-
-  const { routeCourseData: courseData, workshopData } = route?.params || {};
-
-  const updateState = useCallback(updates => {
-    setState(prev => ({ ...prev, ...updates }));
-  }, []);
-
-  const showModal = useCallback((title, description) => {
-    setModalState({
-      visible: true,
-      title,
-      description,
-    });
-  }, []);
-
-  const hideModal = useCallback(() => {
-    navigation.goBack();
-    setModalState({
-      visible: false,
-      title: '',
-      description: '',
-    });
-  }, []);
-
-  const calculateGSTForItem = useCallback((price, gstRate = GST_RATE) => {
-    const gstAmount = (price * gstRate) / (100 + gstRate);
-    const coursePrice = price - gstAmount;
-    return {
-      coursePrice: parseFloat(coursePrice.toFixed(2)),
-      gst: parseFloat(gstAmount.toFixed(2)),
-      total: parseFloat(price.toFixed(2)),
-    };
-  }, []);
-
-  const calculateGST = useCallback(
-    (cartItems, gstRate = GST_RATE) => {
-      const gstDetails = cartItems.map(item => {
-        const price = item.workshop_id
-          ? parseFloat(item.price) * SESSION_NUMBER
-          : parseFloat(item.price);
-        return calculateGSTForItem(price, gstRate);
-      });
-
-      const totalGST = gstDetails.reduce(
-        (total, details) => total + details.gst,
-        0,
-      );
-      const totalCoursePriceExGST = gstDetails.reduce(
-        (total, details) => total + details.coursePrice,
-        0,
-      );
-      const total = cartItems.reduce((sum, item) => {
-        const itemPrice = item.workshop_id
-          ? parseFloat(item.price) * SESSION_NUMBER
-          : parseFloat(item.price);
-        return sum + itemPrice;
-      }, 0);
-
-      return {
-        total: parseFloat(total.toFixed(2)),
-        coursePriceExGST: parseFloat(totalCoursePriceExGST.toFixed(2)),
-        gst: parseFloat(totalGST.toFixed(2)),
-      };
-    },
-    [calculateGSTForItem],
-  );
-
-  const createOrder = useCallback(async () => {
-    updateState({ isCreatingOrder: true, error: null });
-
-    try {
-      const totalAmount = courseData.reduce(
-        (sum, course) => sum + course.price,
-        0,
-      );
-      const payload = {
-        amount: totalAmount,
-        currency: 'INR',
-      };
-
-      const hasCourseIds = courseData.some(course => course.course_id);
-      const hasWorkshopIds = courseData.some(course => course.workshop_id);
-
-      if (hasCourseIds) {
-        payload.course_id = courseData.map(course => course.course_id);
-      } else if (hasWorkshopIds) {
-        payload.workshop_id = courseData.map(course => course.workshop_id);
-      }
-
-      const response = await fetch(`${API.BASE_URL}/payments/create-order`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `HTTP error! status: ${response.status}`,
-        );
-      }
-
-      const responseData = await response.json();
-      updateState({ orderData: responseData });
-    } catch (error) {
-      const errorMessage = error.message || 'Failed to create order';
-      updateState({ error: errorMessage });
-
-      showModal(
-        'Order Creation Failed',
-        `Failed to create order: ${errorMessage}`,
-      );
-    } finally {
-      updateState({ isCreatingOrder: false });
-    }
-  }, [courseData, token, updateState, showModal, hideModal]);
-
-  const verifyPayment = useCallback(
-    async paymentData => {
-      updateState({ isVerifyingPayment: true });
-
-      try {
-        const response = await axios.post(
-          `${API.BASE_URL}/payments/verify-payment`,
-          {
-            razorpay_order_id: paymentData.razorpay_order_id,
-            razorpay_payment_id: paymentData.razorpay_payment_id,
-            razorpay_signature: paymentData.razorpay_signature,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        const responseData = await response.data;
-        console.log('response: ', responseData);
-
-        await enrollUserAfterPayment();
-
-        showModal(
-          'Payment Successful!',
-          `Payment completed successfully and you have been enrolled!\nPayment ID: ${paymentData.razorpay_payment_id}`,
-        );
-
-        return responseData;
-      } catch (error) {
-        showModal(
-          'Payment Verification Failed',
-          `Payment verification failed: ${error.message}`,
-        );
-
-        throw error;
-      } finally {
-        updateState({ isVerifyingPayment: false });
-      }
-    },
-    [token, navigation, updateState, showModal, hideModal],
-  );
-
-  const enrollUserAfterPayment = useCallback(async () => {
-    console.log('isem');
-    if (!user?.email || !courseData) {
-      return;
-    }
-
-    try {
-      const enrollmentPromises = [];
-
-      const courses = courseData.filter(item => item.course_id);
-      const workshops = courseData.filter(item => item.workshop_id);
-
-      console.log('courses: ', courses);
-      console.log('workshops: ', workshops);
-
-      for (const course of courses) {
-        const courseEnrollmentPromise = axios.post(
-          `${API.BASE_URL}/enroll`,
-          {
-            user_email: user.email,
-            course_id: course.course_id,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          },
-        );
-        enrollmentPromises.push(courseEnrollmentPromise);
-      }
-
-      for (const workshop of workshops) {
-        const workshopEnrollmentPromise = axios.post(
-          `${API.BASE_URL}/enroll/workshop`,
-          {
-            user_email: user.email,
-            workshop_id: workshop.workshop_id,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        enrollmentPromises.push(workshopEnrollmentPromise);
-      }
-      const enrollmentResults = await Promise.allSettled(enrollmentPromises);
-      console.log('enrollmentResults: ', enrollmentResults);
-
-      enrollmentResults.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-          const enrolledItem =
-            index < courses.length
-              ? courses[index]
-              : workshops[index - courses.length];
-          if (enrolledItem.course_id) {
-            dispatch(removeFromCart(enrolledItem.course_id));
-          } else if (enrolledItem.workshop_id) {
-            dispatch(removeFromCart(enrolledItem.workshop_id));
-          }
-        } else {
-        }
-      });
-
-      const failedEnrollments = enrollmentResults.filter(
-        result => result.status === 'rejected',
-      );
-
-      if (failedEnrollments.length > 0) {
-      }
-    } catch (error) {
-      console.log('error: ', error);
-    }
-  }, [courseData, token, user, dispatch]);
-
-  const handlePayNow = useCallback(async () => {
-    if (!state.orderData) {
-      showModal('Order Not Ready', 'Please create an order first');
-      return;
-    }
-
-    updateState({ isProcessing: true });
-
-    try {
-      const options = {
-        description: 'Credits towards consultation',
-        currency: state.orderData?.currency,
-        key: RAZORPAY_KEY,
-        amount: state.orderData.amount,
-        name: 'Vibe Gurukul',
-        order_id: state.orderData?.order_id,
-        prefill: {
-          email: user.email,
-          contact: user.mobile_number,
-          name: user.full_name,
-        },
-        theme: { color: colors.primary },
-      };
-
-      const paymentResult = await RazorpayCheckout.open(options);
-
-      await verifyPayment(paymentResult);
-    } catch (error) {
-      if (error.code === 'PAYMENT_CANCELLED') {
-        showModal('Payment Cancelled', 'Payment was cancelled by user');
-      } else {
-        showModal('Payment Failed', 'Payment could not be processed');
-      }
-    } finally {
-      updateState({ isProcessing: false });
-    }
-  }, [state.orderData, verifyPayment, updateState, showModal, hideModal]);
-
-  const handleRetryCreateOrder = useCallback(() => {
-    updateState({ error: null, orderData: null });
-    createOrder();
-  }, [createOrder, updateState]);
-
-  useEffect(() => {
-    if (!state.orderData && !state.error && !state.isCreatingOrder) {
-      createOrder();
-    }
-  }, [createOrder, state.orderData, state.error, state.isCreatingOrder]);
-
-  const gstCalculation = courseData ? calculateGST(courseData) : null;
-
-  if (state.isCreatingOrder) {
-    return <LoadingSpinnerWebView />;
-  }
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
-      <Header
-        title="Namaste"
-        subtitle="Checkout"
-        onBack={() => navigation.goBack()}
-      />
-
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        {state.error && !state.isCreatingOrder && (
-          <View style={styles.errorCard}>
-            <Ionicons name="alert-circle" size={24} color={colors.error} />
-            <Typography style={styles.errorText}>
-              Failed to create order
-            </Typography>
-            <Typography style={styles.errorSubtext}>{state.error}</Typography>
-            <TouchableOpacity
-              style={styles.retryButton}
-              onPress={handleRetryCreateOrder}
-            >
-              <Typography style={styles.retryButtonText}>Retry</Typography>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {state.orderData && (
-          <View style={styles.card}>
-            <LinearGradient
-              colors={[colors.primary, colors.secondary]}
-              style={styles.cardHeader}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <Typography style={styles.cardHeaderTitle}>
-                Order Summary
-              </Typography>
-              <Typography style={styles.cardHeaderSubtitle}>
-                Order ID: {state.orderData.order_id}
-              </Typography>
-              <Typography style={styles.cardHeaderSubtitle}>
-                Status: {state.orderData.status}
-              </Typography>
-            </LinearGradient>
-
-            <View style={styles.cardContent}>
-              <Typography style={styles.sectionTitle}>
-                Course Details
-              </Typography>
-
-              {courseData?.map((course, index) => (
-                <View
-                  key={course.course_id || course.workshop_id}
-                  style={[
-                    styles.courseItem,
-                    index < courseData.length - 1 && styles.courseItemBorder,
-                  ]}
-                >
-                  <View style={styles.courseInfo}>
-                    <Typography style={styles.courseTitle}>
-                      {course.title}
-                    </Typography>
-                    <Typography style={styles.courseSubtitle}>
-                      {course.short_title}
-                    </Typography>
-                  </View>
-                  {console.log('enrollmentResults: ', course?.price)}
-                  {course && course?.price && (
-                    <Typography style={styles.coursePrice}>
-                      ₹{course.price}
-                    </Typography>
-                  )}
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {state.orderData && gstCalculation && (
-          <View style={styles.card}>
-            <Typography style={styles.cardTitle}>Price Breakdown</Typography>
-
-            <View style={styles.priceBreakdown}>
-              <View style={styles.priceRow}>
-                <Typography style={styles.priceLabel}>
-                  Course Price (Excl. GST)
-                </Typography>
-                <Typography style={styles.priceValue}>
-                  ₹{gstCalculation.coursePriceExGST}
-                </Typography>
-              </View>
-
-              <View style={styles.priceRow}>
-                <Typography style={styles.priceLabel}>GST (18%)</Typography>
-                <Typography style={styles.priceValue}>
-                  ₹{gstCalculation.gst}
-                </Typography>
-              </View>
-
-              <View style={styles.priceDivider} />
-
-              <View style={styles.priceRow}>
-                <Typography style={styles.totalLabel}>Total Amount</Typography>
-                <Typography style={styles.totalValue}>
-                  ₹{gstCalculation.total}
-                </Typography>
-              </View>
-
-              <View style={styles.priceRow}>
-                <Typography style={styles.priceLabel}>Order Amount</Typography>
-                <Typography style={styles.priceValue}>
-                  ₹{state.orderData.amount}
-                </Typography>
-              </View>
-            </View>
-          </View>
-        )}
-
-        {state.orderData && (
-          <TouchableOpacity
-            style={[
-              styles.payButton,
-              (state.isProcessing || state.isVerifyingPayment) &&
-                styles.payButtonDisabled,
-            ]}
-            disabled={state.isProcessing || state.isVerifyingPayment}
-            onPress={handlePayNow}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={[colors.primary, colors.secondary]}
-              style={styles.payButtonGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <View style={styles.payButtonContent}>
-                {state.isProcessing || state.isVerifyingPayment ? (
-                  <>
-                    <ActivityIndicator size="small" color={colors.white} />
-                    <Typography style={styles.payButtonText}>
-                      {state.isVerifyingPayment
-                        ? 'Verifying...'
-                        : 'Processing...'}
-                    </Typography>
-                  </>
-                ) : (
-                  <>
-                    <Ionicons
-                      name="card-outline"
-                      size={20}
-                      color={colors.white}
-                    />
-                    <Typography style={styles.payButtonText}>
-                      Pay Now ₹{state.orderData.amount}
-                    </Typography>
-                  </>
-                )}
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
-
-        <Typography style={styles.footerText}>
-          By proceeding, you agree to our Terms of Service and Privacy Policy
-        </Typography>
-      </ScrollView>
-
-      <InfoModal
-        visible={modalState.visible}
-        title={modalState.title}
-        description={modalState.description}
-        onClose={hideModal}
-      />
-    </SafeAreaView>
-  );
-};
 
 export default CheckoutScreen;
