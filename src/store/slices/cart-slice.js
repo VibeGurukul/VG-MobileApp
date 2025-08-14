@@ -2,13 +2,14 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { API } from '../../constants';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken } from '../../utils/SecureStorage/token';
 
 export const fetchCartData = createAsyncThunk(
     'cart/fetchCartData',
     async (_, { rejectWithValue }) => {
         try {
 
-            const token = await AsyncStorage.getItem('access_token')
+            const token = await getToken()
 
             const response = await axios.get(`${API.BASE_URL}/users/cart`, {
                 headers: {
@@ -28,7 +29,7 @@ export const addToCartAsync = createAsyncThunk(
     'cart/addToCartAsync',
     async (itemData, { rejectWithValue }) => {
         try {
-            const token = await AsyncStorage.getItem('access_token')
+            const token = await getToken()
             const response = await axios.post(`${API.BASE_URL}/users/cart/add`, itemData, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -45,7 +46,7 @@ export const removeFromCartAsync = createAsyncThunk(
     'cart/removeFromCartAsync',
     async ({ course_id, workshop_id }, { rejectWithValue }) => {
         try {
-            const token = await AsyncStorage.getItem('access_token')
+            const token = await getToken()
 
             const requestBody = {};
             if (course_id) requestBody.course_id = course_id;
