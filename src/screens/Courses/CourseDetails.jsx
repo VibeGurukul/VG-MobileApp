@@ -26,6 +26,7 @@ import { addToCart, addToCartAsync } from '../../store/slices/cart-slice';
 import LoadingSpinnerWebView from '../../components/Loader';
 import Typography from '../../library/components/Typography';
 import { useTheme } from '../../context/ThemeContext';
+import { getToken } from '../../utils/SecureStorage/token';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -268,12 +269,12 @@ const CourseDetails = ({ route, navigation }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const keys = ['full_name', 'email', 'access_token'];
+        const keys = ['full_name', 'email'];
         const storedValues = await AsyncStorage.multiGet(keys);
 
         const storedFullName = storedValues[0][1];
         const storedEmail = storedValues[1][1];
-        const storedToken = storedValues[2][1];
+        const storedToken = await getToken();
 
         if (storedFullName) {
           const firstName = storedFullName.split(' ')[0];
