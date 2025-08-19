@@ -1,35 +1,65 @@
-import React, { useEffect } from "react";
-import { View, ActivityIndicator, StyleSheet, SafeAreaView, StatusBar, Alert } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
-import SplashScreen from "./src/screens/SplashScreen";
-import AuthStack from "./src/navigation/AuthStack";
-import AppStack from "./src/navigation/AppStack";
-import { AuthProvider, useAuth } from "./src/context/AuthContext";
-import ToastManager from "toastify-react-native";
-import { Provider } from "react-redux";
-import { PersistGate } from "redux-persist/integration/react";
-import { persistor, store } from "./src/store";
-import LoadingSpinnerWebView from "./src/components/Loader";
-import { ZoomVideoSdkProvider } from "@zoom/react-native-videosdk";
-import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
+import React, { useEffect } from 'react';
+import {
+  View,
+  ActivityIndicator,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  Alert,
+} from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import {
+  createStackNavigator,
+  CardStyleInterpolators,
+} from '@react-navigation/stack';
+import SplashScreen from './src/screens/SplashScreen';
+import AuthStack from './src/navigation/AuthStack';
+import AppStack from './src/navigation/AppStack';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import ToastManager from 'toastify-react-native';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { persistor, store } from './src/store';
+import LoadingSpinnerWebView from './src/components/Loader';
+import { ZoomVideoSdkProvider } from '@zoom/react-native-videosdk';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import JailMonkey from 'jail-monkey';
 import RNExitApp from 'react-native-exit-app';
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://5554cfc91ae6b498b450a1399478b8b3@o4509865873899520.ingest.us.sentry.io/4509865876717568',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [
+    Sentry.mobileReplayIntegration(),
+    Sentry.feedbackIntegration(),
+  ],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 const RootStack = createStackNavigator();
 
 const FadeTransition = {
-  gestureDirection: "horizontal",
+  gestureDirection: 'horizontal',
   transitionSpec: {
-    open: { animation: "timing", config: { duration: 300 } },
-    close: { animation: "timing", config: { duration: 300 } },
+    open: { animation: 'timing', config: { duration: 300 } },
+    close: { animation: 'timing', config: { duration: 300 } },
   },
   cardStyleInterpolator: CardStyleInterpolators.forFadeFromBottomAndroid,
 };
 
 const RootNavigation = () => {
-  const { isAuthenticated, isLoading } = useAuth()
-  const { colors } = useTheme()
+  const { isAuthenticated, isLoading } = useAuth();
+  const { colors } = useTheme();
 
   // This effect runs once when the component mounts to check for a compromised device.
   useEffect(() => {
@@ -44,15 +74,13 @@ const RootNavigation = () => {
         'Security Alert',
         'For your security, this application cannot be run on a compromised device. The app will now close.',
         [{ text: 'Exit', onPress: () => RNExitApp.exitApp() }],
-        { cancelable: false } // User cannot dismiss the alert without exiting.
+        { cancelable: false }, // User cannot dismiss the alert without exiting.
       );
     }
   }, []);
 
   if (isLoading) {
-    return (
-      <LoadingSpinnerWebView />
-    );
+    return <LoadingSpinnerWebView />;
   }
 
   const ZOOM_CONFIG = {
@@ -64,12 +92,13 @@ const RootNavigation = () => {
 
   return (
     <ZoomVideoSdkProvider config={ZOOM_CONFIG}>
-      <StatusBar
-        backgroundColor={colors?.primary}
-        barStyle="light-content"
-      />
-      <RootStack.Navigator screenOptions={{ headerShown: false, ...FadeTransition }}>
-        {isLoading && <RootStack.Screen name="Splash" component={SplashScreen} />}
+      <StatusBar backgroundColor={colors?.primary} barStyle="light-content" />
+      <RootStack.Navigator
+        screenOptions={{ headerShown: false, ...FadeTransition }}
+      >
+        {isLoading && (
+          <RootStack.Screen name="Splash" component={SplashScreen} />
+        )}
         {isAuthenticated ? (
           <RootStack.Screen name="App" component={AppStack} />
         ) : (
@@ -80,7 +109,7 @@ const RootNavigation = () => {
   );
 };
 
-export default function App() {
+export default Sentry.wrap(function App() {
   return (
     <>
       <Provider store={store}>
@@ -97,4 +126,4 @@ export default function App() {
       </Provider>
     </>
   );
-}
+});
