@@ -1,0 +1,38 @@
+name: Android Build Debug
+run-name: Android Build Debug
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL_STAGING: ${{ secrets.BASE_URL_STAGING }}
+      BASE_URL_PRODUCTION: ${{ secrets.BASE_URL_PRODUCTION }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --network-timeout 300000
+
+      - name: Bundle React Native JS code
+        run: |
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+
+      - name: Make Gradlew Executable
+        run: cd android && chmod +x ./gradlew
+
+      - name: Build Android Debug
+        run: |
+          cd android && ./gradlew clean && ./gradlew app:assembleDebug
+
+      - name: Upload application
+        uses: actions/upload-artifact@v4
+        with:
+          name: app
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 3
