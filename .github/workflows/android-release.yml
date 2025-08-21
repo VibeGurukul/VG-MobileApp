@@ -22,6 +22,11 @@ jobs:
           cd android
           chmod +x gradlew
 
+      - name: Generate New Architecture C++ code # This new step runs the codegen
+        run: |
+          # Ensure you are in the root of the React Native project to run codegen
+          npx react-native codegen
+
       - name: Build application
         run: |
           cd android
