@@ -5,27 +5,138 @@ import {
   TextInput,
   Dimensions,
   SafeAreaView,
-} from "react-native";
-import { useState, useMemo } from "react";
-import { colors } from "../../assets/colors";
-import Header from "../../components/Header";
-import { FlatList } from "react-native-gesture-handler";
-import { useSelector } from "react-redux";
-import Typography from "../../library/components/Typography";
-import { useAuth } from "../../context/AuthContext";
-import CartItem from "./components/CartItem";
-import EmptyComponent from "../../components/EmptyComponent";
-import { cartSlice } from "../../store/slices/cart-slice";
+} from 'react-native';
+import { useState, useMemo } from 'react';
+import Header from '../../components/Header';
+import { FlatList } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
+import Typography from '../../library/components/Typography';
+import { useAuth } from '../../context/AuthContext';
+import CartItem from './components/CartItem';
+import EmptyComponent from '../../components/EmptyComponent';
+import { cartSlice } from '../../store/slices/cart-slice';
+import { useTheme } from '../../context/ThemeContext';
 
 const Cart = ({ navigation }) => {
-  const cartState = useSelector((state) => state.cart);
-  const [searchQuery, setSearchQuery] = useState("");
+  const cartState = useSelector(state => state.cart);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+  const { colors } = useTheme();
 
   const { user } = useAuth();
 
-  const { width: screenWidth } = Dimensions.get("window");
+  const { width: screenWidth } = Dimensions.get('window');
   const isTablet = screenWidth > 768;
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    searchBar: {
+      backgroundColor: colors.cardBackground,
+      marginHorizontal: 6,
+      borderRadius: 25,
+      padding: 15,
+      fontSize: 16,
+      marginBottom: 20,
+      elevation: 2,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      alignSelf: 'center',
+      width: '100%',
+      color: colors.textPrimary,
+    },
+    tabletSearchBar: {
+      fontSize: 20,
+      padding: 18,
+      width: '80%',
+    },
+    flatListContent: {
+      paddingBottom: 20,
+    },
+    footer: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderTopLeftRadius: 25,
+      borderTopRightRadius: 25,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    expandButton: {
+      alignItems: 'center',
+      paddingVertical: 4,
+      marginBottom: 8,
+    },
+    expandIndicator: {
+      width: '20%',
+      height: 5,
+      backgroundColor: colors.white,
+      borderRadius: 2,
+    },
+    breakdownContainer: {
+      marginBottom: 16,
+    },
+    breakdownRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    breakdownLabel: {
+      fontSize: 16,
+      color: colors.white,
+      fontWeight: '500',
+    },
+    breakdownValue: {
+      fontSize: 16,
+      color: colors.white,
+      fontWeight: '600',
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.white,
+      opacity: 0.3,
+      marginVertical: 8,
+    },
+    totalContainer: {
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    orderTotalLabel: {
+      fontSize: 16,
+      color: colors.white,
+      fontWeight: '500',
+      marginBottom: 4,
+    },
+    orderTotalAmount: {
+      fontSize: 24,
+      color: colors.white,
+      fontWeight: 'bold',
+    },
+    paymentButton: {
+      backgroundColor: colors.black,
+      paddingVertical: 16,
+      paddingHorizontal: 40,
+      borderRadius: 25,
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    paymentButtonText: {
+      fontSize: 16,
+      color: colors.white,
+      fontWeight: '600',
+    },
+    placeholderText: {
+      color: colors.textQuaternary,
+    },
+  });
 
   // Function to calculate GST for individual item
   const calculateGSTForItem = (price, gstRate = 18) => {
@@ -42,7 +153,7 @@ const Cart = ({ navigation }) => {
   const calculateGST = (cartItems, gstRate = 18) => {
     const sessionNumber = 1; // You might need to adjust this based on your logic
 
-    const gstDetails = cartItems.map((item) => {
+    const gstDetails = cartItems.map(item => {
       const price = item.workshop_id
         ? parseFloat(item.price) * sessionNumber
         : parseFloat(item.price);
@@ -128,7 +239,7 @@ const Cart = ({ navigation }) => {
       <TouchableOpacity
         style={styles.paymentButton}
         onPress={() => {
-          navigation.navigate("Checkout", { routeCourseData: cartState.cart });
+          navigation.navigate('Checkout', { routeCourseData: cartState.cart });
         }}
       >
         <Typography style={styles.paymentButtonText}>
@@ -142,14 +253,14 @@ const Cart = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <Header
         title={`Namaste!`}
-        subtitle={"Cart"}
+        subtitle={'Cart'}
         onBack={() => navigation.goBack()}
       />
       <View style={{ flex: 1, paddingHorizontal: 10, paddingTop: 24 }}>
         <TextInput
           style={[styles.searchBar, isTablet && styles.tabletSearchBar]}
           placeholder="Search something..."
-          placeholderTextColor="#999"
+          placeholderTextColor={colors.textQuaternary}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -167,109 +278,3 @@ const Cart = ({ navigation }) => {
 };
 
 export default Cart;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  searchBar: {
-    backgroundColor: "white",
-    marginHorizontal: 6,
-    borderRadius: 25,
-    padding: 15,
-    fontSize: 16,
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    alignSelf: "center",
-    width: "100%",
-  },
-  tabletSearchBar: {
-    fontSize: 20,
-    padding: 18,
-    width: "80%",
-  },
-  flatListContent: {
-    paddingBottom: 20,
-  },
-  footer: {
-    backgroundColor: "#FF9500", // Orange color matching the screenshot
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  expandButton: {
-    alignItems: "center",
-    paddingVertical: 4,
-    marginBottom: 8,
-  },
-  expandIndicator: {
-    width: "20%",
-    height: 5,
-    backgroundColor: colors.black,
-    borderRadius: 2,
-  },
-  breakdownContainer: {
-    marginBottom: 16,
-  },
-  breakdownRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  breakdownLabel: {
-    fontSize: 16,
-    color: colors.white,
-    fontWeight: "500",
-  },
-  breakdownValue: {
-    fontSize: 16,
-    color: colors.white,
-    fontWeight: "600",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.white,
-    opacity: 0.3,
-    marginVertical: 8,
-  },
-  totalContainer: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  orderTotalLabel: {
-    fontSize: 16,
-    color: colors.white,
-    fontWeight: "500",
-    marginBottom: 4,
-  },
-  orderTotalAmount: {
-    fontSize: 24,
-    color: colors.white,
-    fontWeight: "bold",
-  },
-  paymentButton: {
-    backgroundColor: colors.black,
-    paddingVertical: 16,
-    paddingHorizontal: 40,
-    borderRadius: 25,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  paymentButtonText: {
-    fontSize: 16,
-    color: colors.white,
-    fontWeight: "600",
-  },
-});

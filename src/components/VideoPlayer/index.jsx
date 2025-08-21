@@ -28,11 +28,10 @@ const VideoPlayer = ({
 
     setOrientation();
 
-    // Reset orientation when component unmounts
     return () => {
       if (autoLandscape) {
         try {
-          Orientation.unlockAllOrientations();
+          Orientation.lockToPortrait();
         } catch (error) {
           console.error('Failed to unlock screen orientation:', error);
         }

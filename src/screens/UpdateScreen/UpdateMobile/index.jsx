@@ -8,30 +8,176 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-} from "react-native";
-import React, { useState } from "react";
-import Typography from "../../../library/components/Typography";
-import Header from "../../../components/Header";
-import { colors } from "../../../assets/colors";
-import { TextInput } from "react-native-gesture-handler";
-import { API } from "../../../constants";
-import { useAuth } from "../../../context/AuthContext";
-import InfoModal from "../../../components/Modal/InfoModal";
-import axios from "axios";
+} from 'react-native';
+import React, { useState } from 'react';
+import Typography from '../../../library/components/Typography';
+import Header from '../../../components/Header';
+// import { colors } from "../../../assets/colors";
+import { TextInput } from 'react-native-gesture-handler';
+import { API } from '../../../constants';
+import { useAuth } from '../../../context/AuthContext';
+import InfoModal from '../../../components/Modal/InfoModal';
+import axios from 'axios';
+import { useTheme } from '../../../context/ThemeContext';
 
 const UpdateMobile = ({ navigation }) => {
-  const [newMobile, setNewMobile] = useState("");
+  const [newMobile, setNewMobile] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [message, setMessage] = useState({
-    title: "",
-    message: "",
+    title: '',
+    message: '',
   });
 
   const { updateMobile } = useAuth();
+  const { colors } = useTheme();
 
-  const validateMobile = (mobile) => {
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    keyboardAvoid: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    content: {
+      flex: 1,
+      padding: 20,
+    },
+    infoCard: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 30,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    infoIcon: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    infoIconText: {
+      fontSize: 24,
+    },
+    infoTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    infoSubtitle: {
+      fontSize: 14,
+      color: colors.textTertiary,
+      textAlign: 'center',
+      lineHeight: 20,
+    },
+    inputGroup: {
+      marginBottom: 24,
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: colors.textSecondary,
+      marginBottom: 8,
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      borderRadius: 12,
+      backgroundColor: colors.white,
+      paddingHorizontal: 16,
+      minHeight: 52,
+    },
+    inputError: {
+      borderColor: colors.error,
+      backgroundColor: colors.gray200,
+    },
+    countryCode: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: colors.textSecondary,
+      marginRight: 8,
+      paddingRight: 8,
+      borderRightWidth: 1,
+      borderRightColor: colors.border,
+    },
+    textInput: {
+      flex: 1,
+      fontSize: 16,
+      color: colors.textPrimary,
+      paddingVertical: 0,
+    },
+    errorText: {
+      color: colors.error,
+      fontSize: 12,
+      marginTop: 4,
+      marginLeft: 4,
+    },
+    securityNote: {
+      flexDirection: 'row',
+      backgroundColor: '#FFF8E7',
+      borderRadius: 12,
+      padding: 16,
+      marginTop: 20,
+      borderWidth: 1,
+      borderColor: colors.warning,
+    },
+    securityIcon: {
+      fontSize: 16,
+      marginRight: 12,
+      marginTop: 2,
+    },
+    securityText: {
+      flex: 1,
+      fontSize: 13,
+      color: '#B8860B',
+      lineHeight: 18,
+    },
+    buttonContainer: {
+      padding: 20,
+      paddingTop: 10,
+    },
+    updateButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: colors.primary,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    updateButtonDisabled: {
+      backgroundColor: colors.lightGray,
+      shadowOpacity: 0,
+      elevation: 0,
+    },
+    updateButtonText: {
+      color: colors.white,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  });
+
+  const validateMobile = mobile => {
     const mobileRegex = /^[6-9]\d{9}$/;
     return mobileRegex.test(mobile);
   };
@@ -41,9 +187,9 @@ const UpdateMobile = ({ navigation }) => {
 
     const newErrors = {};
     if (!newMobile) {
-      newErrors.newMobile = "Mobile number is required";
+      newErrors.newMobile = 'Mobile number is required';
     } else if (!validateMobile(newMobile)) {
-      newErrors.newMobile = "Please enter a valid 10-digit mobile number";
+      newErrors.newMobile = 'Please enter a valid 10-digit mobile number';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -58,8 +204,8 @@ const UpdateMobile = ({ navigation }) => {
 
       if (result.success) {
         setMessage({
-          title: "Success",
-          message: "Mobile number updated successfully!",
+          title: 'Success',
+          message: 'Mobile number updated successfully!',
         });
         setModalVisible(true);
       }
@@ -81,13 +227,13 @@ const UpdateMobile = ({ navigation }) => {
         }}
       />
       <Header
-        title={"Namaste!"}
-        subtitle={"Update Mobile"}
+        title={'Namaste!'}
+        subtitle={'Update Mobile'}
         onBack={() => navigation.goBack()}
       />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoid}
       >
         <ScrollView
@@ -171,147 +317,3 @@ const UpdateMobile = ({ navigation }) => {
 };
 
 export default UpdateMobile;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  infoCard: {
-    backgroundColor: "#F8F9FF",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 30,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E8EAFF",
-  },
-  infoIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  infoIconText: {
-    fontSize: 24,
-  },
-  infoTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.textSecondary,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  infoSubtitle: {
-    fontSize: 14,
-    color: colors.textTertiary,
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  inputGroup: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: colors.textSecondary,
-    marginBottom: 8,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: 12,
-    backgroundColor: colors.white,
-    paddingHorizontal: 16,
-    minHeight: 52,
-  },
-  inputError: {
-    borderColor: colors.error,
-    backgroundColor: "#FEF2F2",
-  },
-  countryCode: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: colors.textSecondary,
-    marginRight: 8,
-    paddingRight: 8,
-    borderRightWidth: 1,
-    borderRightColor: colors.border,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 16,
-    color: colors.textPrimary,
-    paddingVertical: 0,
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: 12,
-    marginTop: 4,
-    marginLeft: 4,
-  },
-  securityNote: {
-    flexDirection: "row",
-    backgroundColor: "#FFF8E7",
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: colors.warning,
-  },
-  securityIcon: {
-    fontSize: 16,
-    marginRight: 12,
-    marginTop: 2,
-  },
-  securityText: {
-    flex: 1,
-    fontSize: 13,
-    color: "#B8860B",
-    lineHeight: 18,
-  },
-  buttonContainer: {
-    padding: 20,
-    paddingTop: 10,
-  },
-  updateButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: colors.primary,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  updateButtonDisabled: {
-    backgroundColor: colors.lightGray,
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  updateButtonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

@@ -1,4 +1,4 @@
-export const backgroundColors = [
+export const lightBackgroundColors = [
     "#FFF3C4",
     "#FFE1E1",
     "#E8E1FF",
@@ -10,6 +10,10 @@ export const backgroundColors = [
     "#E8F5E8",
     "#F3E5F5",
 ];
+export const darkBackgroundColors = [
+    "#5f7793ff",
+];
+
 
 export const iconColors = [
     "#FFC107",

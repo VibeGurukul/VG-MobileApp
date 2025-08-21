@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API } from "../constants";
 import axios from "axios";
 import { Toast } from "toastify-react-native";
+import { getToken, saveToken } from "../utils/SecureStorage/token";
 
 export const AuthContext = createContext();
 
@@ -40,11 +41,9 @@ export const AuthProvider = ({ children }) => {
 
             // Fetch user details using the access token
             const userDetails = await fetchUserDetails(data.access_token);
-
             if (userDetails) {
-                // Store token, user details, and login time
+                await saveToken(data.access_token)
                 await AsyncStorage.multiSet([
-                    ['access_token', data.access_token],
                     ['email', userDetails.email],
                     ['full_name', userDetails.full_name],
                     ['mobile_number', userDetails.mobile_number || ''],
@@ -61,11 +60,8 @@ export const AuthProvider = ({ children }) => {
                 setIsAuthenticated(true);
             } else {
                 // If user details fetch fails, still store the token but with limited info
-                await AsyncStorage.multiSet([
-                    ['access_token', data.access_token],
-                    ['login_time', loginTime]
-                ]);
-
+                await saveToken(data.access_token)
+                await AsyncStorage.setItem('login_time', loginTime);
                 setToken(data.access_token);
                 setUser(null);
                 setIsAuthenticated(true);
@@ -106,7 +102,8 @@ export const AuthProvider = ({ children }) => {
                 return { success: true, data: response.data };
             }
         } catch (error) {
-            Toast.error(error.response?.data?.detail || "Something went wrong!");
+            const errorMessage = error.response?.data?.detail || "Something went wrong!";
+            Toast.error(errorMessage);
             return { success: false, error: errorMessage };
         }
     };
@@ -137,7 +134,9 @@ export const AuthProvider = ({ children }) => {
 
     const checkLoginStatus = async () => {
         try {
-            const storedToken = await AsyncStorage.getItem("access_token");
+            // const storedToken = await AsyncStorage.getItem("access_token");
+            const storedToken = await getToken();
+            console.log("stored token: ", storedToken)
             const email = await AsyncStorage.getItem("email");
             const full_name = await AsyncStorage.getItem("full_name");
             const mobile_number = await AsyncStorage.getItem("mobile_number");

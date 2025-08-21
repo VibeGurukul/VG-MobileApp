@@ -5,15 +5,16 @@ import {
   Text,
   View,
   TouchableWithoutFeedback,
-} from "react-native";
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import VideoPlayer from "../../components/VideoPlayer";
-import axios from "axios";
-import { API } from "../../constants";
-import { useAuth } from "../../context/AuthContext";
-import { colors } from "../../assets/colors";
-import Header from "../../components/Header";
+} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import VideoPlayer from '../../components/VideoPlayer';
+import axios from 'axios';
+import { API } from '../../constants';
+import { useAuth } from '../../context/AuthContext';
+// import { colors } from "../../assets/colors";
+import Header from '../../components/Header';
+import { useTheme } from '../../context/ThemeContext';
 
 const MainVideoScreen = () => {
   const route = useRoute();
@@ -24,8 +25,9 @@ const MainVideoScreen = () => {
   const [showHeader, setShowHeader] = useState(true);
   const headerTimeoutRef = useRef(null);
   const oldProg = useRef();
+  const { colors } = useTheme();
 
-  const trackProgress = async (progress) => {
+  const trackProgress = async progress => {
     if (oldProg.current >= Math.floor(progress)) return;
     oldProg.current = Math.floor(progress);
     const response = await axios.put(
@@ -38,9 +40,9 @@ const MainVideoScreen = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
-    console.log("res: ", response.data);
+    console.log('res: ', response.data);
   };
 
   const savedProgress = async () => {
@@ -52,11 +54,11 @@ const MainVideoScreen = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       oldProg.current = response.data.progress;
     } catch (error) {
-      console.log("error: ", error);
+      console.log('error: ', error);
     } finally {
       setLoading(false);
     }
@@ -100,17 +102,17 @@ const MainVideoScreen = () => {
       <SafeAreaView
         style={{
           flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
+          alignItems: 'center',
+          justifyContent: 'center',
           backgroundColor: colors.black,
         }}
       >
         {showHeader && (
           <View
             style={{
-              position: "absolute",
+              position: 'absolute',
               top: 0,
-              width: "100%",
+              width: '100%',
               zIndex: 10,
             }}
           >
@@ -119,12 +121,12 @@ const MainVideoScreen = () => {
         )}
 
         {loading ? (
-          <ActivityIndicator size={"large"} color={colors.primary} />
+          <ActivityIndicator size={'large'} color={colors.primary} />
         ) : (
           <VideoPlayer
             videoURL={videoURL}
             savedProgress={oldProg.current}
-            onProgress={(progress) => trackProgress(progress)}
+            onProgress={progress => trackProgress(progress)}
             autoLandscape={true}
           />
         )}
@@ -134,5 +136,3 @@ const MainVideoScreen = () => {
 };
 
 export default MainVideoScreen;
-
-const styles = StyleSheet.create({});

@@ -1,5 +1,5 @@
-import React from "react";
-import { View, ActivityIndicator, StyleSheet, SafeAreaView, StatusBar } from "react-native";
+import React, { useEffect } from "react";
+import { View, ActivityIndicator, StyleSheet, SafeAreaView, StatusBar, Alert } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
 import SplashScreen from "./src/screens/SplashScreen";
@@ -11,8 +11,10 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor, store } from "./src/store";
 import LoadingSpinnerWebView from "./src/components/Loader";
-import { colors } from "./src/assets/colors";
 import { ZoomVideoSdkProvider } from "@zoom/react-native-videosdk";
+import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
+import JailMonkey from 'jail-monkey';
+import RNExitApp from 'react-native-exit-app';
 
 const RootStack = createStackNavigator();
 
@@ -27,6 +29,25 @@ const FadeTransition = {
 
 const RootNavigation = () => {
   const { isAuthenticated, isLoading } = useAuth()
+  const { colors } = useTheme()
+
+  // This effect runs once when the component mounts to check for a compromised device.
+  useEffect(() => {
+    // JailMonkey.trustFall() is a comprehensive check for both jailbroken/rooted devices
+    // and mock location status.
+    const isCompromised = JailMonkey.trustFall();
+
+    if (isCompromised) {
+      // If the device is compromised, show an alert and exit the app.
+      // This is a critical security measure to protect your app and user data.
+      Alert.alert(
+        'Security Alert',
+        'For your security, this application cannot be run on a compromised device. The app will now close.',
+        [{ text: 'Exit', onPress: () => RNExitApp.exitApp() }],
+        { cancelable: false } // User cannot dismiss the alert without exiting.
+      );
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -35,16 +56,18 @@ const RootNavigation = () => {
   }
 
   const ZOOM_CONFIG = {
-    appType: 1, // Or your specific app type
+    appType: 1,
     domain: 'zoom.us',
     enableLogDirPath: true,
     logLevel: 'info',
-    // Add appGroupId for iOS if applicable:
-    // appGroupId: '{Your Apple Group ID here}', // Required for iOS, but doesn't hurt Android
   };
 
   return (
     <ZoomVideoSdkProvider config={ZOOM_CONFIG}>
+      <StatusBar
+        backgroundColor={colors?.primary}
+        barStyle="light-content"
+      />
       <RootStack.Navigator screenOptions={{ headerShown: false, ...FadeTransition }}>
         {isLoading && <RootStack.Screen name="Splash" component={SplashScreen} />}
         {isAuthenticated ? (
@@ -60,21 +83,18 @@ const RootNavigation = () => {
 export default function App() {
   return (
     <>
-      <StatusBar
-        backgroundColor={colors.primary}
-        barStyle="light-content"
-      />
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <AuthProvider>
-            <NavigationContainer>
-              <RootNavigation />
-              <ToastManager />
-            </NavigationContainer>
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <NavigationContainer>
+                <RootNavigation />
+                <ToastManager />
+              </NavigationContainer>
+            </AuthProvider>
+          </ThemeProvider>
         </PersistGate>
       </Provider>
     </>
   );
 }
-
