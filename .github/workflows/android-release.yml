@@ -14,6 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js # <--- ADDED: Explicitly set Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x' # Using Node.js 20 LTS, adjust if your project requires a different version
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-timeout 300000
 
@@ -22,7 +27,12 @@ jobs:
           cd android
           chmod +x gradlew
 
-      - name: Generate New Architecture C++ code # This new step runs the codegen
+      - name: Clean previous codegen artifacts # <--- ADDED: Clean existing generated files
+        run: |
+          rm -rf android/app/build/generated/source/codegen
+          rm -rf build/generated/ios # Also clean iOS codegen output just in case
+
+      - name: Generate New Architecture C++ code
         run: |
           # Ensure you are in the root of the React Native project to run codegen
           npx react-native codegen
