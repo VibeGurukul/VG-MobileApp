@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -16,7 +15,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import Header from '../../components/Header';
 import CourseTabs from '../../components/CourseTabs';
-import { colors } from '../../assets/colors';
+// import { colors } from '../../assets/colors';
 import { useAuth } from '../../context/AuthContext';
 import { API } from '../../constants';
 import Video from 'react-native-video';
@@ -25,13 +24,16 @@ import { addBookmark, removeBookmark } from '../../store/slices/bookmarkSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, addToCartAsync } from '../../store/slices/cart-slice';
 import LoadingSpinnerWebView from '../../components/Loader';
+import Typography from '../../library/components/Typography';
+import { useTheme } from '../../context/ThemeContext';
+import { getToken } from '../../utils/SecureStorage/token';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const CourseDetails = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const { addingToCart } = useSelector(state => state.cart);
-
+  const { colors } = useTheme();
   const state = useSelector(state => state.bookmark);
   const cartState = useSelector(state => state.cart);
 
@@ -52,6 +54,130 @@ const CourseDetails = ({ route, navigation }) => {
   // Video player state
   const [isPlaying, setIsPlaying] = useState(true);
   const videoRef = useRef(null);
+
+  const styles = StyleSheet.create({
+    contentContainer: {
+      flex: 1,
+      padding: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 50,
+    },
+    video: {
+      width: 350,
+      height: 275,
+    },
+    controlsContainer: {
+      padding: 10,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    content: {
+      padding: screenWidth * 0.05,
+      paddingBottom: 100,
+    },
+    courseTitle: {
+      fontSize: screenWidth * 0.06,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      color: colors.textPrimary,
+      marginBottom: 20,
+    },
+    videoContainer: {
+      borderRadius: 15,
+      overflow: 'hidden',
+      marginBottom: 20,
+    },
+    videoPlaceholder: {
+      width: '100%',
+      height: screenWidth * 0.5,
+      backgroundColor: colors.gray300,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 15,
+    },
+    placeholderText: {
+      fontSize: screenWidth * 0.04,
+      color: colors.textTertiary,
+    },
+    metaContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginBottom: 20,
+    },
+    metaText: {
+      fontSize: screenWidth * 0.04,
+      color: colors.textSecondary,
+    },
+    priceText: {
+      fontSize: screenWidth * 0.06,
+      fontWeight: 'bold',
+      color: colors.primary,
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+    bottomNav: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: colors.surface,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 15,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    bookmarkButton: {
+      padding: 15,
+    },
+    bottomButton: {
+      borderRadius: 25,
+      paddingVertical: 15,
+      paddingHorizontal: 40,
+    },
+    enrollButton: {
+      backgroundColor: colors.black,
+    },
+    bottomButtonText: {
+      color: colors.white,
+      fontWeight: 'bold',
+      fontSize: screenWidth * 0.04, // 4% of screen width
+    },
+    continueButton: {
+      backgroundColor: colors.success,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      marginTop: 10,
+      fontSize: screenWidth * 0.04,
+      color: colors.textTertiary,
+    },
+    errorText: {
+      fontSize: screenWidth * 0.04,
+      color: colors.textTertiary,
+      textAlign: 'center',
+      marginBottom: 20,
+    },
+    retryButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 30,
+      paddingVertical: 12,
+      borderRadius: 25,
+    },
+    retryButtonText: {
+      color: colors.white,
+      fontWeight: 'bold',
+      fontSize: screenWidth * 0.04,
+    },
+  });
 
   const getCourseDetails = async () => {
     setCourseLoading(true); // Start loading
@@ -143,12 +269,12 @@ const CourseDetails = ({ route, navigation }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const keys = ['full_name', 'email', 'access_token'];
+        const keys = ['full_name', 'email'];
         const storedValues = await AsyncStorage.multiGet(keys);
 
         const storedFullName = storedValues[0][1];
         const storedEmail = storedValues[1][1];
-        const storedToken = storedValues[2][1];
+        const storedToken = await getToken();
 
         if (storedFullName) {
           const firstName = storedFullName.split(' ')[0];
@@ -260,12 +386,14 @@ const CourseDetails = ({ route, navigation }) => {
       <View style={styles.container}>
         <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
         <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Failed to load course details</Text>
+          <Typography style={styles.errorText}>
+            Failed to load course details
+          </Typography>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={getCourseDetails}
           >
-            <Text style={styles.retryButtonText}>Retry</Text>
+            <Typography style={styles.retryButtonText}>Retry</Typography>
           </TouchableOpacity>
         </View>
       </View>
@@ -278,7 +406,7 @@ const CourseDetails = ({ route, navigation }) => {
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Course Title */}
-        <Text style={styles.courseTitle}>{course.title}</Text>
+        <Typography style={styles.courseTitle}>{course.title}</Typography>
 
         {/* Preview Video */}
         <View style={styles.videoContainer}>
@@ -301,19 +429,21 @@ const CourseDetails = ({ route, navigation }) => {
                 playInBackground={false}
               />
             ) : (
-              <Text style={styles.placeholderText}>No preview available</Text>
+              <Typography style={styles.placeholderText}>
+                No preview available
+              </Typography>
             )}
           </View>
         </View>
 
         {/* Rating and Duration */}
         <View style={styles.metaContainer}>
-          <Text style={styles.metaText}>⭐ 4.5 Rating</Text>
-          <Text style={styles.metaText}>⏳ 8 Hours Duration</Text>
+          <Typography style={styles.metaText}>⭐ 4.5 Rating</Typography>
+          <Typography style={styles.metaText}>⏳ 8 Hours Duration</Typography>
         </View>
 
         {/* Price */}
-        <Text style={styles.priceText}>₹{course.price}/-</Text>
+        <Typography style={styles.priceText}>₹{course.price}/-</Typography>
 
         <CourseTabs
           course={course}
@@ -352,13 +482,13 @@ const CourseDetails = ({ route, navigation }) => {
                 {isLoading || addingToCart ? (
                   <ActivityIndicator size={'small'} color={colors.white} />
                 ) : (
-                  <Text style={styles.bottomButtonText}>
+                  <Typography style={styles.bottomButtonText}>
                     {isEnrolled
                       ? 'Continue'
                       : checkIfInCart()
                       ? 'Go To Cart'
                       : 'Add To Cart'}
-                  </Text>
+                  </Typography>
                 )}
               </TouchableOpacity>
             ) : (
@@ -370,129 +500,5 @@ const CourseDetails = ({ route, navigation }) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 50,
-  },
-  video: {
-    width: 350,
-    height: 275,
-  },
-  controlsContainer: {
-    padding: 10,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#F0F0F0',
-  },
-  content: {
-    padding: screenWidth * 0.05, // 5% of screen width
-    paddingBottom: 100,
-  },
-  courseTitle: {
-    fontSize: screenWidth * 0.06, // 6% of screen width
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
-    marginBottom: 20,
-  },
-  videoContainer: {
-    borderRadius: 15,
-    overflow: 'hidden',
-    marginBottom: 20,
-  },
-  videoPlaceholder: {
-    width: '100%',
-    height: screenWidth * 0.5, // 50% of screen width
-    backgroundColor: '#ccc',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 15,
-  },
-  placeholderText: {
-    fontSize: screenWidth * 0.04, // 4% of screen width
-    color: '#666',
-  },
-  metaContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  metaText: {
-    fontSize: screenWidth * 0.04, // 4% of screen width
-    color: '#666',
-  },
-  priceText: {
-    fontSize: screenWidth * 0.06,
-    fontWeight: 'bold',
-    color: colors.primary,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#f0f0f0',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  bookmarkButton: {
-    padding: 15,
-  },
-  bottomButton: {
-    borderRadius: 25,
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-  },
-  enrollButton: {
-    backgroundColor: '#000',
-  },
-  bottomButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: screenWidth * 0.04, // 4% of screen width
-  },
-  continueButton: {
-    backgroundColor: '#32CD32',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: screenWidth * 0.04,
-    color: '#666',
-  },
-  errorText: {
-    fontSize: screenWidth * 0.04,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 25,
-  },
-  retryButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: screenWidth * 0.04,
-  },
-});
 
 export default CourseDetails;

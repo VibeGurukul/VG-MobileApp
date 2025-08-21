@@ -4,18 +4,80 @@ import {
   View,
   TouchableOpacity,
   ActivityIndicator,
-} from "react-native";
-import React, { useState } from "react";
-import { colors } from "../../../../assets/colors";
-import Typography from "../../../../library/components/Typography";
-import { useDispatch, useSelector } from "react-redux";
-import { removeFromCartAsync } from "../../../../store/slices/cart-slice";
+} from 'react-native';
+import React, { useState } from 'react';
+import Typography from '../../../../library/components/Typography';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeFromCartAsync } from '../../../../store/slices/cart-slice';
+import { useTheme } from '../../../../context/ThemeContext';
 
 const CartItem = ({ item }) => {
   const dispatch = useDispatch();
   const [removingFromCart, setRemoving] = useState(false);
+  const { colors } = useTheme();
 
-  const handleRemoveFromCart = async (item) => {
+  const styles = StyleSheet.create({
+    itemContainer: {
+      marginHorizontal: 6,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.cardBackground,
+      borderRadius: 12,
+      padding: 12,
+      marginVertical: 4,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    image: {
+      width: 90,
+      height: 90,
+      borderRadius: 10,
+      marginRight: 12,
+    },
+    detailsContainer: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 6,
+      color: colors.textPrimary,
+    },
+    price: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: colors.primary,
+    },
+    removeButton: {
+      backgroundColor: colors.black,
+      padding: 10,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+    removeText: {
+      fontSize: 13,
+      color: colors.white,
+      fontWeight: '600',
+    },
+    priceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      marginRight: 10,
+    },
+    priceContainerMain: {
+      width: '30%',
+    },
+    quantityContainer: {
+      // Added for consistency
+    },
+  });
+
+  const handleRemoveFromCart = async item => {
     setRemoving(true);
     const removeData = {};
     if (item.course_id) removeData.course_id = item.course_id;
@@ -23,9 +85,9 @@ const CartItem = ({ item }) => {
 
     try {
       await dispatch(removeFromCartAsync(removeData)).unwrap();
-      console.log("Item removed from cart successfully");
+      console.log('Item removed from cart successfully');
     } catch (error) {
-      console.error("Failed to remove item from cart:", error);
+      console.error('Failed to remove item from cart:', error);
     } finally {
       setRemoving(false);
     }
@@ -46,7 +108,7 @@ const CartItem = ({ item }) => {
               style={styles.removeButton}
             >
               {removingFromCart ? (
-                <ActivityIndicator color={"white"} size={"small"} />
+                <ActivityIndicator color={colors.white} size={'small'} />
               ) : (
                 <Typography style={styles.removeText}>Remove</Typography>
               )}
@@ -59,60 +121,3 @@ const CartItem = ({ item }) => {
 };
 
 export default CartItem;
-
-const styles = StyleSheet.create({
-  itemContainer: {
-    marginHorizontal: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
-    marginVertical: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  image: {
-    width: 90,
-    height: 90,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-  detailsContainer: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 6,
-    color: colors.black,
-  },
-  price: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-  removeButton: {
-    backgroundColor: colors.black,
-    padding: 10,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  removeText: {
-    fontSize: 13,
-    color: colors.white,
-  },
-  priceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    marginRight: 10,
-  },
-  priceContainerMain: {
-    width: "30%",
-  },
-});

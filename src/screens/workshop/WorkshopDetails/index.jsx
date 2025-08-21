@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -15,7 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import Header from '../../../components/Header';
-import { colors } from '../../../assets/colors';
+// import { colors } from '../../../assets/colors';
 import { useAuth } from '../../../context/AuthContext';
 import { API } from '../../../constants';
 import {
@@ -26,6 +25,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToCartAsync } from '../../../store/slices/cart-slice';
 import Typography from '../../../library/components/Typography';
 import LoadingSpinnerWebView from '../../../components/Loader';
+import { useTheme } from '../../../context/ThemeContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -35,6 +35,7 @@ const WorkshopDetails = ({ route, navigation }) => {
   const state = useSelector(state => state.bookmark);
   const cartState = useSelector(state => state.cart);
   const params = route.params;
+  const { colors } = useTheme();
 
   const [workshop, setWorkshop] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
@@ -42,6 +43,162 @@ const WorkshopDetails = ({ route, navigation }) => {
   const [enrolling, setEnrolling] = useState(false);
 
   const { token, user } = useAuth();
+
+  const styles = StyleSheet.create({
+    contentContainer: {
+      flex: 1,
+      padding: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 50,
+    },
+    card: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 15,
+      padding: 20,
+      boxShadow: `0 0 8px ${colors.cardShadow}`,
+    },
+    video: {
+      width: 350,
+      height: 275,
+    },
+    controlsContainer: {
+      padding: 10,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    content: {
+      padding: screenWidth * 0.05,
+      paddingBottom: 100,
+    },
+    courseTitle: {
+      fontSize: screenWidth * 0.06,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      color: colors.textPrimary,
+      marginBottom: 20,
+    },
+    videoContainer: {
+      borderRadius: 15,
+      overflow: 'hidden',
+      marginBottom: 20,
+    },
+    videoPlaceholder: {
+      width: '100%',
+      height: screenWidth * 0.5,
+      backgroundColor: colors.cardBackground,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 15,
+    },
+    placeholderText: {
+      fontSize: screenWidth * 0.04,
+      color: colors.textQuaternary,
+    },
+    metaContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginBottom: 20,
+    },
+    metaText: {
+      fontSize: screenWidth * 0.04,
+      color: colors.textSecondary,
+    },
+    priceText: {
+      fontSize: screenWidth * 0.06,
+      fontWeight: 'bold',
+      color: colors.primary,
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+    bottomNav: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: colors.surface,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 15,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    bookmarkButton: {
+      padding: 15,
+    },
+    bottomButton: {
+      borderRadius: 25,
+      paddingVertical: 15,
+      paddingHorizontal: 40,
+    },
+    enrollButton: {
+      backgroundColor: colors.black,
+    },
+    joinNowButton: {
+      backgroundColor: colors.infoDark,
+    },
+    liveButton: {
+      backgroundColor: colors.youtube,
+    },
+    cartButton: {
+      backgroundColor: colors.secondary,
+    },
+    endedButton: {
+      backgroundColor: colors.youtube,
+    },
+    bottomButtonText: {
+      color: 'white',
+      fontWeight: 'bold',
+      fontSize: screenWidth * 0.04,
+    },
+    continueButton: {
+      backgroundColor: colors.success,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      marginTop: 10,
+      fontSize: screenWidth * 0.04,
+      color: colors.textSecondary,
+    },
+    errorText: {
+      fontSize: screenWidth * 0.04,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: 20,
+    },
+    retryButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 30,
+      paddingVertical: 12,
+      borderRadius: 25,
+    },
+    retryButtonText: {
+      color: colors.white,
+      fontWeight: 'bold',
+      fontSize: screenWidth * 0.04,
+    },
+    sectionHeading: {
+      fontSize: screenWidth * 0.05,
+      fontWeight: '800',
+      color: colors.textSecondary,
+      marginTop: 15,
+      marginBottom: 10,
+      textAlign: 'center',
+    },
+    sectionText: {
+      fontSize: screenWidth * 0.035,
+      color: colors.textTertiary,
+      lineHeight: 22,
+      textAlign: 'center',
+    },
+  });
 
   const checkIfEnrolled = async () => {
     try {
@@ -219,7 +376,7 @@ const WorkshopDetails = ({ route, navigation }) => {
           onPress={() => navigation.navigate('ZoomSdk')}
           style={[styles.bottomButton, styles.liveButton]}
         >
-          <Text style={styles.bottomButtonText}>Join Live</Text>
+          <Typography style={styles.bottomButtonText}>Join Live</Typography>
         </TouchableOpacity>
       );
     }
@@ -230,7 +387,7 @@ const WorkshopDetails = ({ route, navigation }) => {
           style={[styles.bottomButton, styles.endedButton]}
           disabled={true}
         >
-          <Text style={styles.bottomButtonText}>Ended</Text>
+          <Typography style={styles.bottomButtonText}>Ended</Typography>
         </TouchableOpacity>
       );
     }
@@ -238,7 +395,7 @@ const WorkshopDetails = ({ route, navigation }) => {
     if (isEnrolled) {
       return (
         <TouchableOpacity style={[styles.bottomButton, styles.continueButton]}>
-          <Text style={styles.bottomButtonText}>View Upcoming</Text>
+          <Typography style={styles.bottomButtonText}>View Upcoming</Typography>
         </TouchableOpacity>
       );
     }
@@ -252,7 +409,7 @@ const WorkshopDetails = ({ route, navigation }) => {
           {enrolling ? (
             <ActivityIndicator size={'small'} color={colors.white} />
           ) : (
-            <Text style={styles.bottomButtonText}>Join Now</Text>
+            <Typography style={styles.bottomButtonText}>Join Now</Typography>
           )}
         </TouchableOpacity>
       );
@@ -264,7 +421,7 @@ const WorkshopDetails = ({ route, navigation }) => {
           onPress={() => navigation.navigate('Cart')}
           style={[styles.bottomButton, styles.cartButton]}
         >
-          <Text style={styles.bottomButtonText}>Go To Cart</Text>
+          <Typography style={styles.bottomButtonText}>Go To Cart</Typography>
         </TouchableOpacity>
       );
     }
@@ -277,7 +434,7 @@ const WorkshopDetails = ({ route, navigation }) => {
         {addingToCart ? (
           <ActivityIndicator size={'small'} color={colors.white} />
         ) : (
-          <Text style={styles.bottomButtonText}>Add To Cart</Text>
+          <Typography style={styles.bottomButtonText}>Add To Cart</Typography>
         )}
       </TouchableOpacity>
     );
@@ -297,12 +454,14 @@ const WorkshopDetails = ({ route, navigation }) => {
       <View style={styles.container}>
         <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
         <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Failed to load workshop details</Text>
+          <Typography style={styles.errorText}>
+            Failed to load workshop details
+          </Typography>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={getWorkshopDetails}
           >
-            <Text style={styles.retryButtonText}>Retry</Text>
+            <Typography style={styles.retryButtonText}>Retry</Typography>
           </TouchableOpacity>
         </View>
       </View>
@@ -314,7 +473,7 @@ const WorkshopDetails = ({ route, navigation }) => {
       <Header title={`Namaste!`} onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.courseTitle}>{workshop.title}</Text>
+        <Typography style={styles.courseTitle}>{workshop.title}</Typography>
 
         <View style={styles.videoContainer}>
           <View style={styles.videoPlaceholder}>
@@ -326,11 +485,11 @@ const WorkshopDetails = ({ route, navigation }) => {
           </View>
         </View>
 
-        <Text style={styles.priceText}>
+        <Typography style={styles.priceText}>
           {workshop.price === 0 || workshop.price === '0'
             ? 'Free'
             : `₹${workshop.price}/-`}
-        </Text>
+        </Typography>
 
         <View style={styles.card}>
           <Typography style={styles.sectionHeading}>Description</Typography>
@@ -367,165 +526,5 @@ const WorkshopDetails = ({ route, navigation }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 50,
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-  },
-  video: {
-    width: 350,
-    height: 275,
-  },
-  controlsContainer: {
-    padding: 10,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#F0F0F0',
-  },
-  content: {
-    padding: screenWidth * 0.05,
-    paddingBottom: 100,
-  },
-  courseTitle: {
-    fontSize: screenWidth * 0.06,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
-    marginBottom: 20,
-  },
-  videoContainer: {
-    borderRadius: 15,
-    overflow: 'hidden',
-    marginBottom: 20,
-  },
-  videoPlaceholder: {
-    width: '100%',
-    height: screenWidth * 0.5,
-    backgroundColor: '#ccc',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 15,
-  },
-  placeholderText: {
-    fontSize: screenWidth * 0.04,
-    color: '#666',
-  },
-  metaContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  metaText: {
-    fontSize: screenWidth * 0.04,
-    color: '#666',
-  },
-  priceText: {
-    fontSize: screenWidth * 0.06,
-    fontWeight: 'bold',
-    color: colors.primary,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#f0f0f0',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  bookmarkButton: {
-    padding: 15,
-  },
-  bottomButton: {
-    borderRadius: 25,
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-  },
-  enrollButton: {
-    backgroundColor: '#000',
-  },
-  joinNowButton: {
-    backgroundColor: '#007AFF',
-  },
-  liveButton: {
-    backgroundColor: '#FF3B30',
-  },
-  cartButton: {
-    backgroundColor: '#FF9500',
-  },
-  endedButton: {
-    backgroundColor: '#FF0000',
-  },
-  bottomButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: screenWidth * 0.04,
-  },
-  continueButton: {
-    backgroundColor: '#32CD32',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: screenWidth * 0.04,
-    color: '#666',
-  },
-  errorText: {
-    fontSize: screenWidth * 0.04,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 25,
-  },
-  retryButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: screenWidth * 0.04,
-  },
-  sectionHeading: {
-    fontSize: screenWidth * 0.05,
-    fontWeight: '800',
-    color: '#333',
-    marginTop: 15,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  sectionText: {
-    fontSize: screenWidth * 0.035,
-    color: '#666',
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-});
 
 export default WorkshopDetails;

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
   Image,
@@ -13,13 +12,92 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../../components/Header';
 import HomeWhySection from '../../components/HomeWhySection';
+import Typography from '../../library/components/Typography';
 import { useDispatch } from 'react-redux';
 import { fetchCartData } from '../../store/slices/cart-slice';
+import { useTheme } from '../../context/ThemeContext';
 
 const HomeScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
+  const { colors } = useTheme();
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.backgroundSecondary,
+    },
+    content: {
+      padding: 20,
+      paddingBottom: 80,
+    },
+    searchContainer: {
+      marginBottom: 30,
+    },
+    searchInput: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 25,
+      padding: 15,
+      fontSize: 16,
+      boxShadow: `0 0 8px ${colors.cardShadow}`,
+    },
+    cardContainer: {
+      gap: 10,
+      paddingHorizontal: 10,
+    },
+    tabletCardContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-evenly',
+    },
+    section: {
+      marginBottom: 30,
+    },
+    tabletSection: {
+      width: '45%',
+    },
+    sectionTitle: {
+      fontSize: 25,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+      marginBottom: 15,
+      paddingLeft: 10,
+      textAlign: 'center',
+    },
+    card: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 25,
+      overflow: 'hidden',
+      boxShadow: `0 0 8px ${colors.cardShadow}`,
+      height: 175,
+    },
+    tabletCard: {
+      height: 200,
+      width: '100%',
+    },
+    cardImage: {
+      height: '80%',
+      width: '80%',
+      borderRadius: 25,
+      marginTop: 20,
+      alignSelf: 'center',
+    },
+    ctaButton: {
+      backgroundColor: colors.black,
+      paddingVertical: 12,
+      paddingHorizontal: 30,
+      borderRadius: 10,
+      position: 'absolute',
+      bottom: '40%',
+      right: '10%',
+      transform: [{ translateX: 15 }],
+    },
+    ctaButtonText: {
+      color: colors.white,
+      fontWeight: 'bold',
+    },
+  });
 
   const dispatch = useDispatch();
 
@@ -66,7 +144,9 @@ const HomeScreen = ({ navigation }) => {
         >
           {/* Course Card */}
           <View style={[styles.section, isTablet && styles.tabletSection]}>
-            <Text style={styles.sectionTitle}>Explore our courses</Text>
+            <Typography style={styles.sectionTitle}>
+              Explore our courses
+            </Typography>
             <View style={[styles.card, isTablet && styles.tabletCard]}>
               <Image
                 source={require('../../assets/BloomingBuds.webp')}
@@ -77,14 +157,16 @@ const HomeScreen = ({ navigation }) => {
                 style={styles.ctaButton}
                 onPress={() => navigation.navigate('AllCourses')}
               >
-                <Text style={styles.ctaButtonText}>Explore</Text>
+                <Typography style={styles.ctaButtonText}>Explore</Typography>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Workshop Card */}
           <View style={[styles.section, isTablet && styles.tabletSection]}>
-            <Text style={styles.sectionTitle}>Take part in our Workshops</Text>
+            <Typography style={styles.sectionTitle}>
+              Take part in our Workshops
+            </Typography>
             <View style={[styles.card, isTablet && styles.tabletCard]}>
               <Image
                 source={require('../../assets/BloomingBuds.webp')}
@@ -92,101 +174,17 @@ const HomeScreen = ({ navigation }) => {
                 resizeMode="cover"
               />
               <TouchableOpacity style={styles.ctaButton}>
-                <Text style={styles.ctaButtonText}>Join</Text>
+                <Typography style={styles.ctaButtonText}>Join</Typography>
               </TouchableOpacity>
             </View>
           </View>
 
-          <HomeWhySection />
+          <HomeWhySection colors={colors} />
         </View>
         <View style={{ height: 95 }} />
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F0F0F0',
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 80,
-  },
-  searchContainer: {
-    marginBottom: 30,
-  },
-  searchInput: {
-    backgroundColor: 'white',
-    borderRadius: 25,
-    padding: 15,
-    fontSize: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  cardContainer: {
-    gap: 10,
-    paddingHorizontal: 10,
-  },
-  tabletCardContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-evenly',
-  },
-  section: {
-    marginBottom: 30,
-  },
-  tabletSection: {
-    width: '45%',
-  },
-  sectionTitle: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-    paddingLeft: 10,
-    textAlign: 'center',
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 25,
-    overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    height: 175,
-  },
-  tabletCard: {
-    height: 200,
-    width: '100%',
-  },
-  cardImage: {
-    height: '80%',
-    width: '80%',
-    borderRadius: 25,
-    marginTop: 20,
-    alignSelf: 'center',
-  },
-  ctaButton: {
-    backgroundColor: '#000',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 10,
-    position: 'absolute',
-    bottom: '40%',
-    right: '10%',
-    transform: [{ translateX: 15 }],
-  },
-  ctaButtonText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
-});
 
 export default HomeScreen;
