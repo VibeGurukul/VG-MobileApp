@@ -1,5 +1,5 @@
-name: 'Android Build Release'
-run-name: 'Android Build Release'
+name: Android Build Release
+run-name: Android Build Release
 
 on:
   workflow_dispatch:
@@ -7,35 +7,71 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      BASE_URL_STAGING: ${{ secrets.BASE_URL_STAGING }}
-      BASE_URL_PRODUCTION: ${{ secrets.BASE_URL_PRODUCTION }}
+
     steps:
-      - name: Checkout repository
+      - name: ⬇️ Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --network-timeout 300000
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Make Gradle wrapper executable
+      - name: 📦 Cache Node Modules
+        id: cache-npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: 📥 Install JavaScript Dependencies
+        run: npm install
+
+      - name: ☕ Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 📱 Install Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 35
+          build-tools-version: 35.0.0
+
+      - name: 🛠️ Grant Execute Permissions for gradlew
         run: |
           cd android
           chmod +x gradlew
 
-      - name: Generate Codegen Artifacts
+      - name: 📝 Generate Codegen Artifacts (New Architecture)
+        run: |
+          node node_modules/react-native/scripts/generate-codegen-artifacts.js \
+            -p . \
+            -t android \
+            -o build/generated/source/codegen
+
+      - name: 🔐 Setup Android Keystore
+        run: |
+          echo "${{ secrets.ANDROID_SIGNING_KEY_BASE64 }}" | base64 --decode > android/app/release.keystore
+          echo "storeFile=release.keystore" >> android/gradle.properties
+          echo "storePassword=${{ secrets.ANDROID_KEY_STORE_PASSWORD }}" >> android/gradle.properties
+          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/gradle.properties
+          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/gradle.properties
+        env:
+          ANDROID_KEY_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: 🏗️ Build Android Release APK (New Architecture)
         run: |
           cd android
-          # This command triggers the necessary code generation.
-          node ../node_modules/react-native/scripts/generate-codegen-artifacts.js \
-          --path ../ \
-          --outputPath ../android/app/build/generated/source/codegen/
+          ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,x86_64 # Specify architectures for release
+          # To build an Android App Bundle (.aab) instead, use: ./gradlew bundleRelease
 
-      - name: Build application
-        run: |
-          cd android
-          ./gradlew assembleRelease
-
-      - name: Upload application
+      - name: ⬆️ Upload Android Release APK
         uses: actions/upload-artifact@v4
         with:
           name: app
