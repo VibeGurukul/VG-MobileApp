@@ -2,6 +2,10 @@ import { StyleSheet } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import Orientation from 'react-native-orientation-locker';
 import Video from 'react-native-video';
+import {
+  CaptureProtection,
+  useCaptureProtection,
+} from 'react-native-capture-protection';
 
 const VideoPlayer = ({
   videoURL,
@@ -14,8 +18,15 @@ const VideoPlayer = ({
   const [currentTime, setCurrentTime] = useState(0);
   const hasPerformedInitialSeek = useRef(false);
   const videoRef = useRef(null);
+  const { protectionStatus, status } = useCaptureProtection();
 
   useEffect(() => {
+    CaptureProtection.prevent();
+    CaptureProtection.prevent({
+      screenshot: true,
+      record: true,
+      appSwitcher: true,
+    });
     const setOrientation = () => {
       if (autoLandscape) {
         try {
@@ -29,6 +40,7 @@ const VideoPlayer = ({
     setOrientation();
 
     return () => {
+      CaptureProtection.allow();
       if (autoLandscape) {
         try {
           Orientation.lockToPortrait();
