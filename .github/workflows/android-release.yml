@@ -22,6 +22,14 @@ jobs:
           cd android
           chmod +x gradlew
 
+      - name: Generate Codegen Artifacts
+        run: |
+          cd android
+          # This command triggers the necessary code generation.
+          node ../node_modules/react-native/scripts/generate-codegen-artifacts.js \
+          --path ../ \
+          --outputPath ../android/app/build/generated/source/codegen/
+
       - name: Build application
         run: |
           cd android
