@@ -26,6 +26,7 @@ import { addToCartAsync } from '../../../store/slices/cart-slice';
 import Typography from '../../../library/components/Typography';
 import LoadingSpinnerWebView from '../../../components/Loader';
 import { useTheme } from '../../../context/ThemeContext';
+import { showError, showSuccess } from '../../../services/ToastService';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -231,10 +232,10 @@ const WorkshopDetails = ({ route, navigation }) => {
       });
       const data = response.data;
       setIsEnrolled(true);
-      Alert.alert('Success', 'Successfully enrolled in the workshop!');
+      showSuccess('Successfully enrolled in the workshop!');
     } catch (e) {
       console.log(e);
-      Alert.alert('Error', 'Failed to enroll. Please try again.');
+      showError('Failed to enroll. Please try again.');
     } finally {
       setEnrolling(false);
     }
@@ -256,7 +257,7 @@ const WorkshopDetails = ({ route, navigation }) => {
       await checkIfEnrolled();
     } catch (error) {
       console.log(error);
-      Alert.alert('Error', 'Failed to load workshop details.');
+      showError('Failed to load workshop details.');
     } finally {
       setWorkshopLoading(false);
     }
@@ -359,10 +360,7 @@ const WorkshopDetails = ({ route, navigation }) => {
       await dispatch(addToCartAsync(data)).unwrap();
     } catch (error) {
       console.log(error);
-      Alert.alert(
-        'Error',
-        error.response?.data?.message || 'Something went wrong.',
-      );
+      showError(error.response?.data?.message || 'Something went wrong.');
     }
   };
 

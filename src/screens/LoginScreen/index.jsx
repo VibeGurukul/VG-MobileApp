@@ -18,6 +18,7 @@ import PasswordInput from '../../components/PasswordInput';
 import { useAuth } from '../../context/AuthContext';
 import { API } from '../../constants';
 import { useTheme } from '../../context/ThemeContext';
+import { showError, showWarning } from '../../services/ToastService';
 
 const LoginScreen = () => {
   const route = useRoute();
@@ -149,7 +150,7 @@ const LoginScreen = () => {
         setErrorMessage(
           'Failed to Login. Please try again with the correct password.',
         );
-        Alert.alert('Error', errorMessage);
+        showError(errorMessage);
       }
     } catch (error) {
       console.error(
@@ -158,14 +159,13 @@ const LoginScreen = () => {
       );
 
       if (error.response) {
-        setErrorMessage(
-          error.response.data?.message ||
+        showError(
+          error.response.data?.details ||
             'Login failed. Please check your credentials.',
         );
       } else {
-        setErrorMessage('Network error. Please try again.');
+        showError('Network error. Please try again.');
       }
-      Alert.alert('Error', errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -216,7 +216,7 @@ const LoginScreen = () => {
           }
         >
           <Typography style={styles.forgotPasswordText}>
-            Forget Password?
+            Forgot Password?
           </Typography>
         </TouchableOpacity>
 
