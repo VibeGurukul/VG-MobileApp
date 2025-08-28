@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -27,6 +27,7 @@ import LoadingSpinnerWebView from '../../components/Loader';
 import Typography from '../../library/components/Typography';
 import { useTheme } from '../../context/ThemeContext';
 import { getToken } from '../../utils/SecureStorage/token';
+import { showError, showSuccess } from '../../services/ToastService';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -40,6 +41,7 @@ const CourseDetails = ({ route, navigation }) => {
   const params = route.params;
   const [firstName, setFirstName] = useState('');
   const [course, setCourse] = useState(null);
+  const [courseReview, setCourseReview] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [courseLoading, setCourseLoading] = useState(true); // New loading state for course API
@@ -180,7 +182,7 @@ const CourseDetails = ({ route, navigation }) => {
   });
 
   const getCourseDetails = async () => {
-    setCourseLoading(true); // Start loading
+    setCourseLoading(true);
     try {
       const response = await axios.get(
         `${API.BASE_URL}/courses/${params.course._id}`,
@@ -195,15 +197,46 @@ const CourseDetails = ({ route, navigation }) => {
       setCourse(data);
     } catch (error) {
       console.log('error: ', error.response);
-      Alert.alert('Error', 'Failed to load course details. Please try again.');
-    } finally {
-      setCourseLoading(false); // Stop loading
+      showError('Failed to load course details. Please try again.');
+    }
+  };
+  const getCourseReview = async () => {
+    setCourseLoading(true);
+    try {
+      const response = await axios.get(
+        `${API.BASE_URL}/courses/${params.course._id}/reviews`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      const data = response.data;
+
+      setCourseReview(data);
+    } catch (error) {
+      console.log('error: ', error.response);
+      showError('Failed to load course details. Please try again.');
     }
   };
 
+  let getCourseData = () => {
+    Promise.all([getCourseDetails(), getCourseReview()]).then(() => {
+      setCourseLoading(false);
+    });
+  };
+
   useEffect(() => {
-    getCourseDetails();
-  }, []); // Remove course dependency to prevent infinite loop
+    getCourseData();
+  }, []);
+
+  const getTotalDuration = useCallback(() => {
+    let totalDuration = 0;
+    course?.sections?.map(item => {
+      totalDuration += item.duration;
+    });
+    return (totalDuration / 360).toFixed(2);
+  }, [course]);
 
   const checkIfBookmarked = () => {
     let hasBookmarked = state.bookmarked?.filter(bookmark => {
@@ -308,14 +341,13 @@ const CourseDetails = ({ route, navigation }) => {
       });
 
       if (response.data) {
-        Toast.success('You have successfully enrolled in the course.');
+        showSuccess('You have successfully enrolled in the course.');
         await checkEnrollmentStatus(user.email, token);
       } else {
         console.log('err');
       }
     } catch (error) {
-      Alert.alert(
-        'Error',
+      showError(
         error.response?.data?.message ||
           'Something went wrong. Please try again.',
       );
@@ -342,8 +374,7 @@ const CourseDetails = ({ route, navigation }) => {
       await dispatch(addToCartAsync(data)).unwrap();
     } catch (error) {
       console.log('error: ', error);
-      Alert.alert(
-        'Error',
+      showError(
         error.response?.data?.message ||
           'Something went wrong. Please try again.',
       );
@@ -438,8 +469,12 @@ const CourseDetails = ({ route, navigation }) => {
 
         {/* Rating and Duration */}
         <View style={styles.metaContainer}>
-          <Typography style={styles.metaText}>⭐ 4.5 Rating</Typography>
-          <Typography style={styles.metaText}>⏳ 8 Hours Duration</Typography>
+          <Typography style={styles.metaText}>
+            ⭐ {courseReview?.average_rating} Rating
+          </Typography>
+          <Typography style={styles.metaText}>
+            ⏳ {getTotalDuration()} Hours Duration
+          </Typography>
         </View>
 
         {/* Price */}

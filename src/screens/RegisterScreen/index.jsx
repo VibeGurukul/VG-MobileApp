@@ -18,6 +18,7 @@ import { useAuth } from '../../context/AuthContext';
 import { API } from '../../constants';
 import Typography from '../../library/components/Typography';
 import { useTheme } from '../../context/ThemeContext';
+import { showError, showWarning } from '../../services/ToastService';
 
 const RegisterScreen = () => {
   const route = useRoute();
@@ -125,7 +126,7 @@ const RegisterScreen = () => {
 
   const handleSubmit = async () => {
     if (!fullName || !mobileNumber || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      showWarning('Please fill in all fields');
       return;
     }
 
@@ -150,7 +151,7 @@ const RegisterScreen = () => {
         await login(response.data);
       } else {
         setErrorMessage('Failed to create account. Please try again later.');
-        Alert.alert('Error', errorMessage);
+        showWarning(errorMessage);
       }
     } catch (error) {
       console.error(
@@ -166,7 +167,7 @@ const RegisterScreen = () => {
       } else {
         setErrorMessage('Network error. Please try again.');
       }
-      Alert.alert('Error', errorMessage);
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }

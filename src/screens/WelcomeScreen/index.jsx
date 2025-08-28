@@ -18,6 +18,7 @@ import { isValidEmail } from '../../utils';
 import { API } from '../../constants';
 import Typography from '../../library/components/Typography';
 import { useTheme } from '../../context/ThemeContext';
+import { showError, showWarning } from '../../services/ToastService';
 
 const WelcomeScreen = () => {
   const [email, setEmail] = useState('');
@@ -117,7 +118,7 @@ const WelcomeScreen = () => {
 
   const checkEmailRegistration = async () => {
     if (!isValidEmail(email)) {
-      Alert.alert('Please enter a valid email address.');
+      showWarning('Please enter a valid email address.');
       return;
     }
 
@@ -135,8 +136,7 @@ const WelcomeScreen = () => {
       }
     } catch (error) {
       console.error('API Error:', error);
-      Alert.alert(
-        'Error',
+      showError(
         error.response?.data?.message ||
           'Something went wrong. Please try again.',
       );

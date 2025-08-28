@@ -16,6 +16,7 @@ import { useRoute } from '@react-navigation/native';
 import { API } from '../../constants';
 import Typography from '../../library/components/Typography';
 import { useTheme } from '../../context/ThemeContext';
+import { showWarning } from '../../services/ToastService';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const route = useRoute();
@@ -109,7 +110,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
   const handleSubmit = async () => {
     if (!email) {
       setErrorMessage('Please enter your email address');
-      Alert.alert('Error', 'Please enter your email address');
+      showWarning('Please enter your email address');
       return;
     }
 
